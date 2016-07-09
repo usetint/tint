@@ -1,6 +1,9 @@
 <h1><%= params['filename'] %></h1>
-<ul>
-<% data.each do |key, value| %>
-  <li><%= render_stuff(key, value) %></li>
-<% end %>
-</ul>
+<form action="/data/<%= params['filename'] %>" method="post">
+  <button type="submit">Save</button>
+  <ul>
+  <% data.each do |key, value| %>
+    <li><%= render_stuff(key, value, "data[#{key}]") %></li>
+  <% end %>
+  </ul>
+</form>
