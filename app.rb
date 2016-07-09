@@ -15,7 +15,7 @@ helpers do
     elsif value.is_a? Array
       "#{key}: <ul>#{render_value(value)}</ul>"
     else
-      "#{key}: #{render_value(value)}"
+      "<label>#{key}#{render_value(value)}</label>"
     end
   end
 
@@ -27,7 +27,17 @@ helpers do
         render_stuff(key, value)
       end.join
     else
-      value.to_s + "<br>"
+      render_input(value) + "<br>"
+    end
+  end
+
+  def render_input(value)
+    if [true, false].include? value
+      "<input type='checkbox'#{' checked="checked"' if value} />"
+    elsif value.is_a?(String) && value.length > 50
+      "<textarea>#{value}</textarea>"
+    else
+      "<input type='text' value='#{value}' />"
     end
   end
 end
