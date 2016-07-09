@@ -1,0 +1,8 @@
+<h1>Hello</h1>
+<ol>
+  <% files.each do |file| %>
+    <li>
+      <a href="/data/<%= File.basename(file) %>"><%= File.basename(file) %></a>
+    </li>
+  <% end %>
+</ol>

@@ -1,0 +1,6 @@
+<h1><%= params['filename'] %></h1>
+<ul>
+<% data.each do |key, value| %>
+  <li><%= render_stuff(key, value) %></li>
+<% end %>
+</ul>
