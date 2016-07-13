@@ -1,14 +1,16 @@
 require "sinatra"
 require "sinatra/reloader" if development?
+require "sinatra/json"
 
 require "yaml"
+require "json"
+
 require "git"
 
 require "awesome_print"
 require "pry"
 
-folder = "/Users/Eric/code/boltmade/ricardas"
-data_path = "#{folder}/_data"
+project_path = "/Users/Eric/code/boltmade/ricardas-test"
 
 helpers do
   def render_stuff(key, value, name)
@@ -31,7 +33,7 @@ helpers do
         render_stuff(key, value, "#{name}[#{key}]")
       end.join
     else
-      render_input(key, value, name) + "<br>"
+      render_input(key, value, name)
     end
   end
 
@@ -47,24 +49,61 @@ helpers do
 end
 
 get "/" do
-  files = Dir.glob("#{data_path}/*")
-  erb :index, locals: { files: files }
+  files = Dir.glob("#{project_path}/*")
+  erb :index, locals: { files: files, root: project_path }
 end
 
-get "/data/:filename" do
-  data = YAML.load_file("#{data_path}/#{params['filename']}")
-  erb :data, locals: { data: data }
+get "/files/:path" do
+  if File.directory?("#{project_path}/#{params['path']}")
+    files = Dir.glob("#{project_path}/#{params['path']}/*")
+    erb :index, locals: { files: files, root: project_path }
+  end
 end
 
-post "/data/:filename" do
-  g = Git.open(folder)
-  new_yml = params['data'].to_yaml
-  File.open("#{data_path}/#{params['filename']}", "w") do |file|
-    file.write new_yml
+get "/files/:folder/:filename" do
+  file_path = "#{project_path}/#{params['folder']}/#{params['filename']}"
+  data = YAML.load_file(file_path)
+  erb :data, locals: { data: data, path: "/files" + file_path.gsub(project_path, "") }
+end
+
+def transforms
+  {
+    "on" => true
+  }
+end
+
+post "/files/:folder/:filename" do
+  folder = params['folder']
+  g = Git.open(project_path)
+  updated_data = normalize(params['data'])
+  new_yml = updated_data.to_yaml
+  file_path = "#{project_path}/#{params['folder']}/#{params['filename']}"
+  original_data = YAML.load_file(file_path)
+
+  if original_data != updated_data
+    File.open(file_path, "w") do |file|
+      file.write new_yml
+    end
+
+    g.add("#{project_path}/#{params['folder']}/#{params['filename']}")
+    g.commit("Modified #{params['filename']} via admin")
   end
 
-  g.add("#{folder}/_data/#{params['filename']}")
-  g.commit("Modified #{params['filename']} via admin")
   redirect to("/")
+end
+
+def normalize(data)
+  data.reduce({}) do |new_data, (key, value)|
+    if value.is_a? Hash
+      new_data[key] = normalize(value)
+    elsif value.is_a? Array
+      new_data[key] = value.map { |v| normalize(v) }
+    elsif transforms.keys.include? value
+      new_data[key] = transforms[value]
+    else
+      new_data[key] = value
+    end
+    new_data
+  end
 end
 

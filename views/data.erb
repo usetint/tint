@@ -1,9 +1,58 @@
+<style type="text/css">
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+label {
+  display: block;
+  margin: 0 0 1rem 0;
+}
+
+input[type="text"],
+textarea {
+  display: block;
+  padding: 1rem;
+  width: 20rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+textarea {
+  height: 10rem;
+}
+
+button {
+  padding: 1rem 2rem;
+  background: #3498db;
+  border: none;
+  border-radius: 2px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+ul {
+  list-style-type: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+ul ul {
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  border-left: 1px solid #ededed;
+}
+</style>
 <h1><%= params['filename'] %></h1>
-<form action="/data/<%= params['filename'] %>" method="post">
-  <button type="submit">Save</button>
+<form action="<%= path %>" method="post">
   <ul>
-  <% data.each do |key, value| %>
-    <li><%= render_stuff(key, value, "data[#{key}]") %></li>
-  <% end %>
+    <% data.each do |key, value| %>
+      <li><%= render_stuff(key, value, "data[#{key}]") %></li>
+    <% end %>
   </ul>
+  <button type="submit">Save</button>
 </form>
