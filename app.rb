@@ -14,12 +14,13 @@ project_path = "/Users/Eric/code/boltmade/ricardas-test"
 
 helpers do
   def render_stuff(key, value, name)
+    key = key.capitalize
     if value.is_a? Hash
-      key + ": <ul>" + values.map do |key, value|
+      key + " <ul>" + values.map do |key, value|
         "<li>" + render_stuff(key, value, name) + "</li>"
       end.join + "</ul>"
     elsif value.is_a? Array
-      "#{key}: <ul>#{render_value(key, value, "#{name}[]")}</ul>"
+      "#{key} <ul>#{render_value(key, value, "#{name}[]")}</ul>"
     else
       "<label>#{key}#{render_value(key, value, name)}</label>"
     end
