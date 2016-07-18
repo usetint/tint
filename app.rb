@@ -10,13 +10,25 @@ require "git"
 require "awesome_print"
 require "pry"
 
-project_path = "/Users/Eric/code/boltmade/ricardas-test"
+project_path = "/Users/Eric/code/projects/tint-demo"
 
 helpers do
-  def render_stuff(key, value, name)
-    key = key.capitalize
+  def render_yml(value)
+    "<ul>#{
     if value.is_a? Hash
-      key + " <ul>" + values.map do |key, value|
+      value.map do |key, value|
+        "<li>#{render_stuff(key, value, "data[#{key}]")}</li>"
+      end.join
+    elsif value.is_a? Array
+      value.map { |v| "<li>#{render_stuff("", v, "[]")}</li>" }.join
+    end
+    }</ul>"
+  end
+
+  def render_stuff(key, value, name)
+    key = key && key.capitalize
+    if value.is_a? Hash
+      key + " <ul>" + value.map do |key, value|
         "<li>" + render_stuff(key, value, name) + "</li>"
       end.join + "</ul>"
     elsif value.is_a? Array

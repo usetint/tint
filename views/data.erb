@@ -51,7 +51,7 @@ ul ul {
   padding-top: 0.5rem;
 }
 
-ul ul li {
+ul li {
   border: 1px solid #ccc;
   border-radius: 2px;
   padding: 1rem;
@@ -60,10 +60,6 @@ ul ul li {
 </style>
 <h1><%= params['filename'] %></h1>
 <form action="<%= path %>" method="post">
-  <ul>
-    <% data.each do |key, value| %>
-      <li><%= render_stuff(key, value, "data[#{key}]") %></li>
-    <% end %>
-  </ul>
+  <%= render_yml(data) %>
   <button type="submit">Save</button>
 </form>
