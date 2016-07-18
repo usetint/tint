@@ -1,0 +1,58 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+label {
+  display: block;
+  margin: 0 0 1rem 0;
+  font-weight: normal;
+}
+
+li label:last-child {
+  margin-bottom: 0;
+}
+
+input[type="text"],
+textarea {
+  display: block;
+  padding: 1rem;
+  width: 20rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+textarea {
+  height: 10rem;
+}
+
+button {
+  padding: 1rem 2rem;
+  background: #3498db;
+  border: none;
+  border-radius: 2px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+ul {
+  list-style-type: none;
+  margin-left: 0;
+  padding-left: 0;
+  font-weight: bold;
+}
+
+ul ul {
+  padding-top: 0.5rem;
+}
+
+ul ul li {
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
