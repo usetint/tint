@@ -29,8 +29,7 @@ class Tint < Sinatra::Base
   project_path = ENV['PROJECT_PATH']
 
   get "/" do
-    files = Dir.glob("#{project_path}/*")
-    erb :index, locals: { files: files, root: project_path }
+    erb :index
   end
 
   get "/assets/*" do
@@ -38,25 +37,27 @@ class Tint < Sinatra::Base
     settings.environment.call(env)
   end
 
-  get "/files/:path" do
-    if File.directory?("#{project_path}/#{params['path']}")
-      files = Dir.glob("#{project_path}/#{params['path']}/*")
-      erb :index, locals: { files: files, root: project_path }
+  get "/files" do
+    files = Dir.glob("#{project_path}/*")
+    erb :"files/index", locals: { files: files, root: project_path }
+  end
+
+  get "/files/*" do
+    path = "#{project_path}/#{params['splat'].join('/')}"
+    if File.directory?(path)
+      files = Dir.glob("#{path}/*")
+      erb :"files/index", locals: { files: files, root: project_path }
+    else
+      data = YAML.load_file(path)
+      erb :"files/yml", locals: { data: data, path: "/files" + path.gsub(project_path, "") }
     end
   end
 
-  get "/files/:folder/:filename" do
-    file_path = "#{project_path}/#{params['folder']}/#{params['filename']}"
-    data = YAML.load_file(file_path)
-    erb :data, locals: { data: data, path: "/files" + file_path.gsub(project_path, "") }
-  end
-
-  post "/files/:folder/:filename" do
-    folder = params['folder']
+  post "/files/*" do
     g = Git.open(project_path)
     updated_data = normalize(params['data'])
     new_yml = updated_data.to_yaml
-    file_path = "#{project_path}/#{params['folder']}/#{params['filename']}"
+    file_path = "#{project_path}/#{params['splat'].join('/')}"
     original_data = YAML.load_file(file_path)
 
     if original_data != updated_data
@@ -64,7 +65,7 @@ class Tint < Sinatra::Base
         file.write new_yml
       end
 
-      g.add("#{project_path}/#{params['folder']}/#{params['filename']}")
+      g.add("#{project_path}/#{params['path']}")
       g.commit("Modified #{params['filename']} via admin")
     end
 
