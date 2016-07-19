@@ -1,12 +1,14 @@
 require "sinatra"
 require "sinatra/json"
 require "sinatra/reloader"
+require "sinatra/streaming"
 
-require "yaml"
-require "json"
+require "filemagic"
 require "git"
-require "sprockets"
+require "json"
 require "sass"
+require "sprockets"
+require "yaml"
 
 if development?
   require "awesome_print"
@@ -17,6 +19,8 @@ if development?
 end
 
 class Tint < Sinatra::Base
+  helpers Sinatra::Streaming
+
   configure :development do
     register Sinatra::Reloader
   end
@@ -48,26 +52,56 @@ class Tint < Sinatra::Base
       files = Dir.glob("#{path}/*")
       erb :"files/index", locals: { files: files, root: project_path }
     else
-      data = YAML.safe_load(open(path))
-      erb :"files/yml", locals: { data: data, path: "/files" + path.gsub(project_path, "") }
+      is_text = FileMagic.open(:mime) do |magic|
+        magic.file(path).split('/').first == 'text'
+      end
+
+      if is_text
+        has_content, has_frontmatter = detect_content_or_frontmatter(path)
+        if path.split(/\./).last.downcase == 'yml' || !has_content
+          data = YAML.safe_load(open(path))
+          erb :"files/yml", locals: { data: data, path: "/files" + path.gsub(project_path, "") }
+        else
+          frontmatter = has_frontmatter && YAML.safe_load(open(path))
+          stream do |out|
+            html = erb :"files/text", locals: { frontmatter: frontmatter, path: "/files" + path.gsub(project_path, "") }
+            top, bottom = html.split('<textarea name="content">', 2)
+            out.puts top
+            out.puts '<textarea name="content">'
+            stream_content(path, &out.method(:puts))
+            out.puts bottom
+          end
+        end
+      else
+        raise 'Editing binary files is not supported'
+      end
     end
   end
 
   post "/files/*" do
     file_path = "#{project_path}/#{params['splat'].join('/')}"
-    original_data = YAML.safe_load(open(file_path))
     updated_data = normalize(params['data'])
 
-    if original_data != updated_data
-      Tempfile.open('tint-save') do |tmp|
+    Tempfile.open('tint-save') do |tmp|
+      if updated_data
         tmp.puts updated_data.to_yaml
-        stream_after_frontmatter(file_path, &tmp.method(:puts))
-        FileUtils.mv(tmp.path, file_path, force: true)
+        tmp.puts '---'
       end
+      if params.has_key?('content')
+        tmp.puts(params['content'].gsub(/\r\n?/, "\n"))
+      else
+        stream_content(file_path, &tmp.method(:puts))
+      end
+      FileUtils.mv(tmp.path, file_path, force: true)
+    end
 
-      g = Git.open(project_path)
-      g.add(file_path)
-      g.commit("Modified #{params['splat'].join('/')} via tint")
+    g = Git.open(project_path)
+    g.add(file_path)
+
+    g.status.each do |f|
+      if f.path == params['splat'].join('/') && f.type
+        g.commit("Modified #{params['splat'].join('/')} via tint")
+      end
     end
 
     redirect to("/")
@@ -75,16 +109,36 @@ class Tint < Sinatra::Base
 
 protected
 
-  def stream_after_frontmatter(path)
-    doc_start = 0
-    File.foreach(path) do |line|
+  def detect_content_or_frontmatter(path)
+    has_frontmatter = false
+    File.foreach(path).with_index do |line, idx|
       line.chomp!
-      if line == '---'
-        doc_start += 1
-        next if doc_start < 2
+      if line == '---' && idx == 0
+        has_frontmatter = true
+        next
       end
 
-      yield line if doc_start >= 2
+      if has_frontmatter && line == '---'
+        return [true, has_frontmatter]
+      end
+    end
+
+    [!has_frontmatter, has_frontmatter]
+  end
+
+  def stream_content(path)
+    has_frontmatter = false
+    doc_start = 0
+    File.foreach(path).with_index do |line, idx|
+      line.chomp!
+
+      if doc_start < 2
+        has_frontmatter = true if line == '---' && idx == 0
+        doc_start += 1 if line == '---'
+        next if has_frontmatter
+      end
+
+      yield line
     end
   end
 
