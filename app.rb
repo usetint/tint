@@ -65,8 +65,8 @@ class Tint < Sinatra::Base
         file.write new_yml
       end
 
-      g.add("#{project_path}/#{params['path']}")
-      g.commit("Modified #{params['filename']} via admin")
+      g.add(file_path)
+      g.commit("Modified #{params['splat'].join('/')} via tint")
     end
 
     redirect to("/")
