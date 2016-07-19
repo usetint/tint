@@ -61,7 +61,7 @@ class Tint < Sinatra::Base
     if original_data != updated_data
       Tempfile.open('tint-save') do |tmp|
         tmp.puts updated_data.to_yaml
-        stream_after_frontmatter(file_path, tmp)
+        stream_after_frontmatter(file_path, &tmp.method(:puts))
         FileUtils.mv(tmp.path, file_path, force: true)
       end
 
@@ -75,7 +75,7 @@ class Tint < Sinatra::Base
 
 protected
 
-  def stream_after_frontmatter(path, handle)
+  def stream_after_frontmatter(path)
     doc_start = 0
     File.foreach(path) do |line|
       line.chomp!
@@ -84,7 +84,7 @@ protected
         next if doc_start < 2
       end
 
-      handle.puts(line) if doc_start >= 2
+      yield line if doc_start >= 2
     end
   end
 
