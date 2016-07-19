@@ -10,7 +10,10 @@ require "sass"
 
 if development?
   require "awesome_print"
+  require "dotenv"
   require "pry"
+
+  Dotenv.load
 end
 
 class Tint < Sinatra::Base
@@ -23,7 +26,7 @@ class Tint < Sinatra::Base
   environment.append_path "assets/stylesheets"
   environment.css_compressor = :scss
 
-  project_path = "/Users/Eric/code/projects/tint-demo"
+  project_path = ENV['PROJECT_PATH']
 
   get "/" do
     files = Dir.glob("#{project_path}/*")

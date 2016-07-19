@@ -9,6 +9,7 @@ gem "sprockets"
 
 group :development do
   gem "awesome_print"
+  gem "dotenv"
   gem "pry"
   gem "pry-byebug"
 end
