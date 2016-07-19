@@ -1,0 +1,5 @@
+<ul>
+  <% files.each do |file| %>
+    <li><a href="/files<%= file.to_s.gsub(root, "") %>"><%= File.basename(file) %></a></li>
+  <% end %>
+</ul>
