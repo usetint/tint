@@ -3,8 +3,8 @@ source "https://rubygems.org"
 gem "sinatra"
 gem "sinatra-contrib"
 
-gem "ruby-filemagic"
 gem "git"
+gem "ruby-filemagic"
 gem "sass"
 gem "sprockets"
 

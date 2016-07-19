@@ -62,9 +62,10 @@ class Tint < Sinatra::Base
           data = YAML.safe_load(open(path))
           erb :"files/yml", locals: { data: data, path: "/files" + path.gsub(project_path, "") }
         else
+          wysiwyg = ['md', 'markdown'].include?(path.split(/\./).last.downcase)
           frontmatter = has_frontmatter && YAML.safe_load(open(path))
           stream do |out|
-            html = erb :"files/text", locals: { frontmatter: frontmatter, path: "/files" + path.gsub(project_path, "") }
+            html = erb :"files/text", locals: { frontmatter: frontmatter, wysiwyg: wysiwyg, path: "/files" + path.gsub(project_path, "") }
             top, bottom = html.split('<textarea name="content">', 2)
             out.puts top
             out.puts '<textarea name="content">'
