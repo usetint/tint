@@ -17,33 +17,20 @@ helpers do
     "<ul>#{
     if value.is_a? Hash
       value.map do |key, value|
-        "<li>#{render_stuff(key, value, "data[#{key}]")}</li>"
+        "<li>#{render_value(key, value, "data[#{key}]")}</li>"
       end.join
     elsif value.is_a? Array
-      value.map { |v| "<li>#{render_stuff("", v, "[]")}</li>" }.join
+      value.map { |v| "<li>#{render_value("", v, "data[]")}</li>" }.join
     end
     }</ul>"
   end
 
-  def render_stuff(key, value, name)
-    key = key && key.capitalize
-    if value.is_a? Hash
-      key + " <ul>" + value.map do |key, value|
-        "<li>" + render_stuff(key, value, name) + "</li>"
-      end.join + "</ul>"
-    elsif value.is_a? Array
-      "#{key} <ul>#{render_value(key, value, "#{name}[]")}</ul>"
-    else
-      "<label>#{key}#{render_value(key, value, name)}</label>"
-    end
-  end
-
   def render_value(key, value, name)
     if value.is_a? Array
-      value.map { |v| "<li>" + render_value(key, v, name) + "</li>" }.join
+      "#{key}<ul>#{value.map { |v| "<li>" + render_value(key, v, "#{name}[]") + "</li>" }.join}</ul>"
     elsif value.is_a? Hash
       value.map do |key, value|
-        render_stuff(key, value, "#{name}[#{key}]")
+        "#{render_value(key, value, "#{name}[#{key}]")}"
       end.join
     else
       render_input(key, value, name)
@@ -51,6 +38,7 @@ helpers do
   end
 
   def render_input(key, value, name)
+    "<label>#{key}#{
     if [true, false].include? value
       "<input type='checkbox' name='#{name}' #{' checked="checked"' if value} />"
     elsif value.is_a?(String) && value.length > 50
@@ -58,6 +46,7 @@ helpers do
     else
       "<input type='text' name='#{name}' value='#{value}' />"
     end
+    }</label>"
   end
 end
 
@@ -106,17 +95,34 @@ post "/files/:folder/:filename" do
 end
 
 def normalize(data)
-  data.reduce({}) do |new_data, (key, value)|
-    if value.is_a? Hash
-      new_data[key] = normalize(value)
-    elsif value.is_a? Array
-      new_data[key] = value.map { |v| normalize(v) }
-    elsif transforms.keys.include? value
-      new_data[key] = transforms[value]
-    else
-      new_data[key] = value
+  if data.is_a? Array
+    data.reduce([]) do |new_data, value|
+      if value.is_a? Hash
+        new_data.push normalize(value)
+      elsif value.is_a? Array
+        new_data.push value.map { |v| normalize(v) }
+      elsif transforms.keys.include? value
+        new_data.push transforms[value]
+      else
+        new_data.push value
+      end
+      new_data
     end
-    new_data
+  elsif data.is_a? Hash
+    data.reduce({}) do |new_data, (key, value)|
+      if value.is_a? Hash
+        new_data[key] = normalize(value)
+      elsif value.is_a? Array
+        new_data[key] = value.map { |v| normalize(v) }
+      elsif transforms.keys.include? value
+        new_data[key] = transforms[value]
+      else
+        new_data[key] = value
+      end
+      new_data
+    end
+  else
+    data
   end
 end
 
