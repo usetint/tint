@@ -54,17 +54,16 @@ class Tint < Sinatra::Base
   end
 
   post "/files/*" do
-    g = Git.open(project_path)
-    updated_data = normalize(params['data'])
-    new_yml = updated_data.to_yaml
     file_path = "#{project_path}/#{params['splat'].join('/')}"
     original_data = YAML.load_file(file_path)
+    updated_data = normalize(params['data'])
 
     if original_data != updated_data
       File.open(file_path, "w") do |file|
-        file.write new_yml
+        file.write updated_data.to_yaml
       end
 
+      g = Git.open(project_path)
       g.add(file_path)
       g.commit("Modified #{params['splat'].join('/')} via tint")
     end
@@ -74,38 +73,17 @@ class Tint < Sinatra::Base
 
 protected
 
-  def transforms
-    {
-      "on" => true
-    }
-  end
-
   def normalize(data)
-    if data.is_a? Array
-      data.reduce([]) do |new_data, value|
-        if value.is_a? Hash
-          new_data.push normalize(value)
-        elsif value.is_a? Array
-          new_data.push value.map { |v| normalize(v) }
-        elsif transforms.keys.include? value
-          new_data.push transforms[value]
-        else
-          new_data.push value
-        end
-        new_data
-      end
-    elsif data.is_a? Hash
-      data.reduce({}) do |new_data, (key, value)|
-        if value.is_a? Hash
-          new_data[key] = normalize(value)
-        elsif value.is_a? Array
-          new_data[key] = value.map { |v| normalize(v) }
-        elsif transforms.keys.include? value
-          new_data[key] = transforms[value]
-        else
-          new_data[key] = value
-        end
-        new_data
+    case data
+    when Array
+      data.map &method(:normalize)
+    when Hash
+      if data.keys.include?('___checkbox_unchecked')
+        data.keys.include?('___checkbox_checked')
+      elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
+        data.to_a.sort_by(&:first).map(&:last).map &method(:normalize)
+      else
+        data.merge(data) { |k,v| normalize(v) }
       end
     else
       data
@@ -118,7 +96,7 @@ protected
       when Hash
         value.map { |k, v| render_value(k, v, "data[#{k}]") }.join
       when Array
-        value.map { |v| render_value(nil, v, "data[]") }.join
+        value.each_with_index.map { |v, i| render_value(nil, v, "data[#{i}]") }.join
       else
         raise TypeError, 'YAML root must be a Hash or Array'
       end
@@ -134,7 +112,7 @@ protected
         }</fieldset>"
       when Array
         "<fieldset><legend>#{key}</legend><ol>#{
-          value.map { |v| "<li>#{render_value(nil, v, "#{name}[]")}</li>" }.join
+          value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "#{name}[#{i}]")}</li>" }.join
         }</ol></fieldset>"
       else
         render_input(key, value, name)
@@ -143,7 +121,10 @@ protected
 
     def render_input(key, value, name)
       input = if [true, false].include? value
-        "<input type='checkbox' name='#{name}' #{' checked="checked"' if value} />"
+        "
+          <input type='hidden' name='#{name}[___checkbox_unchecked]' value='' />
+          <input type='checkbox' name='#{name}[___checkbox_checked]' #{' checked="checked"' if value} />
+        "
       elsif value.is_a?(String) && value.length > 50
         "<textarea name='#{name}'>#{value}</textarea>"
       else
