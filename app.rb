@@ -48,19 +48,21 @@ class Tint < Sinatra::Base
       files = Dir.glob("#{path}/*")
       erb :"files/index", locals: { files: files, root: project_path }
     else
-      data = YAML.load_file(path)
+      data = YAML.safe_load(open(path))
       erb :"files/yml", locals: { data: data, path: "/files" + path.gsub(project_path, "") }
     end
   end
 
   post "/files/*" do
     file_path = "#{project_path}/#{params['splat'].join('/')}"
-    original_data = YAML.load_file(file_path)
+    original_data = YAML.safe_load(open(file_path))
     updated_data = normalize(params['data'])
 
     if original_data != updated_data
-      File.open(file_path, "w") do |file|
-        file.write updated_data.to_yaml
+      Tempfile.open('tint-save') do |tmp|
+        tmp.puts updated_data.to_yaml
+        stream_after_frontmatter(file_path, tmp)
+        FileUtils.mv(tmp.path, file_path, force: true)
       end
 
       g = Git.open(project_path)
@@ -72,6 +74,19 @@ class Tint < Sinatra::Base
   end
 
 protected
+
+  def stream_after_frontmatter(path, handle)
+    doc_start = 0
+    File.foreach(path) do |line|
+      line.chomp!
+      if line == '---'
+        doc_start += 1
+        next if doc_start < 2
+      end
+
+      handle.puts(line) if doc_start >= 2
+    end
+  end
 
   def normalize(data)
     case data
