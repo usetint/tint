@@ -110,6 +110,16 @@ class Tint < Sinatra::Base
     redirect to("/")
   end
 
+  delete "/files/*" do
+    file = params['splat'].join('/')
+
+    g = Git.open(project_path)
+    g.remove("#{project_path}/#{file}")
+    g.commit("Removed #{file} via tint")
+
+    redirect to("/files/#{Pathname.new(file).dirname}")
+  end
+
 protected
 
   def detect_content_or_frontmatter(path)

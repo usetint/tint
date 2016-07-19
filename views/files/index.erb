@@ -1,5 +1,14 @@
 <ul>
   <% files.each do |file| %>
-    <li><a href="/files<%= file.to_s.gsub(root, "") %>"><%= File.basename(file) %></a></li>
+    <li>
+      <a href="/files<%= file.to_s.gsub(root, "") %>"><%= File.basename(file) %></a>
+
+      <% unless File.directory?(file) %>
+        <form action="/files<%= file.to_s.gsub(root, "") %>" method="post">
+          <input type="hidden" name="_method" value="DELETE" />
+          <button type="submit">Delete</button>
+        </form>
+      <% end %>
+    </li>
   <% end %>
 </ul>
