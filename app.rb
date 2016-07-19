@@ -6,6 +6,7 @@ require "sinatra/streaming"
 require "filemagic"
 require "git"
 require "json"
+require "pathname"
 require "sass"
 require "sprockets"
 require "yaml"
@@ -26,11 +27,12 @@ class Tint < Sinatra::Base
   end
 
   set :environment, Sprockets::Environment.new
+  set :method_override, true
 
   environment.append_path "assets/stylesheets"
   environment.css_compressor = :scss
 
-  project_path = ENV['PROJECT_PATH']
+  project_path = Pathname.new(ENV['PROJECT_PATH']).realpath.to_s
 
   get "/" do
     erb :index
