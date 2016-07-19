@@ -114,39 +114,47 @@ protected
 
   helpers do
     def render_yml(value)
-      "<ul>#{
-      if value.is_a? Hash
-        value.map do |key, value|
-          "<li>#{render_value(key, value, "data[#{key}]")}</li>"
-        end.join
-      elsif value.is_a? Array
-        value.map { |v| "<li>#{render_value("", v, "data[]")}</li>" }.join
+      case value
+      when Hash
+        value.map { |k, v| render_value(k, v, "data[#{k}]") }.join
+      when Array
+        value.map { |v| render_value(nil, v, "data[]") }.join
+      else
+        raise TypeError, 'YAML root must be a Hash or Array'
       end
-      }</ul>"
     end
 
     def render_value(key, value, name)
-      if value.is_a? Array
-        "#{key}<ul>#{value.map { |v| "<li>" + render_value(key, v, "#{name}[]") + "</li>" }.join}</ul>"
-      elsif value.is_a? Hash
+      case value
+      when Hash
+        "<fieldset>#{"<legend>#{key}</legend>" if key}#{
         value.map do |key, value|
           "#{render_value(key, value, "#{name}[#{key}]")}"
         end.join
+        }</fieldset>"
+      when Array
+        "<fieldset><legend>#{key}</legend><ol>#{
+          value.map { |v| "<li>#{render_value(nil, v, "#{name}[]")}</li>" }.join
+        }</ol></fieldset>"
       else
         render_input(key, value, name)
       end
     end
 
     def render_input(key, value, name)
-      "<label>#{key}#{
-      if [true, false].include? value
+      input = if [true, false].include? value
         "<input type='checkbox' name='#{name}' #{' checked="checked"' if value} />"
       elsif value.is_a?(String) && value.length > 50
         "<textarea name='#{name}'>#{value}</textarea>"
       else
         "<input type='text' name='#{name}' value='#{value}' />"
       end
-      }</label>"
+
+      if key
+        "<label>#{key} #{input}</label>"
+      else
+        input
+      end
     end
   end
 end

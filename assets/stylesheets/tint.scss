@@ -12,10 +12,6 @@ label {
   font-weight: normal;
 }
 
-li label:last-child {
-  margin-bottom: 0;
-}
-
 input[type="text"],
 textarea {
   display: block;
@@ -37,22 +33,4 @@ button {
   border-radius: 2px;
   color: #fff;
   font-size: 1rem;
-}
-
-ul {
-  list-style-type: none;
-  margin-left: 0;
-  padding-left: 0;
-  font-weight: bold;
-
-  ul {
-    padding-top: 0.5rem;
-  }
-
-  li {
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
 }
