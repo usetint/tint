@@ -1,7 +1,9 @@
 <ul>
-  <% files.each do |file| %>
+  <% files.each_with_index do |file, i| %>
+    <% name = File.basename(file) %>
+    <% name = ".." if i == 0 && !in_root %>
     <li>
-      <a href="/files<%= file.to_s.gsub(root, "") %>"><%= File.basename(file) %></a>
+      <a href="/files<%= file.to_s.gsub(root, "") %>"><%= name %></a>
 
       <% unless File.directory?(file) %>
         <form action="/files<%= file.to_s.gsub(root, "") %>" method="post">

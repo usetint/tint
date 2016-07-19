@@ -32,7 +32,9 @@ class Tint < Sinatra::Base
   environment.append_path "assets/stylesheets"
   environment.css_compressor = :scss
 
-  project_path = Pathname.new(ENV['PROJECT_PATH']).realpath.to_s
+  def project_path
+    Pathname.new(ENV['PROJECT_PATH']).realpath.to_s
+  end
 
   get "/" do
     erb :index
@@ -44,15 +46,13 @@ class Tint < Sinatra::Base
   end
 
   get "/files" do
-    files = Dir.glob("#{project_path}/*")
-    erb :"files/index", locals: { files: files, root: project_path }
+    directory(project_path)
   end
 
   get "/files/*" do
     path = "#{project_path}/#{params['splat'].join('/')}"
     if File.directory?(path)
-      files = Dir.glob("#{path}/*")
-      erb :"files/index", locals: { files: files, root: project_path }
+      directory(path)
     else
       is_text = FileMagic.open(:mime) do |magic|
         magic.file(path).split('/').first == 'text'
@@ -62,12 +62,12 @@ class Tint < Sinatra::Base
         has_content, has_frontmatter = detect_content_or_frontmatter(path)
         if path.split(/\./).last.downcase == 'yml' || !has_content
           data = YAML.safe_load(open(path))
-          erb :"files/yml", locals: { data: data, path: "/files" + path.gsub(project_path, "") }
+          erb :"files/yml", layout: :files_layout, locals: { data: data, path: "/files" + path.gsub(project_path, "") }
         else
           wysiwyg = ['md', 'markdown'].include?(path.split(/\./).last.downcase)
           frontmatter = has_frontmatter && YAML.safe_load(open(path))
           stream do |out|
-            html = erb :"files/text", locals: { frontmatter: frontmatter, wysiwyg: wysiwyg, path: "/files" + path.gsub(project_path, "") }
+            html = erb :"files/text", layout: :files_layout, locals: { frontmatter: frontmatter, wysiwyg: wysiwyg, path: "/files" + path.gsub(project_path, "") }
             top, bottom = html.split('<textarea name="content">', 2)
             out.puts top
             out.puts '<textarea name="content">'
@@ -123,6 +123,18 @@ class Tint < Sinatra::Base
   end
 
 protected
+
+  def directory(path)
+    files = Dir.glob("#{path}/*")
+    if path != project_path
+      parent = File.expand_path("..", Dir.open(path))
+      files = files.unshift(parent)
+      in_root = false
+    else
+      in_root = true
+    end
+    erb :"files/index", layout: :files_layout, locals: { files: files, root: project_path, in_root: in_root }
+  end
 
   def detect_content_or_frontmatter(path)
     has_frontmatter = false
