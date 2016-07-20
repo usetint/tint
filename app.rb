@@ -132,8 +132,8 @@ module Tint
   protected
 
     def render_directory(path)
-      erb :"layouts/files" do
-        erb :"files/index", locals: { files: Directory.new(path).files }
+      erb :"layouts/files", locals: { directory: Directory.new(path) } do
+        erb :"files/index", locals: { directory: Directory.new(path) }
       end
     end
 
@@ -207,6 +207,10 @@ module Tint
   class Directory
     def initialize(path)
       @path = path
+    end
+
+    def route
+      "/files#{path.gsub(/\A#{PROJECT_PATH}/, "")}"
     end
 
     def files
