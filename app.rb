@@ -133,7 +133,9 @@ module Tint
       file_path = "#{path}/#{file[:filename]}"
 
       ::File.open(file_path, "w") do |f|
-        f.write(file[:tempfile].read)
+        until file[:tempfile].eof?
+          f.write file[:tempfile].read(4096)
+        end
       end
 
       g = Git.open(project_path)
