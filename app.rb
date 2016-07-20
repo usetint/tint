@@ -95,6 +95,7 @@ class Tint < Sinatra::Base
       else
         stream_content(file_path, &tmp.method(:puts))
       end
+      tmp.flush
       FileUtils.mv(tmp.path, file_path, force: true)
     end
 
