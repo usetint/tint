@@ -140,7 +140,11 @@ module Tint
 
       g = Git.open(project_path)
       g.add(file_path)
-      g.commit("Uploaded #{file[:filename]} via tint")
+      g.status.each do |f|
+        if f.path == file[:filename] && f.type
+          g.commit("Uploaded #{file[:filename]} via tint")
+        end
+      end
 
       redirect to(directory.route)
     end
