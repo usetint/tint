@@ -103,13 +103,15 @@ module Tint
 
 		post "/files/?*" do
 			directory = Tint::File.get(params).to_directory
-			file = directory.upload(params['file'])
+			if params['file']
+				file = directory.upload(params['file'])
 
-			g = Git.open(PROJECT_PATH)
-			g.add(file.path.to_s)
-			g.status.each do |f|
-				if f.path == file.relative_path.to_s && f.type
-					g.commit("Uploaded #{file.relative_path} via tint")
+				g = Git.open(PROJECT_PATH)
+				g.add(file.path.to_s)
+				g.status.each do |f|
+					if f.path == file.relative_path.to_s && f.type
+						g.commit("Uploaded #{file.relative_path} via tint")
+					end
 				end
 			end
 
