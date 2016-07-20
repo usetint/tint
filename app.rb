@@ -119,6 +119,18 @@ module Tint
       redirect to("/files/#{Pathname.new(params['splat'].join('/')).dirname}")
     end
 
+    post "/files/*" do
+      path = "#{project_path}/#{params['splat'].join('/')}"
+      directory = Directory.new(path)
+      file = params['file']
+
+      ::File.open("#{path}/#{file[:filename]}", "w") do |f|
+        f.write(file[:tempfile].read)
+      end
+
+      redirect to(directory.route)
+    end
+
     delete "/files/*" do
       file = params['splat'].join('/')
 
