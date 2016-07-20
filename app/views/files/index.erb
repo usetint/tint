@@ -18,6 +18,14 @@
 					<button type="submit">Delete</button>
 				</form>
 			<% end %>
+
+			<% unless file.name == ".." %>
+				<form action="<%= file.route %>" method="post">
+					<input type="hidden" name="_method" value="PUT" />
+					<input type="text" name="name" value="<%= file.name %>" />
+					<button type="submit">Rename</button>
+				</form>
+			<% end %>
 		</li>
 	<% end %>
 </ul>

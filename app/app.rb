@@ -73,28 +73,44 @@ module Tint
 
 		put "/files/*" do
 			file = Tint::File.get(params)
-			updated_data = normalize(params['data'])
-
-			Tempfile.open('tint-save') do |tmp|
-				if updated_data
-					tmp.puts updated_data.to_yaml
-					tmp.puts '---'
-				end
-				if params.has_key?('content')
-					tmp.puts(params['content'].gsub(/\r\n?/, "\n"))
-				else
-					file.stream_content(&tmp.method(:puts))
-				end
-				tmp.flush
-				FileUtils.mv(tmp.path, file.path, force: true)
-			end
-
 			g = Git.open(PROJECT_PATH)
-			g.add(file.path.to_s)
 
-			g.status.each do |f|
-				if f.path == file.relative_path.to_s && f.type
-					g.commit("Modified #{file.relative_path} via tint")
+			if params['name']
+				new = file.relative_path.dirname.join(params['name'])
+				if PROJECT_PATH.join(new).exist?
+					return 'A file with that name already exists'
+				else
+					begin
+						g.lib.mv(file.relative_path.to_s, new.to_s)
+						g.commit("Renamed #{file.relative_path} to #{params['name']} via tint")
+					rescue Git::GitExecuteError
+						# Not in git, so just rename
+						file.path.rename(PROJECT_PATH.join(new))
+					end
+				end
+			else
+				updated_data = normalize(params['data'])
+
+				Tempfile.open('tint-save') do |tmp|
+					if updated_data
+						tmp.puts updated_data.to_yaml
+						tmp.puts '---'
+					end
+					if params.has_key?('content')
+						tmp.puts(params['content'].gsub(/\r\n?/, "\n"))
+					else
+						file.stream_content(&tmp.method(:puts))
+					end
+					tmp.flush
+					FileUtils.mv(tmp.path, file.path, force: true)
+				end
+
+				g.add(file.path.to_s)
+
+				g.status.each do |f|
+					if f.path == file.relative_path.to_s && f.type
+						g.commit("Modified #{file.relative_path} via tint")
+					end
 				end
 			end
 
