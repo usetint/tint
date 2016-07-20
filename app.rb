@@ -26,6 +26,7 @@ class Tint < Sinatra::Base
   end
 
   set :environment, Sprockets::Environment.new
+  set :method_override, true
 
   environment.append_path "assets/stylesheets"
   environment.css_compressor = :scss
@@ -79,7 +80,7 @@ class Tint < Sinatra::Base
     end
   end
 
-  post "/files/*" do
+  put "/files/*" do
     file_path = "#{project_path}/#{params['splat'].join('/')}"
     updated_data = normalize(params['data'])
 
