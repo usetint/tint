@@ -78,7 +78,7 @@ module Tint
 					end
 				end
 			else
-				'Editing binary files is not supported'
+				erb :error, locals: { message: "Editing binary files is not supported" }
 			end
 		end
 
@@ -89,7 +89,7 @@ module Tint
 			if params['name']
 				new = file.relative_path.dirname.join(params['name'])
 				if PROJECT_PATH.join(new).exist?
-					return 'A file with that name already exists'
+					return erb :error, locals: { message: "A file with that name already exists" }
 				else
 					begin
 						g.lib.mv(file.relative_path.to_s, new.to_s)

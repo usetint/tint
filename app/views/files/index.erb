@@ -11,7 +11,11 @@
 <ul>
 	<% directory.files.each do |file| %>
 		<li>
-			<a href="<%= file.route %>"><%= file.name %></a>
+			<% if file.text? || file.directory? %>
+				<a href="<%= file.route %>"><%= file.name %></a>
+			<% else %>
+				<%= file.name %>
+			<% end %>
 			<% unless file.directory? %>
 				<form action="<%= file.route %>" method="post">
 					<input type="hidden" name="_method" value="DELETE" />
