@@ -155,14 +155,16 @@ module Tint
 
 		helpers do
 			def render_yml(value)
+				"#{
 				case value
 				when Hash
 					value.map { |k, v| render_value(k, v, "data[#{k}]") }.join
 				when Array
-					value.each_with_index.map { |v, i| render_value(nil, v, "data[#{i}]") }.join
+					"<ol data-key='data'>#{value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "data[#{i}]")}" }.join}</ol>"
 				else
 					raise TypeError, 'YAML root must be a Hash or Array'
 				end
+				}<script type='text/javascript' src='/yaml.js'></script>"
 			end
 
 			def render_value(key, value, name)
@@ -174,7 +176,7 @@ module Tint
 					end.join
 					}</fieldset>"
 				when Array
-					"<fieldset><legend>#{key}</legend><ol>#{
+					"<fieldset><legend>#{key}</legend><ol data-key='#{name}'>#{
 						value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "#{name}[#{i}]")}</li>" }.join
 					}</ol></fieldset>"
 				else
