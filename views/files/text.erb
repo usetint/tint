@@ -1,9 +1,9 @@
 <h1><%= params['filename'] %></h1>
 <form action="<%= path %>" method="post">
-  <input type="hidden" name="_method" value="PUT" />
-  <%= render_yml(frontmatter) if frontmatter %>
-  <textarea name="content"></textarea>
-  <button type="submit">Save</button>
+	<input type="hidden" name="_method" value="PUT" />
+	<%= render_yml(frontmatter) if frontmatter %>
+	<textarea name="content"></textarea>
+	<button type="submit">Save</button>
 </form>
 
 <% if wysiwyg %>
@@ -11,27 +11,27 @@
 <script type="text/javascript" src="/upndown.bundle.js"></script>
 <script type="text/javascript" src="/tinymce/tinymce.min.js"></script>
 <script type="text/javascript">
-  window.addEventListener('load', function() {
-    var content = document.querySelector('textarea[name=content]');
-    content.value = marked(content.value);
-    tinymce.init({
-      selector: 'textarea[name=content]',
-      menubar: false,
-      toolbar: 'undo redo | formatselect | bold italic numlist bullist | blockquote link image'
-    });
+	window.addEventListener('load', function() {
+		var content = document.querySelector('textarea[name=content]');
+		content.value = marked(content.value);
+		tinymce.init({
+			selector: 'textarea[name=content]',
+			menubar: false,
+			toolbar: 'undo redo | formatselect | bold italic numlist bullist | blockquote link image'
+		});
 
-    document.querySelector("form").addEventListener("submit", function(e) {
-      e.preventDefault();
+		document.querySelector("form").addEventListener("submit", function(e) {
+			e.preventDefault();
 
-      new upndown().convert(content.value, function(error, markdown) {
-        if(error) {
-          alert(error);
-        } else {
-          content.value = markdown;
-          HTMLFormElement.prototype.submit.call(document.querySelector("form"));
-        }
-      });
-    });
-  });
+			new upndown().convert(content.value, function(error, markdown) {
+				if(error) {
+					alert(error);
+				} else {
+					content.value = markdown;
+					HTMLFormElement.prototype.submit.call(document.querySelector("form"));
+				}
+			});
+		});
+	});
 </script>
 <% end %>

@@ -1,17 +1,17 @@
 <nav>
-  <ul>
-    <% fragments = (["files"] + Array(params["splat"])).join("/").split("/") %>
-    <% fragments.each_with_index do |fragment, i| %>
-      <li>
-        <% if fragment == fragments.last %>
-          <%= fragment %>
-        <% else %>
-          <% path = "/#{fragments[0..i].join("/")}" %>
-          <a href="<%= path %>"><%= fragment %></a>
-        <% end %>
-      </li>
-    <% end %>
-  </ul>
+	<ul>
+		<% fragments = (["files"] + Array(params["splat"])).join("/").split("/") %>
+		<% fragments.each_with_index do |fragment, i| %>
+			<li>
+				<% if fragment == fragments.last %>
+					<%= fragment %>
+				<% else %>
+					<% path = "/#{fragments[0..i].join("/")}" %>
+					<a href="<%= path %>"><%= fragment %></a>
+				<% end %>
+			</li>
+		<% end %>
+	</ul>
 </nav>
 
 <%= yield %>

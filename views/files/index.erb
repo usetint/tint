@@ -1,18 +1,18 @@
 <form action="<%= directory.route %>" method="post" enctype="multipart/form-data">
-  <input type="file" name="file" />
-  <button type="submit">Upload</button>
+	<input type="file" name="file" />
+	<button type="submit">Upload</button>
 </form>
 
 <ul>
-  <% directory.files.each do |file| %>
-    <li>
-      <a href="<%= file.route %>"><%= file.name %></a>
-      <% unless file.directory? %>
-        <form action="<%= file.route %>" method="post">
-          <input type="hidden" name="_method" value="DELETE" />
-          <button type="submit">Delete</button>
-        </form>
-      <% end %>
-    </li>
-  <% end %>
+	<% directory.files.each do |file| %>
+		<li>
+			<a href="<%= file.route %>"><%= file.name %></a>
+			<% unless file.directory? %>
+				<form action="<%= file.route %>" method="post">
+					<input type="hidden" name="_method" value="DELETE" />
+					<button type="submit">Delete</button>
+				</form>
+			<% end %>
+		</li>
+	<% end %>
 </ul>

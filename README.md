@@ -3,3 +3,7 @@
 Copy `.env.sample` to `.env` and set `PROJECT_PATH` to the path of a jekyll app on your system.
 
 Run the app using `rackup`.
+
+# Contributing
+
+Code style uses http://intellindent.info/seriously

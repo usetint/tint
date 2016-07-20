@@ -1,66 +1,66 @@
 * {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 body {
-  font-family: sans-serif;
+	font-family: sans-serif;
 }
 
 label {
-  display: block;
-  margin: 0 0 1rem 0;
-  font-weight: normal;
+	display: block;
+	margin: 0 0 1rem 0;
+	font-weight: normal;
 }
 
 input[type="text"],
 input[type="file"],
 textarea {
-  display: block;
-  padding: 1rem;
-  width: 20rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 2px;
+	display: block;
+	padding: 1rem;
+	width: 20rem;
+	font-size: 1rem;
+	border: 1px solid #ccc;
+	border-radius: 2px;
 }
 
 textarea {
-  height: 10rem;
+	height: 10rem;
 }
 
 button {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: #3498db;
-  border: none;
-  border-radius: 2px;
-  color: #fff;
-  font-size: 1rem;
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	background: #3498db;
+	border: none;
+	border-radius: 2px;
+	color: #fff;
+	font-size: 1rem;
 }
 
 body > nav > ul {
-  list-style-type: none;
-  margin: 0 0 2rem 0;
-  padding: 0;
+	list-style-type: none;
+	margin: 0 0 2rem 0;
+	padding: 0;
 
-  li {
-    display: inline-block;
+	li {
+		display: inline-block;
 
-    &:after {
-      content: "›";
-      margin-left: 0.5rem;
-    }
+		&:after {
+			content: "›";
+			margin-left: 0.5rem;
+		}
 
-    &:last-child:after {
-      content: none;
-    }
-  }
+		&:last-child:after {
+			content: none;
+		}
+	}
 }
 
 ul form {
-  display: inline-block;
+	display: inline-block;
 
-  button {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
-  }
+	button {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.8rem;
+	}
 }
