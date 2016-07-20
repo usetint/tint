@@ -93,8 +93,12 @@ module Tint
 
 				Tempfile.open('tint-save') do |tmp|
 					if updated_data
-						tmp.puts updated_data.to_yaml
-						tmp.puts '---'
+						if file.content?
+							tmp.puts updated_data.to_yaml
+							tmp.puts '---'
+						else
+							tmp.puts updated_data.to_yaml.sub(/\A---\r?\n?/, '')
+						end
 					end
 					if params.has_key?('content')
 						tmp.puts(params['content'].gsub(/\r\n?/, "\n"))
