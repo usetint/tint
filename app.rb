@@ -6,6 +6,7 @@ require "sinatra/streaming"
 require "filemagic"
 require "git"
 require "json"
+require "pathname"
 require "sass"
 require "sprockets"
 require "yaml"
@@ -31,7 +32,7 @@ class Tint < Sinatra::Base
   environment.append_path "assets/stylesheets"
   environment.css_compressor = :scss
 
-  project_path = ENV['PROJECT_PATH']
+  project_path = Pathname.new(ENV['PROJECT_PATH']).realpath.to_s
 
   get "/" do
     erb :index
@@ -107,6 +108,16 @@ class Tint < Sinatra::Base
     end
 
     redirect to("/")
+  end
+
+  delete "/files/*" do
+    file = params['splat'].join('/')
+
+    g = Git.open(project_path)
+    g.remove("#{project_path}/#{file}")
+    g.commit("Removed #{file} via tint")
+
+    redirect to("/files/#{Pathname.new(file).dirname}")
   end
 
 protected
