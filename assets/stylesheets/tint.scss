@@ -4,6 +4,11 @@
 
 body {
 	font-family: sans-serif;
+	padding: 2rem;
+}
+
+form {
+	margin-bottom: 2rem;
 }
 
 label {
@@ -58,6 +63,7 @@ body > nav > ul {
 
 ul form {
 	display: inline-block;
+	margin-bottom: 0;
 
 	input[type="text"] {
 		display: inline-block;
