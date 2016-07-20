@@ -60,18 +60,22 @@ module Tint
         render_directory path
       elsif file.text?
         if file.yml? || !file.content?
-          erb :"files/yml", layout: :files_layout, locals: {
-            data: file.frontmatter,
-            path: file.route
-          }
+          erb :"layouts/files" do
+            erb :"files/yml", locals: {
+              data: file.frontmatter,
+              path: file.route
+            }
+          end
         else
           frontmatter = file.frontmatter? && file.frontmatter
           stream do |out|
-            html = erb :"files/text", layout: :files_layout, locals: {
-              frontmatter: frontmatter,
-              wysiwyg: file.markdown?,
-              path: file.route
-            }
+            html = erb :"layouts/files" do
+              erb :"files/text", locals: {
+                frontmatter: frontmatter,
+                wysiwyg: file.markdown?,
+                path: file.route
+              }
+            end
             top, bottom = html.split('<textarea name="content">', 2)
             out.puts top
             out.puts '<textarea name="content">'
@@ -128,9 +132,9 @@ module Tint
   protected
 
     def render_directory(path)
-      erb :"files/index", layout: :files_layout, locals: {
-        files: Directory.new(path).files,
-      }
+      erb :"layouts/files" do
+        erb :"files/index", locals: { files: Directory.new(path).files }
+      end
     end
 
     def normalize(data)
