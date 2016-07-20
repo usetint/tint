@@ -144,7 +144,7 @@ module Tint
 				if data.keys.include?('___checkbox_unchecked')
 					data.keys.include?('___checkbox_checked')
 				elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
-					data.to_a.sort_by(&:first).map(&:last).map &method(:normalize)
+					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map &method(:normalize)
 				else
 					data.merge(data) { |k,v| normalize(v) }
 				end
