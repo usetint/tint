@@ -82,7 +82,8 @@ class Tint < Sinatra::Base
   end
 
   put "/files/*" do
-    file_path = "#{project_path}/#{params['splat'].join('/')}"
+    file = params['splat'].join('/')
+    file_path = "#{project_path}/#{file}"
     updated_data = normalize(params['data'])
 
     Tempfile.open('tint-save') do |tmp|
@@ -103,12 +104,12 @@ class Tint < Sinatra::Base
     g.add(file_path)
 
     g.status.each do |f|
-      if f.path == params['splat'].join('/') && f.type
-        g.commit("Modified #{params['splat'].join('/')} via tint")
+      if f.path == file && f.type
+        g.commit("Modified #{file} via tint")
       end
     end
 
-    redirect to("/")
+    redirect to("/files/#{Pathname.new(file).dirname}")
   end
 
   delete "/files/*" do
