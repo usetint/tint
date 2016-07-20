@@ -74,7 +74,7 @@ class Tint < Sinatra::Base
           end
         end
       else
-        raise 'Editing binary files is not supported'
+        'Editing binary files is not supported'
       end
     end
   end
