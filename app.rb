@@ -20,7 +20,7 @@ if development?
 end
 
 module Tint
-  PROJECT_PATH = ENV["PROJECT_PATH"]
+  PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath
 
   class App < Sinatra::Base
     helpers Sinatra::Streaming
@@ -35,10 +35,6 @@ module Tint
     environment.append_path "assets/stylesheets"
     environment.css_compressor = :scss
 
-    def project_path
-      Pathname.new(PROJECT_PATH).realpath.to_s
-    end
-
     get "/" do
       erb :index
     end
@@ -48,16 +44,11 @@ module Tint
       settings.environment.call(env)
     end
 
-    get "/files" do
-      render_directory project_path
-    end
-
-    get "/files/*" do
-      path = "#{project_path}/#{params['splat'].join('/')}"
-      file = Tint::File.new(path)
+    get "/files/?*" do
+      file = Tint::File.get(params)
 
       if file.directory?
-        render_directory path
+        render_directory file.to_directory
       elsif file.text?
         if file.yml? || !file.content?
           erb :"layouts/files" do
@@ -89,8 +80,7 @@ module Tint
     end
 
     put "/files/*" do
-      path = "#{project_path}/#{params['splat'].join('/')}"
-      file = Tint::File.new(path)
+      file = Tint::File.get(params)
       updated_data = normalize(params['data'])
 
       Tempfile.open('tint-save') do |tmp|
@@ -104,45 +94,30 @@ module Tint
           file.stream_content(&tmp.method(:puts))
         end
         tmp.flush
-        FileUtils.mv(tmp.path, path, force: true)
+        FileUtils.mv(tmp.path, file.path, force: true)
       end
 
-      g = Git.open(project_path)
-      g.add(path)
+      g = Git.open(PROJECT_PATH)
+      g.add(file.path.to_s)
 
       g.status.each do |f|
-        if f.path == params['splat'].join('/') && f.type
-          g.commit("Modified #{params['splat'].join('/')} via tint")
+        if f.path == file.relative_path.to_s && f.type
+          g.commit("Modified #{file.relative_path} via tint")
         end
       end
 
-      redirect to("/files/#{Pathname.new(params['splat'].join('/')).dirname}")
+      redirect to(file.parent.route)
     end
 
-    post "/files" do
-      upload(project_path, params['file'])
-    end
+    post "/files/?*" do
+      directory = Tint::File.get(params).to_directory
+      file = directory.upload(params['file'])
 
-    post "/files/*" do
-      path = "#{project_path}/#{params['splat'].join('/')}"
-      upload(path, params['file'])
-    end
-
-    def upload(path, file)
-      directory = Directory.new(path)
-      file_path = "#{path}/#{file[:filename]}"
-
-      ::File.open(file_path, "w") do |f|
-        until file[:tempfile].eof?
-          f.write file[:tempfile].read(4096)
-        end
-      end
-
-      g = Git.open(project_path)
-      g.add(file_path)
+      g = Git.open(PROJECT_PATH)
+      g.add(file.path.to_s)
       g.status.each do |f|
-        if f.path == file[:filename] && f.type
-          g.commit("Uploaded #{file[:filename]} via tint")
+        if f.path == file.relative_path.to_s && f.type
+          g.commit("Uploaded #{file.relative_path} via tint")
         end
       end
 
@@ -150,20 +125,20 @@ module Tint
     end
 
     delete "/files/*" do
-      file = params['splat'].join('/')
+      file = Tint::File.get(params)
 
-      g = Git.open(project_path)
-      g.remove("#{project_path}/#{file}")
-      g.commit("Removed #{file} via tint")
+      g = Git.open(PROJECT_PATH)
+      g.remove(file.path.to_s)
+      g.commit("Removed #{file.relative_path} via tint")
 
-      redirect to("/files/#{Pathname.new(file).dirname}")
+      redirect to(file.parent.route)
     end
 
   protected
 
-    def render_directory(path)
-      erb :"layouts/files", locals: { directory: Directory.new(path) } do
-        erb :"files/index", locals: { directory: Directory.new(path) }
+    def render_directory(directory)
+      erb :"layouts/files", locals: { directory: directory } do
+        erb :"files/index", locals: { directory: directory }
       end
     end
 
@@ -236,25 +211,40 @@ module Tint
 
   class Directory
     def initialize(path)
-      @path = path
+      @path = Pathname.new(path)
     end
 
     def route
-      "/files#{path.gsub(/\A#{PROJECT_PATH}/, "")}"
+      "/files/#{relative_path}"
+    end
+
+    def relative_path
+      path.relative_path_from(PROJECT_PATH)
     end
 
     def files
+      return @files if @files
+
       files = Dir.glob("#{path}/*").map { |file| Tint::File.new(file) }
 
-      if path != PROJECT_PATH
-        parent = Tint::File.new(
-          ::File.expand_path("..", Dir.open(path)),
-          ".."
-        )
+      if path.realpath != PROJECT_PATH
+        parent = Tint::File.new(path.dirname, "..")
         files = files.unshift(parent)
       end
 
-      files
+      @files = files.sort_by { |f| [f.directory? ? 0 : 1, f.name] }
+    end
+
+    def upload(file)
+      file_path = path + file[:filename]
+
+      ::File.open(file_path, "w") do |f|
+        until file[:tempfile].eof?
+          f.write file[:tempfile].read(4096)
+        end
+      end
+
+      Tint::File.new(file_path)
     end
 
   protected
@@ -263,18 +253,28 @@ module Tint
   end
 
   class File
+    attr_reader :path
+
     def initialize(path, name=nil)
-      @path = path
+      @path = Pathname.new(path)
       @name = name
+    end
+
+    def self.get(params)
+      Tint::File.new("#{PROJECT_PATH}/#{params['splat'].join('/')}")
     end
 
     def directory?
       ::File.directory?(path)
     end
 
+    def parent
+      @parent ||= Tint::Directory.new(path.dirname)
+    end
+
     def text?
       FileMagic.open(:mime) do |magic|
-        magic.file(path).split('/').first == 'text'
+        magic.file(path.to_s).split('/').first == 'text'
       end
     end
 
@@ -291,11 +291,15 @@ module Tint
     end
 
     def route
-      "/files#{path.gsub(/\A#{PROJECT_PATH}/, "")}"
+      "/files/#{relative_path}"
+    end
+
+    def relative_path
+      path.relative_path_from(PROJECT_PATH)
     end
 
     def name
-      @name ||= ::File.basename(path)
+      @name ||= path.basename.to_s
     end
 
     def stream_content
@@ -326,10 +330,14 @@ module Tint
       YAML.safe_load(open(path))
     end
 
+    def to_directory
+      Tint::Directory.new(path)
+    end
+
   protected
 
     def extension
-      @extension ||= path.split(/\./).last.downcase
+      @extension ||= path.extname
     end
 
     def detect_content_or_frontmatter
@@ -350,7 +358,5 @@ module Tint
 
       @content_or_frontmatter = [!has_frontmatter, has_frontmatter]
     end
-
-    attr_reader :path
   end
 end
