@@ -194,13 +194,13 @@ module Tint
 			def render_value(key, value, name)
 				case value
 				when Hash
-					"<fieldset>#{"<legend>#{key}</legend>" if key}#{
+					"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}>#{"<legend>#{key}</legend>" if key}#{
 					value.map do |key, value|
 						"#{render_value(key, value, "#{name}[#{key}]")}"
 					end.join
 					}</fieldset>"
 				when Array
-					"<fieldset><legend>#{key}</legend><ol data-key='#{name}'>#{
+					"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}><legend>#{key}</legend><ol data-key='#{name}'>#{
 						value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "#{name}[#{i}]")}</li>" }.join
 					}</ol></fieldset>"
 				else
@@ -221,7 +221,7 @@ module Tint
 				end
 
 				if key
-					"<label>#{key} #{input}</label>"
+					"<label#{" class='hidden'" if key.to_s.start_with?("_")}>#{key} #{input}</label>"
 				else
 					input
 				end

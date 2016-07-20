@@ -29,4 +29,7 @@ window.addEventListener("load", function() {
 		ol.parentElement.appendChild(button);
 		hydrate(ol);
 	});
+
+	var hidden = document.querySelectorAll("form .hidden");
+	Array.prototype.forEach.call(hidden, function(el) { el.style.display = 'none'; });
 });
