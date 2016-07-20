@@ -48,11 +48,7 @@ module Tint
       settings.environment.call(env)
     end
 
-    get "/files" do
-      render_directory project_path
-    end
-
-    get "/files/*" do
+    get "/files/?*" do
       path = "#{project_path}/#{params['splat'].join('/')}"
       file = Tint::File.new(path)
 
@@ -119,16 +115,9 @@ module Tint
       redirect to("/files/#{Pathname.new(params['splat'].join('/')).dirname}")
     end
 
-    post "/files" do
-      upload(project_path, params['file'])
-    end
-
-    post "/files/*" do
+    post "/files/?*" do
       path = "#{project_path}/#{params['splat'].join('/')}"
-      upload(path, params['file'])
-    end
-
-    def upload(path, file)
+      file = params['file']
       directory = Directory.new(path)
       file_path = "#{path}/#{file[:filename]}"
 
@@ -246,7 +235,7 @@ module Tint
     def files
       files = Dir.glob("#{path}/*").map { |file| Tint::File.new(file) }
 
-      if path != PROJECT_PATH
+      if Pathname.new(path).realpath != Pathname.new(PROJECT_PATH).realpath
         parent = Tint::File.new(
           ::File.expand_path("..", Dir.open(path)),
           ".."
