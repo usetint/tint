@@ -13,6 +13,7 @@ label {
 }
 
 input[type="text"],
+input[type="file"],
 textarea {
   display: block;
   padding: 1rem;
@@ -27,7 +28,8 @@ textarea {
 }
 
 button {
-  padding: 1rem 2rem;
+  display: inline-block;
+  padding: 0.5rem 1rem;
   background: #3498db;
   border: none;
   border-radius: 2px;
@@ -51,5 +53,14 @@ body > nav > ul {
     &:last-child:after {
       content: none;
     }
+  }
+}
+
+ul form {
+  display: inline-block;
+
+  button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
   }
 }
