@@ -119,6 +119,36 @@ module Tint
       redirect to("/files/#{Pathname.new(params['splat'].join('/')).dirname}")
     end
 
+    post "/files" do
+      upload(project_path, params['file'])
+    end
+
+    post "/files/*" do
+      path = "#{project_path}/#{params['splat'].join('/')}"
+      upload(path, params['file'])
+    end
+
+    def upload(path, file)
+      directory = Directory.new(path)
+      file_path = "#{path}/#{file[:filename]}"
+
+      ::File.open(file_path, "w") do |f|
+        until file[:tempfile].eof?
+          f.write file[:tempfile].read(4096)
+        end
+      end
+
+      g = Git.open(project_path)
+      g.add(file_path)
+      g.status.each do |f|
+        if f.path == file[:filename] && f.type
+          g.commit("Uploaded #{file[:filename]} via tint")
+        end
+      end
+
+      redirect to(directory.route)
+    end
+
     delete "/files/*" do
       file = params['splat'].join('/')
 
