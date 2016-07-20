@@ -1,3 +1,3 @@
 require "./app"
 
-run Tint.new
+run Tint::App.new
