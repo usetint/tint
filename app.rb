@@ -253,7 +253,7 @@ module Tint
     end
 
     def route
-      "/files#{path}".gsub(PROJECT_PATH, "")
+      "/files#{path.gsub(/\A#{PROJECT_PATH}/, "")}"
     end
 
     def name
