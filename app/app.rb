@@ -113,6 +113,10 @@ module Tint
 						g.commit("Uploaded #{file.relative_path} via tint")
 					end
 				end
+			elsif params['folder']
+				folder = directory.path.join(params['folder'])
+				folder.mkdir
+				return redirect to(Tint::Directory.new(folder).route)
 			end
 
 			redirect to(directory.route)

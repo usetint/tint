@@ -39,8 +39,6 @@ module Tint
 			Tint::File.new(file_path)
 		end
 
-	protected
-
 		attr_reader :path
 	end
 end

@@ -3,6 +3,11 @@
 	<button type="submit">Upload</button>
 </form>
 
+<form action="<%= directory.route %>" method="post">
+	<input type="text" name="folder" required="required" />
+	<button type="submit">Create folder</button>
+</form>
+
 <ul>
 	<% directory.files.each do |file| %>
 		<li>
