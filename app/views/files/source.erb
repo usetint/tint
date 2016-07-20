@@ -1,8 +1,8 @@
 <h1><%= params['filename'] %></h1>
 <form action="<%= path %>" method="post">
 	<input type="hidden" name="_method" value="PUT" />
-	<%= render_yml(data) %>
+	<textarea name="source"></textarea>
 	<button type="submit">Save</button>
 </form>
 
-<a href="?source">Edit Raw Source</a>
+<a href="?">Back to editor</a>

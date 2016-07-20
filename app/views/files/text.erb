@@ -6,6 +6,10 @@
 	<button type="submit">Save</button>
 </form>
 
+<% if frontmatter %>
+	<a href="?source">Edit Raw Source</a>
+<% end %>
+
 <% if wysiwyg %>
 <script type="text/javascript" src="/marked.js"></script>
 <script type="text/javascript" src="/upndown.bundle.js"></script>

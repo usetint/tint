@@ -55,12 +55,16 @@ module Tint
 			@name ||= path.basename.to_s
 		end
 
+		def stream
+			::File.foreach(path).with_index do |line, idx|
+				yield line.chomp, idx
+			end
+		end
+
 		def stream_content
 			has_frontmatter = false
 			doc_start = 0
-			::File.foreach(path).with_index do |line, idx|
-				line.chomp!
-
+			stream do |line, idx|
 				if doc_start < 2
 					has_frontmatter = true if line == '---' && idx == 0
 					doc_start += 1 if line == '---'

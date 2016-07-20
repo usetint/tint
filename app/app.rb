@@ -42,7 +42,18 @@ module Tint
 			if file.directory?
 				render_directory file.to_directory
 			elsif file.text?
-				if file.yml? || !file.content?
+				if params.has_key?('source')
+					stream do |out|
+						html = erb :"layouts/files" do
+							erb :"files/source", locals: { path: file.route }
+						end
+						top, bottom = html.split('<textarea name="source">', 2)
+						out.puts top
+						out.puts '<textarea name="source">'
+						file.stream { |line, _| out.puts line }
+						out.puts bottom
+					end
+				elsif file.yml? || !file.content?
 					erb :"layouts/files" do
 						erb :"files/yml", locals: {
 							data: file.frontmatter,
@@ -86,6 +97,16 @@ module Tint
 					rescue Git::GitExecuteError
 						# Not in git, so just rename
 						file.path.rename(PROJECT_PATH.join(new))
+					end
+				end
+			elsif params['source']
+				file.path.write params['source']
+
+				g.add(file.path.to_s)
+
+				g.status.each do |f|
+					if f.path == file.relative_path.to_s && f.type
+						g.commit("Modified #{file.relative_path} via tint")
 					end
 				end
 			else
