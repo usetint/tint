@@ -3,7 +3,10 @@ require "pathname"
 module Tint
 	class Directory
 		def initialize(path)
-			@path = Pathname.new(path)
+			@path = Pathname.new(path).realpath.cleanpath
+			unless @path.to_s.start_with?(PROJECT_PATH.to_s)
+				raise "File is outside of project scope!"
+			end
 		end
 
 		def route

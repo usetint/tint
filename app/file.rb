@@ -9,12 +9,16 @@ module Tint
 		attr_reader :path
 
 		def initialize(path, name=nil)
-			@path = Pathname.new(path)
+			@path = Pathname.new(path).realpath.cleanpath
+			unless @path.to_s.start_with?(PROJECT_PATH.to_s)
+				raise "File is outside of project scope!"
+			end
+
 			@name = name
 		end
 
 		def self.get(params)
-			Tint::File.new("#{PROJECT_PATH}/#{params['splat'].join('/')}")
+			Tint::File.new(PROJECT_PATH.join(params['splat'].join('/')))
 		end
 
 		def directory?

@@ -13,7 +13,7 @@ require_relative "file"
 require_relative "directory"
 
 module Tint
-	PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath
+	PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath.cleanpath
 
 	class App < Sinatra::Base
 		helpers Sinatra::Streaming
