@@ -7,5 +7,12 @@
 	<body>
 		<h1><a href="/">Tint</a></h1>
 		<%= yield %>
+
+		<% if pundit_user %>
+			<form method="post" action="/auth/login">
+				<input type="hidden" name="_method" value="DELETE" />
+				<button type="submit">Logout</button>
+			</form>
+		<% end %>
 	</body>
 </html>
