@@ -5,12 +5,14 @@ require "sinatra/streaming"
 require 'sinatra/pundit'
 
 require "git"
+require "json"
 require "omniauth"
 require "omniauth-github"
 require "omniauth-indieauth"
 require "pathname"
 require "sass"
 require "securerandom"
+require "sequel"
 require "shellwords"
 require "sprockets"
 
@@ -21,6 +23,7 @@ require_relative "helpers"
 
 module Tint
 	PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath.cleanpath
+	DB = Sequel.connect(ENV.fetch("DATABASE_URL"))
 
 	class App < Sinatra::Base
 		use OmniAuth::Builder do
@@ -77,9 +80,27 @@ module Tint
 			redirect to("/")
 		end
 
-		get '/auth/:provider/callback' do
+		get "/auth/:provider/callback" do
 			skip_authorization
-			session['user'] = "#{params['provider']}:#{request.env['omniauth.auth'].uid}"
+
+			identity = DB[:identities][provider: params["provider"], uid: request.env["omniauth.auth"].uid]
+
+			if identity
+				session["user"] = identity[:user_id]
+			else
+				session['user'] = DB[:users].insert(
+					fn: request.env["omniauth.auth"].info.name,
+					email: request.env["omniauth.auth"].info.email
+				)
+
+				DB[:identities].insert(
+					provider: params["provider"],
+					uid: request.env["omniauth.auth"].uid,
+					omniauth: request.env["omniauth.auth"].to_json,
+					user_id: session["user"]
+				)
+			end
+
 			redirect to("/")
 		end
 
