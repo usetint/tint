@@ -38,7 +38,10 @@ module Tint
 						<input type='checkbox' name='#{name}[___checkbox_checked]' #{' checked="checked"' if value} />
 					"
 				elsif key.end_with?("_path")
-					"<input type='file' name='#{name}' value='#{value}' />"
+					"
+						<input type='hidden' name='#{name}' value='#{value}' />
+						<input type='file' name='#{name}' />
+					"
 				elsif value.is_a?(String) && value.length > 50
 					"<textarea name='#{name}'>#{value}</textarea>"
 				else
