@@ -1,5 +1,5 @@
 <h1><%= params['filename'] %></h1>
-<form action="<%= path %>" method="post">
+<form action="<%= path %>" method="post" enctype="multipart/form-data">
 	<input type="hidden" name="_method" value="PUT" />
 	<%= render_yml(data) %>
 	<button type="submit">Save</button>

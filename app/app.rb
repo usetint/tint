@@ -10,12 +10,14 @@ require "omniauth-github"
 require "omniauth-indieauth"
 require "pathname"
 require "sass"
+require "securerandom"
 require "shellwords"
 require "sprockets"
 
 require_relative "file"
 require_relative "directory"
 require_relative "tint_omniauth" # Monkeypatch
+require_relative "helpers"
 
 module Tint
 	PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath.cleanpath
@@ -30,8 +32,8 @@ module Tint
 				provider :indieauth, client_id: ENV['APP_URL']
 			end
 		end
-		helpers Sinatra::Streaming
 		register Sinatra::Pundit
+		helpers Sinatra::Streaming, Tint::Helpers::Rendering
 
 		configure :development do
 			register Sinatra::Reloader
@@ -179,7 +181,7 @@ module Tint
 					end
 				end
 			else
-				updated_data = normalize(params['data'])
+				updated_data = process_form_data(params['data'], g)
 
 				Tempfile.open('tint-save') do |tmp|
 					if updated_data
@@ -255,71 +257,27 @@ module Tint
 			end
 		end
 
-		def normalize(data)
+		def process_form_data(data, git)
 			case data
 			when Array
-				data.map &method(:normalize)
+				data.map { |v| process_form_data(v, git) }
 			when Hash
-				if data.keys.include?('___checkbox_unchecked')
+				if data.keys.include?(:filename) && data.keys.include?(:tempfile)
+					uploads_path = PROJECT_PATH.join("uploads").join(Time.now.strftime("%Y"))
+					uploads_path.mkpath
+					uploads = Directory.new(uploads_path)
+					file = uploads.upload(data.merge(filename: "#{SecureRandom.uuid}-#{data[:filename]}"))
+					git.add(file.path.to_s)
+					file.relative_path.to_s
+				elsif data.keys.include?('___checkbox_unchecked')
 					data.keys.include?('___checkbox_checked')
 				elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
-					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map &method(:normalize)
+					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map { |v| process_form_data(v, git) }
 				else
-					data.merge(data) { |k,v| normalize(v) }
+					data.merge(data) { |k,v| process_form_data(v, git) }
 				end
 			else
 				data
-			end
-		end
-
-		helpers do
-			def render_yml(value)
-				"#{
-				case value
-				when Hash
-					value.map { |k, v| render_value(k, v, "data[#{k}]") }.join
-				when Array
-					"<ol data-key='data'>#{value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "data[#{i}]")}" }.join}</ol>"
-				else
-					raise TypeError, 'YAML root must be a Hash or Array'
-				end
-				}<script type='text/javascript' src='/yaml.js'></script>"
-			end
-
-			def render_value(key, value, name)
-				case value
-				when Hash
-					"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}>#{"<legend>#{key}</legend>" if key}#{
-					value.map do |key, value|
-						"#{render_value(key, value, "#{name}[#{key}]")}"
-					end.join
-					}</fieldset>"
-				when Array
-					"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}><legend>#{key}</legend><ol data-key='#{name}'>#{
-						value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "#{name}[#{i}]")}</li>" }.join
-					}</ol></fieldset>"
-				else
-					render_input(key, value, name)
-				end
-			end
-
-			def render_input(key, value, name)
-				input = if [true, false].include? value
-					"
-						<input type='hidden' name='#{name}[___checkbox_unchecked]' value='' />
-						<input type='checkbox' name='#{name}[___checkbox_checked]' #{' checked="checked"' if value} />
-					"
-				elsif value.is_a?(String) && value.length > 50
-					"<textarea name='#{name}'>#{value}</textarea>"
-				else
-					"<input type='text' name='#{name}' value='#{value}' />"
-				end
-
-				if key
-					"<label#{" class='hidden'" if key.to_s.start_with?("_")}>#{key} #{input}</label>"
-				else
-					input
-				end
 			end
 		end
 	end
