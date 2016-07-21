@@ -261,7 +261,13 @@ module Tint
 			when Array
 				data.map &method(:normalize)
 			when Hash
-				if data.keys.include?('___checkbox_unchecked')
+				if data.keys.include?(:filename) && data.keys.include?(:tempfile)
+					uploads_path = PROJECT_PATH.join("uploads")
+					uploads_path.mkpath
+					uploads = Directory.new(uploads_path)
+					file = uploads.upload(data)
+					file.relative_path.to_s
+				elsif data.keys.include?('___checkbox_unchecked')
 					data.keys.include?('___checkbox_checked')
 				elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
 					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map &method(:normalize)
