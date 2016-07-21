@@ -10,6 +10,7 @@ require "omniauth-github"
 require "omniauth-indieauth"
 require "pathname"
 require "sass"
+require "securerandom"
 require "shellwords"
 require "sprockets"
 
@@ -180,7 +181,7 @@ module Tint
 					end
 				end
 			else
-				updated_data = normalize(params['data'], g)
+				updated_data = process_form_data(params['data'], g)
 
 				Tempfile.open('tint-save') do |tmp|
 					if updated_data
@@ -256,24 +257,24 @@ module Tint
 			end
 		end
 
-		def normalize(data, git)
+		def process_form_data(data, git)
 			case data
 			when Array
-				data.map &method(:normalize)
+				data.map { |v| process_form_data(v, git) }
 			when Hash
 				if data.keys.include?(:filename) && data.keys.include?(:tempfile)
-					uploads_path = PROJECT_PATH.join("uploads")
+					uploads_path = PROJECT_PATH.join("uploads").join(Time.now.strftime("%Y"))
 					uploads_path.mkpath
 					uploads = Directory.new(uploads_path)
-					file = uploads.upload(data)
-					git.add(file.path)
+					file = uploads.upload(data.merge(filename: "#{SecureRandom.uuid}-#{data[:filename]}"))
+					git.add(file.path.to_s)
 					file.relative_path.to_s
 				elsif data.keys.include?('___checkbox_unchecked')
 					data.keys.include?('___checkbox_checked')
 				elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
-					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map &method(:normalize)
+					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map { |v| process_form_data(v, git) }
 				else
-					data.merge(data) { |k,v| normalize(v) }
+					data.merge(data) { |k,v| process_form_data(v, git) }
 				end
 			else
 				data
