@@ -15,6 +15,7 @@ require "sprockets"
 
 require_relative "file"
 require_relative "directory"
+require_relative "tint_omniauth" # Monkeypatch
 
 module Tint
 	PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath.cleanpath
