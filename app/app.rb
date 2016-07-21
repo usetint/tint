@@ -2,8 +2,12 @@ require "sinatra"
 require "sinatra/json"
 require "sinatra/reloader"
 require "sinatra/streaming"
+require 'sinatra/pundit'
 
 require "git"
+require "omniauth"
+require "omniauth-github"
+require "omniauth-indieauth"
 require "pathname"
 require "sass"
 require "shellwords"
@@ -16,28 +20,74 @@ module Tint
 	PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath.cleanpath
 
 	class App < Sinatra::Base
+		use OmniAuth::Builder do
+			if ENV['GITHUB_KEY']
+				provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: "user,repo"
+			end
+
+			if ENV['APP_URL']
+				provider :indieauth, client_id: ENV['APP_URL']
+			end
+		end
 		helpers Sinatra::Streaming
+		register Sinatra::Pundit
 
 		configure :development do
 			register Sinatra::Reloader
 		end
 
+		configure do
+			error Pundit::NotAuthorizedError do
+				redirect to("/auth/login")
+			end
+		end
+
+		enable :sessions
+		set :session_secret, ENV["SESSION_SECRET"]
 		set :environment, Sprockets::Environment.new
 		set :method_override, true
 
 		environment.append_path "assets/stylesheets"
 		environment.css_compressor = :scss
 
+		current_user do
+			session['user']
+		end
+
+		after do
+			verify_authorized
+		end
+
 		get "/" do
+			authorize :'Tint::Application', :index?
 			erb :index
 		end
 
+		get "/auth/login" do
+			skip_authorization
+			erb :login
+		end
+
+		delete "/auth/login" do
+			skip_authorization
+			session['user'] = nil
+			redirect to("/")
+		end
+
+		get '/auth/:provider/callback' do
+			skip_authorization
+			session['user'] = "#{params['provider']}:#{request.env['omniauth.auth'].uid}"
+			redirect to("/")
+		end
+
 		get "/assets/*" do
+			skip_authorization
 			env["PATH_INFO"].sub!("/assets", "")
 			settings.environment.call(env)
 		end
 
 		post "/build" do
+			skip_authorization
 			prefix = Pathname.new(ENV["PREFIX"])
 			prefix.mkpath
 			prefix = Shellwords.escape(prefix.realpath.to_s)
@@ -54,8 +104,11 @@ module Tint
 			file = Tint::File.get(params)
 
 			if file.directory?
+				authorize file.to_directory, :index?
 				render_directory file.to_directory
 			elsif file.text?
+				authorize file, :edit?
+
 				if params.has_key?('source')
 					stream do |out|
 						html = erb :"layouts/files" do
@@ -98,6 +151,7 @@ module Tint
 
 		put "/files/*" do
 			file = Tint::File.get(params)
+			authorize file, :update?
 			g = Git.open(PROJECT_PATH)
 
 			if params['name']
@@ -158,6 +212,8 @@ module Tint
 
 		post "/files/?*" do
 			directory = Tint::File.get(params).to_directory
+			authorize directory, :update?
+
 			if params['file']
 				file = directory.upload(params['file'])
 
@@ -179,6 +235,7 @@ module Tint
 
 		delete "/files/*" do
 			file = Tint::File.get(params)
+			authorize file, :destroy?
 
 			g = Git.open(PROJECT_PATH)
 			g.remove(file.path.to_s)
