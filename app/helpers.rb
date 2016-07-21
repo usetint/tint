@@ -39,6 +39,7 @@ module Tint
 					"
 				elsif key.end_with?("_path")
 					"
+						<div class='value'>#{value}</div>
 						<input type='hidden' name='#{name}' value='#{value}' />
 						<input type='file' name='#{name}' />
 					"
