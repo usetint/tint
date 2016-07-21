@@ -180,7 +180,7 @@ module Tint
 					end
 				end
 			else
-				updated_data = normalize(params['data'])
+				updated_data = normalize(params['data'], g)
 
 				Tempfile.open('tint-save') do |tmp|
 					if updated_data
@@ -256,7 +256,7 @@ module Tint
 			end
 		end
 
-		def normalize(data)
+		def normalize(data, git)
 			case data
 			when Array
 				data.map &method(:normalize)
@@ -266,6 +266,7 @@ module Tint
 					uploads_path.mkpath
 					uploads = Directory.new(uploads_path)
 					file = uploads.upload(data)
+					git.add(file.path)
 					file.relative_path.to_s
 				elsif data.keys.include?('___checkbox_unchecked')
 					data.keys.include?('___checkbox_checked')
