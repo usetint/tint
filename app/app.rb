@@ -6,6 +6,7 @@ require "sinatra/streaming"
 require "git"
 require "pathname"
 require "sass"
+require "shellwords"
 require "sprockets"
 
 require_relative "file"
@@ -34,6 +35,19 @@ module Tint
 		get "/assets/*" do
 			env["PATH_INFO"].sub!("/assets", "")
 			settings.environment.call(env)
+		end
+
+		post "/build" do
+			prefix = Pathname.new(ENV["PREFIX"])
+			prefix.mkpath
+			prefix = Shellwords.escape(prefix.realpath.to_s)
+			project = Shellwords.escape(PROJECT_PATH.to_s)
+			success = system("env -i - PATH=\"#{ENV['PATH']}\" GEM_PATH=\"#{ENV['GEM_PATH']}\" /bin/sh -c 'cd #{project} && make PREFIX=#{prefix} && make install PREFIX=#{prefix}'")
+			if success
+				redirect to("/")
+			else
+				erb :error, locals: { message:  "Something went wrong with the build" }
+			end
 		end
 
 		get "/files/?*" do
