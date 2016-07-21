@@ -183,18 +183,20 @@ module Tint
 
 				Tempfile.open('tint-save') do |tmp|
 					if updated_data
-						if file.content?
+						if file.yml?
+							tmp.puts updated_data.to_yaml.sub(/\A---\r?\n?/, '')
+						else
 							tmp.puts updated_data.to_yaml
 							tmp.puts '---'
-						else
-							tmp.puts updated_data.to_yaml.sub(/\A---\r?\n?/, '')
 						end
 					end
+
 					if params.has_key?('content')
 						tmp.puts(params['content'].gsub(/\r\n?/, "\n"))
-					else
+					elsif !file.yml?
 						file.stream_content(&tmp.method(:puts))
 					end
+
 					tmp.flush
 					FileUtils.mv(tmp.path, file.path, force: true)
 				end
