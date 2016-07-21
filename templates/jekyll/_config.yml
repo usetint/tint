@@ -1,0 +1,3 @@
+# Add this line to your _config.yml
+
+exclude: ['Makefile', 'makefile']
