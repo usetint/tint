@@ -37,7 +37,7 @@ module Tint
 						<input type='hidden' name='#{name}[___checkbox_unchecked]' value='' />
 						<input type='checkbox' name='#{name}[___checkbox_checked]' #{' checked="checked"' if value} />
 					"
-				elsif key && key.end_with?("_path")
+				elsif key.to_s.end_with?("_path")
 					"
 						<div class='value'>#{value}</div>
 						<input type='hidden' name='#{name}' value='#{value}' />
