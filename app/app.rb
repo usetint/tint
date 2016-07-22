@@ -312,7 +312,6 @@ module Tint
 
 		def is_date?(field_name, value)
 			(field_name.end_with?("_date") || field_name == "date") &&
-				!value.is_a?(Time) &&
 				value.is_a?(String) &&
 				value.present?
 		end
