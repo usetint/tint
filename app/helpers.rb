@@ -43,7 +43,7 @@ module Tint
 						<input type='hidden' name='#{name}' value='#{value}' />
 						<input type='file' name='#{name}' />
 					"
-				elsif key.downcase.end_with?("_date") || key.downcase == "date"
+				elsif key.downcase.end_with?("_date") || key.downcase == "date" && !value.is_a?(Time)
 					date = Date.parse(value.to_s)
 					"<input type='date' name='#{name}' value='#{date&.strftime("%F")}' />"
 				elsif value.is_a?(String) && value.length > 50
