@@ -19,7 +19,8 @@ label {
 
 input[type="text"],
 input[type="file"],
-textarea {
+textarea,
+select {
 	display: block;
 	padding: 1rem;
 	width: 20rem;
