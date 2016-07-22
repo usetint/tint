@@ -283,7 +283,7 @@ module Tint
 		def process_form_data(data, git)
 			case data
 			when Array
-				data.reject { |v| v.is_a?(String) && v.strip == "" }.map { |v| process_form_data(v, git) }
+				data.reject { |v| v.is_a?(String) && v.to_s == "" }.map { |v| process_form_data(v, git) }
 			when Hash
 				if data.keys.include?(:filename) && data.keys.include?(:tempfile)
 					uploads_path = PROJECT_PATH.join("uploads").join(Time.now.strftime("%Y"))
@@ -296,7 +296,7 @@ module Tint
 					data.keys.include?('___checkbox_checked')
 				elsif data.keys.include?("___datetime_date")
 					datetime = "#{data["___datetime_date"]} #{data["___datetime_time"]}"
-					Time.parse(datetime) if datetime.strip != ""
+					Time.parse(datetime) if datetime.to_s != ""
 				elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
 					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map { |v| process_form_data(v, git) }
 				else
@@ -306,14 +306,18 @@ module Tint
 					end
 				end
 			else
-				data
+				if data == ""
+					nil
+				else
+					data
+				end
 			end
 		end
 
 		def is_date?(field_name, value)
 			(field_name.end_with?("_date") || field_name == "date") &&
 				value.is_a?(String) &&
-				value.strip != ""
+				value.to_s != ""
 		end
 	end
 end
