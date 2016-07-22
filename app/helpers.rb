@@ -37,7 +37,7 @@ module Tint
 						<input type='hidden' name='#{name}[___checkbox_unchecked]' value='' />
 						<input type='checkbox' name='#{name}[___checkbox_checked]' #{' checked="checked"' if value} />
 					"
-				elsif key.end_with?("_path")
+				elsif key.to_s.end_with?("_path")
 					"
 						<div class='value'>#{value}</div>
 						<input type='hidden' name='#{name}' value='#{value}' />
@@ -45,6 +45,17 @@ module Tint
 					"
 				elsif value.is_a?(String) && value.length > 50
 					"<textarea name='#{name}'>#{value}</textarea>"
+				elsif key && (options = PROJECT_CONFIG["options"]["#{key}s"])
+					"<select name='#{name}'>
+						<option></option>
+						#{
+						if options.is_a? Hash
+							options.map { |k, v| render_option(k, v, value) }.join
+						elsif options.is_a? Array
+							options.map { |v| render_option(v, v, value) }.join
+						end
+						}
+					</select>"
 				else
 					"<input type='text' name='#{name}' value='#{value}' />"
 				end
@@ -54,6 +65,12 @@ module Tint
 				else
 					input
 				end
+			end
+
+		protected
+
+			def render_option(value, fv, current_value)
+				"<option value='#{value}'#{ "selected='selected'" if value == current_value}>#{fv}</option>"
 			end
 		end
 	end
