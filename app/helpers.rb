@@ -43,6 +43,8 @@ module Tint
 						<input type='hidden' name='#{name}' value='#{value}' />
 						<input type='file' name='#{name}' />
 					"
+				elsif key.downcase.end_with?("_date") || key.downcase == "date"
+					"<input type='date' name='#{name}' value='#{value}' />"
 				elsif value.is_a?(String) && value.length > 50
 					"<textarea name='#{name}'>#{value}</textarea>"
 				elsif key && (options = PROJECT_CONFIG["options"]["#{key}s"])
