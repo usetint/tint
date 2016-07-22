@@ -5,9 +5,10 @@ Rake::TestTask.new do |t|
 end
 
 task :environment do
-	if !ENV["RACK_ENV"] || ENV["RACK_ENV"] == "development"
-		require "dotenv"
+	begin
+		require("dotenv")
 		Dotenv.load
+	rescue LoadError
 	end
 end
 
