@@ -19,8 +19,10 @@ label {
 
 input[type="text"],
 input[type="file"],
-textarea,
-select {
+input[type="date"],
+input[type="time"],
+select,
+textarea {
 	display: block;
 	padding: 1rem;
 	width: 20rem;
