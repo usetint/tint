@@ -301,15 +301,20 @@ module Tint
 					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map { |v| process_form_data(v, git) }
 				else
 					data.merge(data) do |k,v|
-						if (k.end_with?("_date") || k == "date") && v.is_a?(String) && v.present? && !v.is_a?(Time)
-							v = Date.parse(v)
-						end
+						v = Date.parse(v) if is_date?(k, v)
 						process_form_data(v, git)
 					end
 				end
 			else
 				data
 			end
+		end
+
+		def is_date?(field_name, value)
+			(field_name.end_with?("_date") || field_name == "date") &&
+				!value.is_a?(Time) &&
+				value.is_a?(String) &&
+				value.present?
 		end
 	end
 end
