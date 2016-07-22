@@ -1,6 +1,10 @@
 require "minitest/autorun"
 require_relative "../app/file"
 
+module Tint
+	PROJECT_PATH = ""
+end
+
 describe File do
 	let(:subject) { Tint::File.new(path) }
 

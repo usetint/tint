@@ -21,3 +21,7 @@ group :development do
 	gem "pry-byebug"
 	gem "sqlite3"
 end
+
+group :test do
+	gem "rake"
+end

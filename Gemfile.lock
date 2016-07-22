@@ -67,6 +67,7 @@ GEM
       rack
     rack-test (0.6.3)
       rack (>= 1.0)
+    rake (11.2.2)
     ruby-filemagic (0.7.1)
     sass (3.4.22)
     sequel (4.36.0)
@@ -107,6 +108,7 @@ DEPENDENCIES
   omniauth-indieauth
   pry
   pry-byebug
+  rake
   ruby-filemagic
   sass
   sequel
