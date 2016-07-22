@@ -4,9 +4,16 @@ Rake::TestTask.new do |t|
 	t.pattern = "test/**/*_test.rb"
 end
 
+task :environment do
+	if !ENV["RACK_ENV"] || ENV["RACK_ENV"] == "development"
+		require "dotenv"
+		Dotenv.load
+	end
+end
+
 namespace :db do
 	desc "Create a new migration"
-	task :migration, [:name]  do |task, args|
+	task :migration, [:name] => [:environment]  do |task, args|
 		path = "migrations/#{Time.now.to_i}_#{args[:name]}.rb"
 		File.open(path, "w") do |file|
 			file.write %{Sequel.migration do
@@ -17,12 +24,8 @@ end}
 	end
 
 	desc "Run migrations"
-	task :migrate, [:version] do |t, args|
+	task :migrate, [:version] => [:environment] do |t, args|
 		require "sequel"
-		if !ENV["RACK_ENV"] || ENV["RACK_ENV"] == "development"
-			require "dotenv"
-			Dotenv.load
-		end
 
 		Sequel.extension :migration
 		db = Sequel.connect(ENV.fetch("DATABASE_URL"))
