@@ -23,9 +23,13 @@ module Tint
 					end.join
 					}</fieldset>"
 				when Array
-					"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}><legend>#{key}</legend><ol data-key='#{name}'>#{
-						value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "#{name}[#{i}]")}</li>" }.join
-					}</ol></fieldset>"
+					if multiple_select?(key)
+						render_input(key, value, name)
+					else
+						"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}><legend>#{key}</legend><ol data-key='#{name}'>#{
+							value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "#{name}[#{i}]")}</li>" }.join
+						}</ol></fieldset>"
+					end
 				else
 					render_input(key, value, name)
 				end
@@ -33,16 +37,9 @@ module Tint
 
 			def render_input(key, value, name)
 				input = if [true, false].include? value
-					"
-						<input type='hidden' name='#{name}[___checkbox_unchecked]' value='' />
-						<input type='checkbox' name='#{name}[___checkbox_checked]' #{' checked="checked"' if value} />
-					"
+					render_checkbox(name, value)
 				elsif key.to_s.end_with?("_path")
-					"
-						<div class='value'>#{value}</div>
-						<input type='hidden' name='#{name}' value='#{value}' />
-						<input type='file' name='#{name}' />
-					"
+					render_file(name, value)
 				elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
 					time = Time.parse(value.to_s) if value.strip != ""
 					"
@@ -55,16 +52,9 @@ module Tint
 				elsif value.is_a?(String) && value.length > 50
 					"<textarea name='#{name}'>#{value}</textarea>"
 				elsif key && (options = PROJECT_CONFIG["options"]["#{key}s"])
-					"<select name='#{name}'>
-						<option></option>
-						#{
-						if options.is_a? Hash
-							options.map { |k, v| render_option(k, v, value) }.join
-						elsif options.is_a? Array
-							options.map { |v| render_option(v, v, value) }.join
-						end
-						}
-					</select>"
+					render_select(name, value, options)
+				elsif key && (options = PROJECT_CONFIG["options"][key])
+					render_multiple_select(name, value, options)
 				else
 					"<input type='text' name='#{name}' value='#{value}' />"
 				end
@@ -78,8 +68,57 @@ module Tint
 
 		protected
 
-			def render_option(value, fv, current_value)
-				"<option value='#{value}'#{ "selected='selected'" if value == current_value}>#{fv}</option>"
+			def render_checkbox(name, value)
+				"
+					<input type='hidden' name='#{name}[___checkbox_unchecked]' value='' />
+					<input type='checkbox' name='#{name}[___checkbox_checked]' #{' checked="checked"' if value} />
+				"
+			end
+
+			def render_file(name, value)
+				"
+					<div class='value'>#{value}</div>
+					<input type='hidden' name='#{name}' value='#{value}' />
+					<input type='file' name='#{name}' />
+				"
+			end
+
+			def render_select(name, value, options)
+				"
+					<select name='#{name}'>
+						<option></option>
+						#{
+						if options.is_a? Hash
+							options.map { |k, v| render_option(k, v, k == value) }.join
+						elsif options.is_a? Array
+							options.map { |v| render_option(v, v, v == value) }.join
+						end
+						}
+					</select>
+				"
+			end
+
+			def render_multiple_select(name, value, options)
+				"
+					<input type='hidden' name='#{name}[]' />
+					<select name='#{name}[]' multiple='multiple'>
+						#{
+						if options.is_a? Hash
+							options.map { |k, v| render_option(k, v, value.include?(k)) }.join
+						elsif options.is_a? Array
+							options.map { |v| render_option(v, v, value.include?(v)) }.join
+						end
+						}
+					</select>
+				"
+			end
+
+			def render_option(value, fv, selected)
+				"<option value='#{value}'#{ "selected='selected'" if selected}>#{fv}</option>"
+			end
+
+			def multiple_select?(key)
+				!!PROJECT_CONFIG["options"][key]
 			end
 		end
 	end
