@@ -40,6 +40,7 @@ module Tint
 		helpers Sinatra::Streaming, Tint::Helpers::Rendering
 
 		configure :development do
+			set :show_exceptions, :after_handler
 			register Sinatra::Reloader
 		end
 
