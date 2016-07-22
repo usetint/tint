@@ -23,6 +23,7 @@ require_relative "helpers"
 
 module Tint
 	PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath.cleanpath
+	PROJECT_CONFIG = YAML.safe_load(open("#{PROJECT_PATH}/.tint.yml"), [Date, Time])
 	DB = Sequel.connect(ENV.fetch("DATABASE_URL"))
 
 	class App < Sinatra::Base

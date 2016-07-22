@@ -45,8 +45,7 @@ module Tint
 					"
 				elsif value.is_a?(String) && value.length > 50
 					"<textarea name='#{name}'>#{value}</textarea>"
-				# TODO: Move retrieval of config to Site.
-				elsif key && (options = YAML.safe_load(open("#{PROJECT_PATH}/_config.yml"), [Date, Time])["#{key}s"])
+				elsif key && (options = PROJECT_CONFIG["options"]["#{key}s"])
 					"<select name='#{name}'>
 						<option></option>
 						#{
