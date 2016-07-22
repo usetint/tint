@@ -283,7 +283,7 @@ module Tint
 		def process_form_data(data, git)
 			case data
 			when Array
-				data.reject { |v| v.is_a?(String) && v.blank? }.map { |v| process_form_data(v, git) }
+				data.reject { |v| v.is_a?(String) && v.strip == "" }.map { |v| process_form_data(v, git) }
 			when Hash
 				if data.keys.include?(:filename) && data.keys.include?(:tempfile)
 					uploads_path = PROJECT_PATH.join("uploads").join(Time.now.strftime("%Y"))
