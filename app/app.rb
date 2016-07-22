@@ -50,11 +50,11 @@ module Tint
 
 		enable :sessions
 		set :session_secret, ENV["SESSION_SECRET"]
-		set :environment, Sprockets::Environment.new
+		set :sprockets, Sprockets::Environment.new
 		set :method_override, true
 
-		environment.append_path "assets/stylesheets"
-		environment.css_compressor = :scss
+		sprockets.append_path "assets/stylesheets"
+		sprockets.css_compressor = :scss
 
 		current_user do
 			session['user']
@@ -107,7 +107,7 @@ module Tint
 		get "/assets/*" do
 			skip_authorization
 			env["PATH_INFO"].sub!("/assets", "")
-			settings.environment.call(env)
+			settings.sprockets.call(env)
 		end
 
 		post "/build" do
