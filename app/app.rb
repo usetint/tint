@@ -4,6 +4,7 @@ require "sinatra/reloader"
 require "sinatra/streaming"
 require 'sinatra/pundit'
 
+require "active_support"
 require "git"
 require "json"
 require "omniauth"
@@ -293,16 +294,15 @@ module Tint
 					file.relative_path.to_s
 				elsif data.keys.include?('___checkbox_unchecked')
 					data.keys.include?('___checkbox_checked')
+				elsif data.keys.include?("___datetime_date")
+					datetime = "#{data["___datetime_date"]} #{data["___datetime_time"]}"
+					Time.parse(datetime) if datetime.present?
 				elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
 					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map { |v| process_form_data(v, git) }
 				else
 					data.merge(data) do |k,v|
-						if k.end_with?("_date") || k == "date"
-							if Date.parse(v).strftime("%F") == v
-								v = Date.parse(v)
-							else
-								v = Time.parse(v)
-							end
+						if (k.end_with?("_date") || k == "date") && v.is_a?(String) && v.present? && !v.is_a?(Time)
+							v = Date.parse(v)
 						end
 						process_form_data(v, git)
 					end
