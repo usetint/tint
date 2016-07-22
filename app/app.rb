@@ -21,6 +21,9 @@ require_relative "directory"
 require_relative "tint_omniauth" # Monkeypatch
 require_relative "helpers"
 
+ENV["GIT_COMMITTER_NAME"] = "Tint"
+ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
+
 module Tint
 	PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath.cleanpath
 	PROJECT_CONFIG = YAML.safe_load(open("#{PROJECT_PATH}/.tint.yml"), [Date, Time])
@@ -59,7 +62,7 @@ module Tint
 		sprockets.css_compressor = :scss
 
 		current_user do
-			session['user']
+			DB[:users][user_id: session['user'].to_i] if session['user']
 		end
 
 		after do
@@ -187,7 +190,7 @@ module Tint
 				else
 					begin
 						g.lib.mv(file.relative_path.to_s, new.to_s)
-						g.commit("Renamed #{file.relative_path} to #{params['name']} via tint")
+						commit(g, "Renamed #{file.relative_path} to #{params['name']}")
 					rescue Git::GitExecuteError
 						# Not in git, so just rename
 						file.path.rename(PROJECT_PATH.join(new))
@@ -200,7 +203,7 @@ module Tint
 
 				g.status.each do |f|
 					if f.path == file.relative_path.to_s && f.type
-						g.commit("Modified #{file.relative_path} via tint")
+						commit(g, "Modified #{file.relative_path}")
 					end
 				end
 			else
@@ -230,7 +233,7 @@ module Tint
 
 				g.status.each do |f|
 					if f.path == file.relative_path.to_s && f.type
-						g.commit("Modified #{file.relative_path} via tint")
+						commit(g, "Modified #{file.relative_path}")
 					end
 				end
 			end
@@ -249,7 +252,7 @@ module Tint
 				g.add(file.path.to_s)
 				g.status.each do |f|
 					if f.path == file.relative_path.to_s && f.type
-						g.commit("Uploaded #{file.relative_path} via tint")
+						commit(g, "Uploaded #{file.relative_path}")
 					end
 				end
 			elsif params['folder']
@@ -267,7 +270,7 @@ module Tint
 
 			g = Git.open(PROJECT_PATH)
 			g.remove(file.path.to_s)
-			g.commit("Removed #{file.relative_path} via tint")
+			commit(g, "Removed #{file.relative_path}")
 
 			redirect to(file.parent.route)
 		end
@@ -314,6 +317,14 @@ module Tint
 			(field_name.end_with?("_date") || field_name == "date") &&
 				value.is_a?(String) &&
 				value.strip != ""
+		end
+
+		def commit(git, message)
+			if pundit_user && pundit_user[:email]
+				git.commit("#{message} via tint", author: "#{pundit_user[:fn]} <#{pundit_user[:email]}>")
+			else
+				git.commit("#{message} via tint")
+			end
 		end
 	end
 end
