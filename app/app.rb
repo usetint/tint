@@ -296,7 +296,10 @@ module Tint
 				elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
 					data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map { |v| process_form_data(v, git) }
 				else
-					data.merge(data) { |k,v| process_form_data(v, git) }
+					data.merge(data) do |k,v|
+						v = Date.parse(v) if k.end_with?("_date") || k == "date"
+						process_form_data(v, git)
+					end
 				end
 			else
 				data

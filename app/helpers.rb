@@ -44,7 +44,8 @@ module Tint
 						<input type='file' name='#{name}' />
 					"
 				elsif key.downcase.end_with?("_date") || key.downcase == "date"
-					"<input type='date' name='#{name}' value='#{value}' />"
+					date = Date.parse(value.to_s)
+					"<input type='date' name='#{name}' value='#{date&.strftime("%F")}' />"
 				elsif value.is_a?(String) && value.length > 50
 					"<textarea name='#{name}'>#{value}</textarea>"
 				elsif key && (options = PROJECT_CONFIG["options"]["#{key}s"])
