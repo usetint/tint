@@ -47,13 +47,16 @@ module Tint
 					"<textarea name='#{name}'>#{value}</textarea>"
 				# TODO: Move retrieval of config to Site.
 				elsif key && (options = YAML.safe_load(open("#{PROJECT_PATH}/_config.yml"), [Date, Time])["#{key}s"])
-					"<select name='#{name}'>#{
+					"<select name='#{name}'>
+						<option></option>
+						#{
 						if options.is_a? Hash
-							options.map { |k, v| render_option(k, v, value) }
+							options.map { |k, v| render_option(k, v, value) }.join
 						elsif options.is_a? Array
-							options.map { |v| render_option(v, v, value) }
+							options.map { |v| render_option(v, v, value) }.join
 						end
-					}</select>"
+						}
+					</select>"
 				else
 					"<input type='text' name='#{name}' value='#{value}' />"
 				end
