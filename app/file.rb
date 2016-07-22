@@ -88,7 +88,7 @@ module Tint
 		end
 
 		def frontmatter
-			YAML.safe_load(open(path))
+			YAML.safe_load(open(path, [Time]))
 		end
 
 		def to_directory
