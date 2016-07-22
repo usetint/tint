@@ -1,5 +1,3 @@
-require "active_support"
-
 module Tint
 	module Helpers
 		module Rendering
@@ -46,13 +44,13 @@ module Tint
 						<input type='file' name='#{name}' />
 					"
 				elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
-					time = Time.parse(value.to_s) if value.present?
+					time = Time.parse(value.to_s) if value.strip != ""
 					"
 						<input type='date' name='#{name}[___datetime_date]' value='#{time && time.strftime("%F")}' />
 						<input type='time' name='#{name}[___datetime_time]' value='#{time && time.strftime("%H:%M:%S")}' />
 					"
 				elsif key.downcase.end_with?("_date") || key.downcase == "date"
-					date = Date.parse(value.to_s) if value.present?
+					date = Date.parse(value.to_s) if value.strip != ""
 					"<input type='date' name='#{name}' value='#{date && date.strftime("%F")}' />"
 				elsif value.is_a?(String) && value.length > 50
 					"<textarea name='#{name}'>#{value}</textarea>"
