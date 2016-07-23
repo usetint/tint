@@ -46,7 +46,7 @@ module Tint
 						<input type='date' name='#{name}[___datetime_date]' value='#{time && time.strftime("%F")}' />
 						<input type='time' name='#{name}[___datetime_time]' value='#{time && time.strftime("%H:%M:%S")}' />
 					"
-				elsif key.downcase.end_with?("_date") || key.downcase == "date"
+				elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date"
 					date = Date.parse(value.to_s) if value.strip != ""
 					"<input type='date' name='#{name}' value='#{date && date.strftime("%F")}' />"
 				elsif value.is_a?(String) && value.length > 50
