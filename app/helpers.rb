@@ -53,9 +53,9 @@ module Tint
 					"<input type='date' name='#{name}' value='#{date && date.strftime("%F")}' />"
 				elsif value.is_a?(String) && value.length > 50
 					"<textarea name='#{name}'>#{value}</textarea>"
-				elsif key && (options = PROJECT_CONFIG["options"][ActiveSupport::Inflector.pluralize(key)])
+				elsif key && (options = site.config["options"][ActiveSupport::Inflector.pluralize(key)])
 					render_select(name, value, options)
-				elsif key && (options = PROJECT_CONFIG["options"][key])
+				elsif key && (options = site.config["options"][key])
 					render_multiple_select(name, value, options)
 				else
 					"<input type='text' name='#{name}' value='#{value}' />"
@@ -120,7 +120,7 @@ module Tint
 			end
 
 			def multiple_select?(key)
-				!!PROJECT_CONFIG["options"][key]
+				!!site.config["options"][key]
 			end
 		end
 	end

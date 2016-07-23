@@ -16,18 +16,17 @@ require "sequel"
 require "shellwords"
 require "sprockets"
 
-require_relative "file"
 require_relative "directory"
-require_relative "tint_omniauth" # Monkeypatch
+require_relative "file"
 require_relative "helpers"
+require_relative "site"
+require_relative "tint_omniauth" # Monkeypatch
 
 ENV["GIT_COMMITTER_NAME"] = "Tint"
 ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
 
 module Tint
-	PROJECT_PATH = Pathname.new(ENV["PROJECT_PATH"]).realpath.cleanpath
-	PROJECT_CONFIG = YAML.safe_load(open("#{PROJECT_PATH}/.tint.yml"), [Date, Time])
-	DB = Sequel.connect(ENV.fetch("DATABASE_URL"))
+	DB = Sequel.connect(ENV.fetch("DATABASE_URL")) unless ENV['SITE_PATH']
 
 	class App < Sinatra::Base
 		use OmniAuth::Builder do
@@ -62,16 +61,15 @@ module Tint
 		sprockets.css_compressor = :scss
 
 		current_user do
-			DB[:users][user_id: session['user'].to_i] if session['user']
+			if ENV['SITE_PATH']
+				{ user_id: 1 }
+			else
+				DB[:users][user_id: session['user'].to_i] if session['user']
+			end
 		end
 
 		after do
 			verify_authorized
-		end
-
-		get "/" do
-			authorize :'Tint::Application', :index?
-			erb :index
 		end
 
 		get "/auth/login" do
@@ -115,12 +113,30 @@ module Tint
 			settings.sprockets.call(env)
 		end
 
-		post "/build" do
+		get "/" do
+			if ENV['SITE_PATH']
+				authorize site, :index?
+				erb :"site/index", locals: { site: site }
+			else
+				authorize Tint::Site, :index?
+				erb :index
+			end
+		end
+
+		get "/:site" do
+			authorize site, :index?
+			erb :"site/index", locals: { site: site }
+		end
+
+		post "/:site/build" do
+			# No harm in letting anyone rebuild
+			# This is also a webhook
 			skip_authorization
+
 			prefix = Pathname.new(ENV["PREFIX"])
 			prefix.mkpath
 			prefix = Shellwords.escape(prefix.realpath.to_s)
-			project = Shellwords.escape(PROJECT_PATH.to_s)
+			project = Shellwords.escape(site.cache_path.to_s)
 			success = system("env -i - PATH=\"#{ENV['PATH']}\" GEM_PATH=\"#{ENV['GEM_PATH']}\" /bin/sh -c 'cd #{project} && make PREFIX=#{prefix} && make install PREFIX=#{prefix}'")
 			if success
 				redirect to("/")
@@ -129,8 +145,8 @@ module Tint
 			end
 		end
 
-		get "/files/?*" do
-			file = Tint::File.get(params)
+		get "/:site/files/?*" do
+			file = site.file(params['splat'].join('/'))
 
 			if file.directory?
 				authorize file.to_directory, :index?
@@ -178,62 +194,63 @@ module Tint
 			end
 		end
 
-		put "/files/*" do
-			file = Tint::File.get(params)
+		put "/:site/files/*" do
+			file = site.file(params["splat"].join("/"))
 			authorize file, :update?
-			g = Git.open(PROJECT_PATH)
 
-			if params['name']
-				new = file.relative_path.dirname.join(params['name'])
-				if PROJECT_PATH.join(new).exist?
+			if params["name"]
+				new = file.parent.file(params["name"])
+				if new.path.exist?
 					return erb :error, locals: { message: "A file with that name already exists" }
 				else
 					begin
-						g.lib.mv(file.relative_path.to_s, new.to_s)
-						commit(g, "Renamed #{file.relative_path} to #{params['name']}")
+						site.git.lib.mv(file.relative_path.to_s, new.relative_path.to_s)
+						commit(site.git, "Renamed #{file.relative_path} to #{new.name}")
 					rescue Git::GitExecuteError
 						# Not in git, so just rename
-						file.path.rename(PROJECT_PATH.join(new))
+						file.path.rename(new.path)
 					end
 				end
-			elsif params['source']
-				file.path.write params['source']
+			elsif params["source"]
+				file.path.write params["source"].encode(universal_newline: true)
 
-				g.add(file.path.to_s)
+				site.git.add(file.path.to_s)
 
-				g.status.each do |f|
+				site.git.status.each do |f|
 					if f.path == file.relative_path.to_s && f.type
-						commit(g, "Modified #{file.relative_path}")
+						commit(site.git, "Modified #{file.relative_path}")
 					end
 				end
 			else
-				updated_data = process_form_data(params['data'], g)
+				updated_data = process_form_data(params["data"], site.git)
 
-				Tempfile.open('tint-save') do |tmp|
+				Tempfile.open("tint-save") do |tmp|
 					if updated_data
 						if file.yml?
-							tmp.puts updated_data.to_yaml.sub(/\A---\r?\n?/, '')
+							tmp.puts updated_data.to_yaml.sub(/\A---\r?\n?/, "")
 						else
 							tmp.puts updated_data.to_yaml
-							tmp.puts '---'
+							tmp.puts "---"
 						end
 					end
 
-					if params.has_key?('content')
-						tmp.puts(params['content'].gsub(/\r\n?/, "\n"))
+					if params.has_key?("content")
+						tmp.puts(params["content"].encode(universal_newline: true))
 					elsif !file.yml?
 						file.stream_content(&tmp.method(:puts))
 					end
 
 					tmp.flush
-					FileUtils.mv(tmp.path, file.path, force: true)
+					# We have to use FileUtils#mv because
+					# Pathname#rename does not work across filesystem boundaries
+					FileUtils.mv(tmp.path, file.path.to_s, force: true)
 				end
 
-				g.add(file.path.to_s)
+				site.git.add(file.path.to_s)
 
-				g.status.each do |f|
+				site.git.status.each do |f|
 					if f.path == file.relative_path.to_s && f.type
-						commit(g, "Modified #{file.relative_path}")
+						commit(site.git, "Modified #{file.relative_path}")
 					end
 				end
 			end
@@ -241,36 +258,34 @@ module Tint
 			redirect to(file.parent.route)
 		end
 
-		post "/files/?*" do
-			directory = Tint::File.get(params).to_directory
+		post "/:site/files/?*" do
+			directory = site.file(params["splat"].join("/")).to_directory
 			authorize directory, :update?
 
 			if params['file']
 				file = directory.upload(params['file'])
 
-				g = Git.open(PROJECT_PATH)
-				g.add(file.path.to_s)
-				g.status.each do |f|
+				site.git.add(file.path.to_s)
+				site.git.status.each do |f|
 					if f.path == file.relative_path.to_s && f.type
-						commit(g, "Uploaded #{file.relative_path}")
+						commit(site.git, "Uploaded #{file.relative_path}")
 					end
 				end
 			elsif params['folder']
-				folder = directory.path.join(params['folder'])
-				folder.mkdir
-				return redirect to(Tint::Directory.new(folder).route)
+				folder = Tint::Directory.new(site, directory.relative_path.join(params["folder"]))
+				folder.path.mkdir
+				return redirect to(folder.route)
 			end
 
 			redirect to(directory.route)
 		end
 
-		delete "/files/*" do
-			file = Tint::File.get(params)
+		delete "/:site/files/*" do
+			file = site.file(params["splat"].join("/"))
 			authorize file, :destroy?
 
-			g = Git.open(PROJECT_PATH)
-			g.remove(file.path.to_s)
-			commit(g, "Removed #{file.relative_path}")
+			site.git.remove(file.path.to_s)
+			commit(site.git, "Removed #{file.relative_path}")
 
 			redirect to(file.parent.route)
 		end
@@ -289,9 +304,8 @@ module Tint
 				data.reject { |v| v.is_a?(String) && v.to_s == "" }.map { |v| process_form_data(v, git) }
 			when Hash
 				if data.keys.include?(:filename) && data.keys.include?(:tempfile)
-					uploads_path = PROJECT_PATH.join("uploads").join(Time.now.strftime("%Y"))
-					uploads_path.mkpath
-					uploads = Directory.new(uploads_path)
+					uploads = Tint::Directory.new(site, Pathname.new("uploads").join(Time.now.strftime("%Y")))
+					uploads.path.mkpath
 					file = uploads.upload(data.merge(filename: "#{SecureRandom.uuid}-#{data[:filename]}"))
 					git.add(file.path.to_s)
 					file.relative_path.to_s
@@ -328,6 +342,19 @@ module Tint
 				git.commit("#{message} via tint", author: "#{pundit_user[:fn]} <#{pundit_user[:email]}>")
 			else
 				git.commit("#{message} via tint")
+			end
+		end
+
+		def site
+			if ENV['SITE_PATH']
+				Tint::Site.new(
+					site_id: (params['site'] || 1).to_i,
+					user_id: 1,
+					cache_path: Pathname.new(ENV['SITE_PATH']).realpath,
+					fn: "Local Site"
+				)
+			else
+				Tint::Site.new(DB[:sites][site_id: params['site'].to_i])
 			end
 		end
 	end

@@ -2,46 +2,59 @@ require "pathname"
 
 module Tint
 	class Directory
-		def initialize(path)
-			@path = Pathname.new(path).realpath.cleanpath
-			unless @path.to_s.start_with?(PROJECT_PATH.to_s)
-				raise "File is outside of project scope!"
-			end
+		attr_reader :relative_path
+
+		def initialize(site, relative_path)
+			@site = site
+			@relative_path = Pathname.new(relative_path).cleanpath
+		end
+
+		def user_id
+			@site.user_id
 		end
 
 		def route
-			"/files/#{relative_path}"
+			@site.route("files/#{relative_path}")
 		end
 
-		def relative_path
-			path.relative_path_from(PROJECT_PATH)
+		def path
+			unless @path
+				# Use realdirpath so that it works if directory does not exist
+				@path = @site.cache_path.join(relative_path).realdirpath
+
+				unless @path.to_s.start_with?(@site.cache_path.to_s)
+					raise "File is outside of project scope!"
+				end
+			end
+
+			@path
+		end
+
+		def file(path)
+			@site.file(relative_path.join(path))
 		end
 
 		def files
 			return @files if @files
 
-			files = Dir.glob("#{path}/*").map { |file| Tint::File.new(file) }
+			files = path.children(false).map(&method(:file))
 
-			if path.realpath != PROJECT_PATH
-				parent = Tint::File.new(path.dirname, "..")
-				files = files.unshift(parent)
+			if relative_path.to_s != "."
+				parent = Tint::File.new(@site, relative_path.dirname, "..")
+				files.unshift(parent)
 			end
 
 			@files = files.sort_by { |f| [f.directory? ? 0 : 1, f.name] }
 		end
 
 		def upload(file)
-			file_path = path + file[:filename]
-
-			::File.open(file_path, "w") do |f|
+			path.join(file[:filename]).open("w") do |f|
 				until file[:tempfile].eof?
 					f.write file[:tempfile].read(4096)
 				end
 			end
 
-			Tint::File.new(file_path)
+			@site.file(relative_path.join(file[:filename]))
 		end
-
-		attr_reader :path
 	end
 end
