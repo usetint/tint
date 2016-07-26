@@ -11,7 +11,11 @@ module OmniAuth
 		alias provider provider_patch
 		class << self
 			def providers
-				@@providers
+				if class_variables.include?(:@@providers)
+					@@providers
+				else
+					[]
+				end
 			end
 		end
 	end
