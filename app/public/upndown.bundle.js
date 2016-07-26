@@ -49,8 +49,8 @@ var upndown = (function () {
         value: function init() {
             this.olstack = [];
             this.inlineelements = ['strong', 'b', 'i', 'em', 'u', 'a', 'img', 'code'];
-            this.htmlblocklevelelement = ['div', 'iframe', 'script'];
-            this.tabindent = '    ';
+            this.htmlblocklevelelement = ['div', 'iframe', 'object', 'embed', 'script', 'section', 'article', 'header', 'footer', 'aside'];
+            this.tabindent = '\t';
             this.nbsp = '\u0000';
         }
     }, {
@@ -90,9 +90,12 @@ var upndown = (function () {
             var _ref$keepHtml = _ref.keepHtml;
             var keepHtml = _ref$keepHtml === undefined ? false : _ref$keepHtml;
 
+            var _ref$keepWhitespace = _ref.keepWhitespace;
+            var keepWhitespace = _ref$keepWhitespace === undefined ? false : _ref$keepWhitespace;
+
             this.init();
 
-            this.walkNodes(dom, { keepHtml: keepHtml }).then((function (markdown) {
+            this.walkNodes(dom, { keepHtml: keepHtml, keepWhitespace: keepWhitespace }).then((function (markdown) {
                 if (!markdown) {
                     markdown = '';
                 }
@@ -134,7 +137,11 @@ var upndown = (function () {
         key: 'walkNode',
         value: function walkNode(resolve, reject, options, lenode) {
             if (this.isText(lenode)) {
-                resolve(this.text(lenode));
+                if(options.keepWhitespace) {
+                    resolve(!lenode.data || lenode.data.replace(/^\r?\n$/, '') === '' ? '' : lenode.data);
+                } else {
+                    resolve(this.text(lenode));
+                }
             } else {
                 this.walkNodes(lenode.children, options).then((function (innerMarkdown) {
                     this.wrapNode(resolve, reject, options, lenode, innerMarkdown);
@@ -149,8 +156,12 @@ var upndown = (function () {
 
             var markdown = '';
             var method = 'wrap_' + lenode.name;
+            var unrepresentableAttribs =
+                Object.keys(lenode.attribs).filter(function(attr) {
+                  return attr !== 'href' && attr !== 'src';
+                }).length > 0;
 
-            if (method in this) {
+            if (method in this && (!options.keepHtml || !unrepresentableAttribs)) {
                 markdown = this[method](lenode, innerMarkdown);
             } else {
                 if (options.keepHtml) {
@@ -242,7 +253,11 @@ var upndown = (function () {
                 htmlattribs += ' ' + attrs[attrnamekey] + '="' + node.attribs[attrs[attrnamekey]] + '"';
             }
 
-            return '<' + node.name + htmlattribs + '>' + markdown.replace(/\s+/gm, ' ') + '</' + node.name + '>' + (this.isHtmlBlockLevelElement(node.name) ? '\n' : '');
+            var blockNewline = this.isHtmlBlockLevelElement(node.name) ? '\n' : '';
+            markdown = markdown.replace(/^[\s\r\n]+|[\s\r\n]+$/g, ' ');
+            if(this.isHtmlBlockLevelElement(node.name)) markdown = markdown.trim();
+
+            return blockNewline + '<' + node.name + htmlattribs + '>' + blockNewline + markdown + blockNewline + '</' + node.name + '>' + blockNewline;
             //return markdown;
         }
     }, {
