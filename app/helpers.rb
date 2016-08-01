@@ -1,3 +1,5 @@
+require 'active_support/inflector/methods'
+
 module Tint
 	module Helpers
 		module Rendering
@@ -51,7 +53,7 @@ module Tint
 					"<input type='date' name='#{name}' value='#{date && date.strftime("%F")}' />"
 				elsif value.is_a?(String) && value.length > 50
 					"<textarea name='#{name}'>#{value}</textarea>"
-				elsif key && (options = PROJECT_CONFIG["options"]["#{key}s"])
+				elsif key && (options = PROJECT_CONFIG["options"][ActiveSupport::Inflector.pluralize(key)])
 					render_select(name, value, options)
 				elsif key && (options = PROJECT_CONFIG["options"][key])
 					render_multiple_select(name, value, options)
