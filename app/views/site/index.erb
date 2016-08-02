@@ -1,0 +1,10 @@
+<h1><%= site.fn %></h1>
+
+<nav>
+	<form method="post" action="<%= site.route("build") %>">
+		<button type="submit">Build</button>
+	</form>
+	<ul>
+		<li><a href="<%= site.route("files") %>">Edit Files</a></li>
+	</ul>
+</nav>

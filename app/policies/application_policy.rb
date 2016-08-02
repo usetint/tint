@@ -8,7 +8,7 @@ module Tint
 		end
 
 		def index?
-			!!user
+			false
 		end
 
 		def show?

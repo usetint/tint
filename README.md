@@ -1,6 +1,6 @@
 # README
 
-Copy `.env.sample` to `.env` and set `PROJECT_PATH` to the path of a jekyll app on your system.
+Copy `.env.sample` to `.env` and set `SITE_PATH` to the path of a jekyll app's git repo on your system.
 
 Run the app using `rackup`.
 

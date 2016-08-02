@@ -6,27 +6,25 @@ require_relative "directory"
 
 module Tint
 	class File
-		attr_reader :path
+		attr_reader :relative_path
 
-		def initialize(path, name=nil)
-			@path = Pathname.new(path).realpath.cleanpath
-			unless @path.to_s.start_with?(PROJECT_PATH.to_s)
-				raise "File is outside of project scope!"
-			end
+		def initialize(site, relative_path, name=nil)
+			@site = site
+			@relative_path = Pathname.new(relative_path).cleanpath
 
 			@name = name
 		end
 
-		def self.get(params)
-			Tint::File.new(PROJECT_PATH.join(params['splat'].join('/')))
+		def user_id
+			site.user_id
 		end
 
 		def directory?
-			::File.directory?(path)
+			path.directory?
 		end
 
 		def parent
-			@parent ||= Tint::Directory.new(path.dirname)
+			@parent ||= Tint::Directory.new(site, relative_path.dirname)
 		end
 
 		def text?
@@ -43,16 +41,20 @@ module Tint
 			[".yaml", ".yml"].include? extension
 		end
 
-		def root?
-			path == PROJECT_PATH
-		end
-
 		def route
-			"/files/#{relative_path}"
+			site.route("files/#{relative_path}")
 		end
 
-		def relative_path
-			path.relative_path_from(PROJECT_PATH)
+		def path
+			unless @path
+				@path = site.cache_path.join(relative_path).realdirpath
+
+				unless @path.to_s.start_with?(site.cache_path.to_s)
+					raise "File is outside of project scope!"
+				end
+			end
+
+			@path
 		end
 
 		def name
@@ -60,7 +62,7 @@ module Tint
 		end
 
 		def stream
-			::File.foreach(path).with_index do |line, idx|
+			path.each_line.with_index do |line, idx|
 				yield line.chomp, idx
 			end
 		end
@@ -92,7 +94,7 @@ module Tint
 		end
 
 		def to_directory
-			Tint::Directory.new(path)
+			Tint::Directory.new(site, relative_path)
 		end
 
 	protected
@@ -105,7 +107,7 @@ module Tint
 			return @content_or_frontmatter if @content_or_frontmatter
 
 			has_frontmatter = false
-			::File.foreach(path).with_index do |line, idx|
+			path.each_line.with_index do |line, idx|
 				line.chomp!
 				if line == '---' && idx == 0
 					has_frontmatter = true
@@ -119,5 +121,8 @@ module Tint
 
 			@content_or_frontmatter = [!has_frontmatter, has_frontmatter]
 		end
+
+		attr_reader :site
+
 	end
 end
