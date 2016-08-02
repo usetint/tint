@@ -19,6 +19,10 @@ module Tint
 			site.user_id
 		end
 
+		def exist?
+			path.exist?
+		end
+
 		def directory?
 			path.directory?
 		end
