@@ -16,7 +16,7 @@ module Tint
 		end
 
 		def user_id
-			@site.user_id
+			site.user_id
 		end
 
 		def directory?
@@ -24,7 +24,7 @@ module Tint
 		end
 
 		def parent
-			@parent ||= Tint::Directory.new(@site, relative_path.dirname)
+			@parent ||= Tint::Directory.new(site, relative_path.dirname)
 		end
 
 		def text?
@@ -42,14 +42,14 @@ module Tint
 		end
 
 		def route
-			@site.route("files/#{relative_path}")
+			site.route("files/#{relative_path}")
 		end
 
 		def path
 			unless @path
-				@path = @site.cache_path.join(relative_path).realdirpath
+				@path = site.cache_path.join(relative_path).realdirpath
 
-				unless @path.to_s.start_with?(@site.cache_path.to_s)
+				unless @path.to_s.start_with?(site.cache_path.to_s)
 					raise "File is outside of project scope!"
 				end
 			end
@@ -94,7 +94,7 @@ module Tint
 		end
 
 		def to_directory
-			Tint::Directory.new(@site, relative_path)
+			Tint::Directory.new(site, relative_path)
 		end
 
 	protected
@@ -121,5 +121,8 @@ module Tint
 
 			@content_or_frontmatter = [!has_frontmatter, has_frontmatter]
 		end
+
+		attr_reader :site
+
 	end
 end

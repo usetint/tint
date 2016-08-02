@@ -10,19 +10,19 @@ module Tint
 		end
 
 		def user_id
-			@site.user_id
+			site.user_id
 		end
 
 		def route
-			@site.route("files/#{relative_path}")
+			site.route("files/#{relative_path}")
 		end
 
 		def path
 			unless @path
 				# Use realdirpath so that it works if directory does not exist
-				@path = @site.cache_path.join(relative_path).realdirpath
+				@path = site.cache_path.join(relative_path).realdirpath
 
-				unless @path.to_s.start_with?(@site.cache_path.to_s)
+				unless @path.to_s.start_with?(site.cache_path.to_s)
 					raise "File is outside of project scope!"
 				end
 			end
@@ -31,7 +31,7 @@ module Tint
 		end
 
 		def file(path)
-			@site.file(relative_path.join(path))
+			site.file(relative_path.join(path))
 		end
 
 		def files
@@ -40,7 +40,7 @@ module Tint
 			files = path.children(false).map(&method(:file))
 
 			if relative_path.to_s != "."
-				parent = Tint::File.new(@site, relative_path.dirname, "..")
+				parent = Tint::File.new(site, relative_path.dirname, "..")
 				files.unshift(parent)
 			end
 
@@ -54,7 +54,12 @@ module Tint
 				end
 			end
 
-			@site.file(relative_path.join(file[:filename]))
+			site.file(relative_path.join(file[:filename]))
 		end
+
+	protected
+
+		attr_reader :site
+
 	end
 end
