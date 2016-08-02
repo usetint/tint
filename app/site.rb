@@ -26,7 +26,7 @@ module Tint
 		end
 
 		def config
-			@config ||= YAML.safe_load(open(cache_path.join(".tint.yml")), [Date, Time])
+			@config ||= YAML.safe_load(open(cache_path.join(".tint.yml")), [Date, Time]) rescue {}
 		end
 
 		def file(path)
