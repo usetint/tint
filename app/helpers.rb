@@ -43,7 +43,7 @@ module Tint
 				elsif key.to_s.end_with?("_path")
 					render_file(name, value)
 				elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
-					time = Time.parse(value.to_s) if value.strip != ""
+					time = Time.parse(value.to_s) if value.to_s != ""
 					"
 						<input type='date' name='#{name}[___datetime_date]' value='#{time && time.strftime("%F")}' />
 						<input type='time' name='#{name}[___datetime_time]' value='#{time && time.strftime("%H:%M:%S")}' />
