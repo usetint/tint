@@ -41,6 +41,10 @@ module Tint
 			cache_path.join('.git').directory?
 		end
 
+		def status
+			@options[:status]
+		end
+
 		def remote
 			@options[:remote]
 		end
@@ -53,10 +57,14 @@ module Tint
 				# Make sure the UI can tell we are ready to rock
 				open(cache_path.join('.git').join('tint-cloned'), 'w').close
 			rescue
+				DB[:sites].where(site_id: @options[:site_id]).update(status: "failed")
+
 				# Something went wrong.  Nuke the cache
 				clear_cache!
 				return
 			end
+
+			DB[:sites].where(site_id: @options[:site_id]).update(status: nil)
 
 			begin
 				# Now, fetch the history for future use

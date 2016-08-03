@@ -9,6 +9,8 @@
 		<ul>
 			<li><a href="<%= site.route("files") %>">Edit Files</a></li>
 		</ul>
+	<% elsif site.status == "failed" %>
+		<p class="error">We were unable to clone your site. Please make sure the repository exists.</p>
 	<% else %>
 		<p>Please wait, we are syncing your remote...</p>
 	<% end %>
