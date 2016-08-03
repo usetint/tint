@@ -1,3 +1,4 @@
+require "base64"
 require "filemagic"
 require "pathname"
 require "yaml"
@@ -65,9 +66,18 @@ module Tint
 			@name ||= path.basename.to_s
 		end
 
-		def stream
-			path.each_line.with_index do |line, idx|
-				yield line.chomp, idx
+		def stream(force_binary=false)
+			if !force_binary && text?
+				path.each_line.with_index do |line, idx|
+					yield line.chomp, idx
+				end
+			else
+				f = path.open
+				idx = 0
+				until f.eof?
+					yield f.read(4096), idx
+					idx += 1
+				end
 			end
 		end
 
@@ -82,6 +92,12 @@ module Tint
 				end
 
 				yield line
+			end
+		end
+
+		def stream_base64
+			stream(true) do |chunk, idx|
+				yield Base64.encode64(chunk)
 			end
 		end
 
