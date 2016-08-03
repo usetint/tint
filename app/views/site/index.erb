@@ -2,7 +2,7 @@
 
 <nav>
 	<form method="post" action="<%= site.route("build") %>">
-		<button type="submit">Build</button>
+		<button type="submit">Sync &amp; Build</button>
 	</form>
 
 	<% if site.cloned? %>
@@ -22,6 +22,6 @@
 		<code><%= ENV.fetch('SSH_PUBLIC') %></code>
 
 		<p>And add this script as a post-receive hook:</p>
-		<pre><code><%= open('templates/post-receive').read.gsub(/http:\/\/localhost:9292/, ENV.fetch('APP_URL')) %></code></pre>
+		<pre><code><%= open('templates/post-receive').read.gsub(/http:\/\/localhost:9292\/1/, ENV.fetch('APP_URL') + "#{site.route}") %></code></pre>
 	</section>
 <% end %>

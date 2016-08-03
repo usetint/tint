@@ -64,5 +64,14 @@ module Tint
 		def cloned?
 			cache_path.join('.git').join('tint-cloned').exist?
 		end
+
+		def sync
+			if git? && cloned?
+				git.fetch("origin")
+				git.reset_hard("origin/master")
+			elsif !git?
+				clone
+			end
+		end
 	end
 end

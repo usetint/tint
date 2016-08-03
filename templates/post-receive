@@ -2,4 +2,4 @@
 
 # This post-receive (or, if testing locally, post-commit) hook causes a rebuild
 
-curl -q http://localhost:9292/build --data-ascii ''
+curl -q http://localhost:9292/1/sync --data-ascii ''
