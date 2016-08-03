@@ -1,37 +1,42 @@
-require 'active_support/inflector/methods'
-require_relative 'future'
+require "active_support/inflector/methods"
+require "slim"
+require_relative "future"
 
 module Tint
 	module Helpers
 		module Rendering
 			def render_yml(value)
-				"#{
 				case value
 				when Hash
-					value.map { |k, v| render_value(k, v, "data[#{k}]") }.join
+					template = "inputs/hash"
 				when Array
-					"<ol data-key='data'>#{value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "data[#{i}]")}" }.join}</ol>"
+					template = "inputs/array"
 				else
 					raise TypeError, 'YAML root must be a Hash or Array'
 				end
-				}<script type='text/javascript' src='/yaml.js'></script>"
+
+				render_slim("inputs/yaml", template: template, value: value)
 			end
 
 			def render_value(key, value, name)
 				case value
 				when Hash
-					"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}>#{"<legend>#{key}</legend>" if key}#{
-					value.map do |key, value|
-						"#{render_value(key, value, "#{name}[#{key}]")}"
-					end.join
-					}</fieldset>"
+					render_slim(
+						"inputs/fieldset/hash",
+						legend: key,
+						name: name,
+						value: value
+					)
 				when Array
 					if multiple_select?(key)
 						render_input(key, value, name)
 					else
-						"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}><legend>#{key}</legend><ol data-key='#{name}'>#{
-							value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "#{name}[#{i}]")}</li>" }.join
-						}</ol></fieldset>"
+						render_slim(
+							"inputs/fieldset/array",
+							legend: key,
+							name: name,
+							value: value
+						)
 					end
 				else
 					render_input(key, value, name)
@@ -40,30 +45,27 @@ module Tint
 
 			def render_input(key, value, name)
 				input = if [true, false].include? value
-					render_checkbox(name, value)
+					render_slim("inputs/checkbox", name: name, value: value)
 				elsif key.to_s.end_with?("_path")
-					render_file(name, value)
+					render_slim("inputs/file", name: name, value: value)
 				elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
 					time = Time.parse(value.to_s) if value.to_s != ""
-					"
-						<input type='date' name='#{name}[___datetime_date]' value='#{time && time.strftime("%F")}' />
-						<input type='time' name='#{name}[___datetime_time]' value='#{time && time.strftime("%H:%M:%S")}' />
-					"
+					render_slim("inputs/datetime", name: name, time: time)
 				elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date"
-					date = Date.parse(value.to_s) if value.strip != ""
-					"<input type='date' name='#{name}' value='#{date && date.strftime("%F")}' />"
+					date = Date.parse(value.to_s) if value.to_s != ""
+					render_slim("inputs/date", name: name, date: date)
 				elsif value.is_a?(String) && value.length > 50
-					"<textarea name='#{name}'>#{value}</textarea>"
-				elsif key && (options = site.config.dig("options", ActiveSupport::Inflector.pluralize(key)))
-					render_select(name, value, options)
+					render_slim("inputs/textarea", name: name, value: value)
 				elsif key && (options = site.config.dig("options", key))
-					render_multiple_select(name, value, options)
+					render_slim("inputs/multiple_select", name: name, value: Array(value), options: format_options(options))
+				elsif key && (options = site.config.dig("options", ActiveSupport::Inflector.pluralize(key)))
+					render_slim("inputs/select", name: name, value: value, options: format_options(options))
 				else
-					"<input type='text' name='#{name}' value='#{value}' />"
+					render_slim("inputs/text", name: name, value: value)
 				end
 
 				if key
-					"<label#{" class='hidden'" if key.to_s.start_with?("_")}>#{key} #{input}</label>"
+					render_slim("inputs/labelled", label: key, input: input)
 				else
 					input
 				end
@@ -71,57 +73,30 @@ module Tint
 
 		protected
 
-			def render_checkbox(name, value)
-				"
-					<input type='hidden' name='#{name}[___checkbox_unchecked]' value='' />
-					<input type='checkbox' name='#{name}[___checkbox_checked]' #{' checked="checked"' if value} />
-				"
+			def render_slim(template, locals)
+				Slim::Template.new("app/views/#{template}.slim").render(
+					Scope.new(locals.merge(site: site))
+				)
 			end
 
-			def render_file(name, value)
-				"
-					<div class='value'>#{value}</div>
-					<input type='hidden' name='#{name}' value='#{value}' />
-					<input type='file' name='#{name}' />
-				"
+			def format_options(options)
+				if options.is_a? Array
+					options.map { |value| [value, value] }
+				elsif options.is_a? Hash
+					options.map { |value, display| [value, display] }
+				else
+					fail ArgumentError, "options must be a Hash or an Array"
+				end
 			end
+		end
 
-			def render_select(name, value, options)
-				"
-					<select name='#{name}'>
-						<option></option>
-						#{
-						if options.is_a? Hash
-							options.map { |k, v| render_option(k, v, k == value) }.join
-						elsif options.is_a? Array
-							options.map { |v| render_option(v, v, v == value) }.join
-						end
-						}
-					</select>
-				"
-			end
+		class Scope
+			include Rendering
 
-			def render_multiple_select(name, value, options)
-				"
-					<input type='hidden' name='#{name}[]' />
-					<select name='#{name}[]' multiple='multiple'>
-						#{
-						if options.is_a? Hash
-							options.map { |k, v| render_option(k, v, value.include?(k)) }.join
-						elsif options.is_a? Array
-							options.map { |v| render_option(v, v, value.include?(v)) }.join
-						end
-						}
-					</select>
-				"
-			end
-
-			def render_option(value, fv, selected)
-				"<option value='#{value}'#{ "selected='selected'" if selected}>#{fv}</option>"
-			end
-
-			def multiple_select?(key)
-				!!site.config.dig("options", key)
+			def initialize(locals)
+				locals.each do |key, value|
+					define_singleton_method(key) { value }
+				end
 			end
 		end
 	end

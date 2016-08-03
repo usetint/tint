@@ -1,0 +1,5 @@
+fieldset class=('hidden' if legend.to_s.start_with?("_"))
+	- if legend
+		legend= legend
+	- value.each do |k, v|
+		== render_value(k, v, "#{name}[#{k}]")
