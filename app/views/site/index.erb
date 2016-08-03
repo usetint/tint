@@ -4,7 +4,12 @@
 	<form method="post" action="<%= site.route("build") %>">
 		<button type="submit">Build</button>
 	</form>
-	<ul>
-		<li><a href="<%= site.route("files") %>">Edit Files</a></li>
-	</ul>
+
+	<% if site.cloned? %>
+		<ul>
+			<li><a href="<%= site.route("files") %>">Edit Files</a></li>
+		</ul>
+	<% else %>
+		<p>Please wait, we are syncing your remote...</p>
+	<% end %>
 </nav>

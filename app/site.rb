@@ -43,6 +43,11 @@ module Tint
 
 		def clone
 			Git.clone(@options[:remote], cache_path.basename, path: cache_path.dirname, depth: 1)
+			open(cache_path.join('.git').join('tint-cloned'), 'w').close
+		end
+
+		def cloned?
+			cache_path.join('.git').join('tint-cloned').exist?
 		end
 	end
 end
