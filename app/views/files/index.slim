@@ -1,0 +1,26 @@
+form action=directory.route method="post" enctype="multipart/form-data"
+	input type="file" name="file" required="required"
+	button type="submit" Upload
+
+form action=directory.route method="post"
+	input type="text" name="folder" required="required"
+	button type="submit" New folder
+
+ul
+	- directory.files.each do |file|
+		li
+			- if file.text? || file.directory?
+				a href=file.route = file.name
+			- else
+				= file.name
+
+			- unless file.directory?
+				form action=file.route method="post"
+					input type="hidden" name="_method" value="DELETE"
+					button type="submit" Delete
+
+			- unless file.name == ".."
+				form action=file.route method="post"
+					input type="hidden" name="_method" value="PUT"
+					input type="text" name="name" value=file.name
+					button type="submit" Rename

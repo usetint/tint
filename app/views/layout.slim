@@ -1,0 +1,12 @@
+doctype html
+html
+	head
+		title Tint
+		link rel="stylesheet" href="/assets/tint.css"
+	body
+		h1: a href="/" Tint
+		== yield
+		- if pundit_user
+			form method="post" action="/auth/login"
+				input type="hidden" name="_method" value="DELETE"
+				button type="submit" Logout

@@ -1,0 +1,7 @@
+- if OmniAuth::Builder.providers.include?(:github)
+	form method="post" action="/auth/github"
+		button type="submit" Login with Github
+
+- if OmniAuth::Builder.providers.include?(:indieauth)
+	form method="post" action="/auth/indieauth"
+		button type="submit" Login with your domain

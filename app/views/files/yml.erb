@@ -1,8 +1,0 @@
-<h1><%= params['filename'] %></h1>
-<form action="<%= path %>" method="post" enctype="multipart/form-data">
-	<input type="hidden" name="_method" value="PUT" />
-	<%= render_yml(data) %>
-	<button type="submit">Save</button>
-</form>
-
-<a href="?source">Edit Raw Source</a>
