@@ -68,6 +68,10 @@ module Tint
 			end
 		end
 
+		before do
+			blank_is_nil!(params)
+		end
+
 		after do
 			verify_authorized
 		end
@@ -354,11 +358,7 @@ module Tint
 					end
 				end
 			else
-				if data == ""
-					nil
-				else
-					data
-				end
+				data
 			end
 		end
 
@@ -387,6 +387,19 @@ module Tint
 				)
 			else
 				Tint::Site.new(DB[:sites][site_id: params['site'].to_i])
+			end
+		end
+
+		def blank_is_nil!(hash)
+			hash.each do |k, v|
+				case v
+				when Hash
+					blank_is_nil!(v)
+				when Array
+					hash[k] = v.map { |x| x.to_s == "" ? nil : x }
+				else
+					hash[k] = nil if v.to_s == ""
+				end
 			end
 		end
 	end
