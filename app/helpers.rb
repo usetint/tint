@@ -28,7 +28,7 @@ module Tint
 						value: value
 					)
 				when Array
-					if multiple_select?(key)
+					if multiple_select_options(key)
 						render_input(key, value, name)
 					else
 						render_slim(
@@ -56,7 +56,7 @@ module Tint
 					render_slim("inputs/date", name: name, date: date)
 				elsif value.is_a?(String) && value.length > 50
 					render_slim("inputs/textarea", name: name, value: value)
-				elsif key && (options = site.config.dig("options", key))
+				elsif (options = multiple_select_options(key))
 					render_slim("inputs/multiple_select", name: name, value: Array(value), options: format_options(options))
 				elsif key && (options = site.config.dig("options", ActiveSupport::Inflector.pluralize(key)))
 					render_slim("inputs/select", name: name, value: value, options: format_options(options))
@@ -77,6 +77,10 @@ module Tint
 				Slim::Template.new("app/views/#{template}.slim").render(
 					Scope.new(locals.merge(site: site))
 				)
+			end
+
+			def multiple_select_options(key)
+				site.config.dig("options", key)
 			end
 
 			def format_options(options)
