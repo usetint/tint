@@ -145,6 +145,19 @@ module Tint
 			erb :"site/index", locals: { site: site }
 		end
 
+		put "/:site/" do
+			authorize site, :update?
+
+			DB[:sites].where(site_id: params[:site]).update(
+				fn: params[:fn],
+				remote: params[:remote],
+			)
+
+			site.clear_cache!
+
+			redirect to(site.route)
+		end
+
 		post "/:site/sync" do
 			# No harm in letting anyone rebuild
 			# This is also a webhook
