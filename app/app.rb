@@ -148,7 +148,7 @@ module Tint
 		get "/:site/files/?*" do
 			file = site.file(params['splat'].join('/'))
 
-			if file.directory?
+			if file.directory? || !file.exist?
 				authorize file.to_directory, :index?
 				render_directory file.to_directory
 			elsif file.text?
@@ -273,7 +273,6 @@ module Tint
 				end
 			elsif params['folder']
 				folder = Tint::Directory.new(site, directory.relative_path.join(params["folder"]))
-				folder.path.mkdir
 				return redirect to(folder.route)
 			end
 
