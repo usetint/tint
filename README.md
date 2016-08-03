@@ -7,3 +7,5 @@ Run the app using `rackup`.
 # Contributing
 
 Code style uses http://intellindent.info/seriously
+
+Slim templates should have a space between tag name and equals sign.
