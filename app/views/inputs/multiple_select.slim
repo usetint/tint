@@ -1,0 +1,4 @@
+input type="hidden" name="#{name}[]"
+select name="#{name}[]" multiple="multiple"
+	- options.each do |ovalue, display|
+		option value=ovalue selected=("selected" if value.to_s.include?(ovalue)) = display

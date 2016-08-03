@@ -12,6 +12,7 @@ gem "ruby-filemagic"
 gem "sass"
 gem "sequel"
 gem "sinatra-pundit"
+gem "slim"
 gem "sprockets"
 
 group :development do
