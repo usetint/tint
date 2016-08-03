@@ -21,18 +21,22 @@ module Tint
 			def render_value(key, value, name)
 				case value
 				when Hash
-					"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}>#{"<legend>#{key}</legend>" if key}#{
-					value.map do |key, value|
-						"#{render_value(key, value, "#{name}[#{key}]")}"
-					end.join
-					}</fieldset>"
+					return render_slim(
+						"inputs/fieldset/hash",
+						legend: key,
+						name: name,
+						value: value
+					)
 				when Array
 					if multiple_select?(key)
 						render_input(key, value, name)
 					else
-						"<fieldset#{" class='hidden'" if key.to_s.start_with?("_")}><legend>#{key}</legend><ol data-key='#{name}'>#{
-							value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "#{name}[#{i}]")}</li>" }.join
-						}</ol></fieldset>"
+						render_slim(
+							"inputs/fieldset/array",
+							legend: key,
+							name: name,
+							value: value
+						)
 					end
 				else
 					render_input(key, value, name)
@@ -71,7 +75,7 @@ module Tint
 
 			def render_slim(template, locals)
 				Slim::Template.new("app/views/#{template}.slim").render(
-					OpenStruct.new(locals)
+					Scope.new(locals.merge(site: site))
 				)
 			end
 
@@ -112,6 +116,16 @@ module Tint
 					options.map { |value, display| [value, display] }
 				else
 					fail ArgumentError, "options must be a Hash or an Array"
+				end
+			end
+		end
+
+		class Scope
+			include Rendering
+
+			def initialize(locals)
+				locals.each do |key, value|
+					self.class.send(:define_method, key) { value }
 				end
 			end
 		end

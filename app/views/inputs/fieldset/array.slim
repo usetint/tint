@@ -1,0 +1,5 @@
+fieldset class=("hidden" if legend.to_s.start_with?("_"))
+	legend= legend
+	ol data-key=name
+		- value.each_with_index do |v, i|
+			li== render_value(nil, v, "#{name}[#{i}]")
