@@ -1,1 +1,13 @@
-Add a site, list of sites, etc
+<ul>
+<% sites.each do |site| %>
+	<li><%= site.fn %></li>
+<% end %>
+</ul>
+
+<h1>New Site</h1>
+
+<form method="POST" action="/">
+	<label>Site name: <input type="text" name="fn" /></label>
+	<label>Git remote: <input type="text" name="remote" /></label>
+	<button type="submit">Add</button>
+</form>

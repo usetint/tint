@@ -6,6 +6,10 @@ module Tint
 			@options = options
 		end
 
+		def self.table
+			DB[:sites]
+		end
+
 		def route(sub='')
 			"/#{@options[:site_id]}/#{sub}"
 		end
