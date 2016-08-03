@@ -132,10 +132,10 @@ module Tint
 				remote: params["remote"]
 			)
 
-			redirect to("/#{site_id}")
+			redirect to("/#{site_id}/")
 		end
 
-		get "/:site" do
+		get "/:site/" do
 			authorize site, :index?
 			erb :"site/index", locals: { site: site }
 		end

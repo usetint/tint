@@ -40,11 +40,11 @@ module Tint
 
 			def initialize(user, scope)
 				@user = user
-				@scope = scope.table
+				@scope = scope
 			end
 
 			def resolve
-				scope.all
+				scope
 			end
 		end
 	end

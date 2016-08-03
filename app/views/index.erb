@@ -1,6 +1,6 @@
 <ul>
 <% sites.each do |site| %>
-	<li><%= site.fn %></li>
+	<li><a href="<%= site.route %>"><%= site.fn %></a></li>
 <% end %>
 </ul>
 
