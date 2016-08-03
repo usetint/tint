@@ -6,7 +6,7 @@
 				<% if fragment == fragments.last %>
 					<%= fragment %>
 				<% else %>
-					<% path = "/#{fragments[0..i].join("/")}" %>
+					<% path = site.route(fragments[0..i].join("/")) %>
 					<a href="<%= path %>"><%= fragment %></a>
 				<% end %>
 			</li>
