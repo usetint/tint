@@ -1,0 +1,18 @@
+h1 = params["filename"]
+form action=path method="post"
+	input type="hidden" name="_method" value="PUT"
+	- if frontmatter
+		== render_yml(frontmatter)
+
+	small Shift+Enter to insert a raw newline (in code blocks, etc)
+	textarea name="content"
+	button type="submit" Save
+
+- if frontmatter
+	a href="?source" Edit Raw Source
+
+- if wysiwyg
+	script type="text/javascript" src="/marked.js"
+	script type="text/javascript" src="/upndown.bundle.js"
+	script type="text/javascript" src="/tinymce/tinymce.js"
+	script type="text/javascript" src="/markdown_editing.js"

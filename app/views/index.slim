@@ -1,0 +1,13 @@
+ul
+	- sites.each do |site|
+		li: a href=site.route = site.fn
+
+h1 New Site
+form method="POST" action="/"
+	label
+		| Site name:
+		input type="text" name="fn" required="required"
+	label
+		| Git remote:
+		input type="text" name="remote" required="required"
+	button type="submit" Add

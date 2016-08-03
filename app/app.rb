@@ -14,6 +14,7 @@ require "sass"
 require "securerandom"
 require "sequel"
 require "shellwords"
+require "slim"
 require "sprockets"
 
 require_relative "directory"
@@ -78,7 +79,7 @@ module Tint
 
 		get "/auth/login" do
 			skip_authorization
-			erb :login
+			slim :login
 		end
 
 		delete "/auth/login" do
@@ -120,10 +121,10 @@ module Tint
 		get "/" do
 			if ENV['SITE_PATH']
 				authorize site, :index?
-				erb :"site/index", locals: { site: site }
+				slim :"site/index", locals: { site: site }
 			else
 				authorize Tint::Site, :index?
-				erb :index, locals: { sites: policy_scope(Tint::Site) }
+				slim :index, locals: { sites: policy_scope(Tint::Site) }
 			end
 		end
 
@@ -146,7 +147,7 @@ module Tint
 				Thread.new { site.clone }
 			end
 
-			erb :"site/index", locals: { site: site }
+			slim :"site/index", locals: { site: site }
 		end
 
 		put "/:site/" do
@@ -186,7 +187,7 @@ module Tint
 			if success
 				redirect to("/")
 			else
-				erb :error, locals: { message:  "Something went wrong with the build" }
+				slim :error, locals: { message:  "Something went wrong with the build" }
 			end
 		end
 
@@ -201,8 +202,8 @@ module Tint
 
 				if params.has_key?('source')
 					stream do |out|
-						html = erb :"layouts/files" do
-							erb :"files/source", locals: { path: file.route }
+						html = slim :"layouts/files" do
+							slim :"files/source", locals: { path: file.route }
 						end
 						top, bottom = html.split('<textarea name="source">', 2)
 						out.puts top
@@ -211,8 +212,8 @@ module Tint
 						out.puts bottom
 					end
 				elsif file.yml? || !file.content?
-					erb :"layouts/files" do
-						erb :"files/yml", locals: {
+					slim :"layouts/files" do
+						slim :"files/yml", locals: {
 							data: file.frontmatter,
 							path: file.route
 						}
@@ -220,8 +221,8 @@ module Tint
 				else
 					frontmatter = file.frontmatter? && file.frontmatter
 					stream do |out|
-						html = erb :"layouts/files" do
-							erb :"files/text", locals: {
+						html = slim :"layouts/files" do
+							slim :"files/text", locals: {
 								frontmatter: frontmatter,
 								wysiwyg: file.markdown?,
 								path: file.route
@@ -235,7 +236,7 @@ module Tint
 					end
 				end
 			else
-				erb :error, locals: { message: "Editing binary files is not supported" }
+				slim :error, locals: { message: "Editing binary files is not supported" }
 			end
 		end
 
@@ -246,7 +247,7 @@ module Tint
 			if params["name"]
 				new = file.parent.file(params["name"])
 				if new.path.exist?
-					return erb :error, locals: { message: "A file with that name already exists" }
+					return slim :error, locals: { message: "A file with that name already exists" }
 				else
 					begin
 						site.git.lib.mv(file.relative_path.to_s, new.relative_path.to_s)
@@ -337,8 +338,8 @@ module Tint
 	protected
 
 		def render_directory(directory)
-			erb :"layouts/files", locals: { directory: directory } do
-				erb :"files/index", locals: { directory: directory }
+			slim :"layouts/files", locals: { directory: directory } do
+				slim :"files/index", locals: { directory: directory }
 			end
 		end
 
