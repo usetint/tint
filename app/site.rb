@@ -41,6 +41,10 @@ module Tint
 			cache_path.join('.git').directory?
 		end
 
+		def remote
+			@options[:remote]
+		end
+
 		def clone
 			begin
 				# First, do a shallow clone so that we are up and running
@@ -50,7 +54,8 @@ module Tint
 				open(cache_path.join('.git').join('tint-cloned'), 'w').close
 			rescue
 				# Something went wrong.  Nuke the cache
-				cache_path.rmtree
+				clear_cache!
+				return
 			end
 
 			begin
@@ -59,6 +64,10 @@ module Tint
 			rescue
 				# Something went wrong, keep the shallow copy that at least works
 			end
+		end
+
+		def clear_cache!
+			cache_path.rmtree
 		end
 
 		def cloned?
