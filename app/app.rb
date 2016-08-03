@@ -367,6 +367,7 @@ module Tint
 					site_id: (params['site'] || 1).to_i,
 					user_id: 1,
 					cache_path: Pathname.new(ENV['SITE_PATH']).realpath,
+					cloned: true,
 					fn: "Local Site"
 				)
 			else

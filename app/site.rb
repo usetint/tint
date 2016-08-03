@@ -62,7 +62,7 @@ module Tint
 		end
 
 		def cloned?
-			cache_path.join('.git').join('tint-cloned').exist?
+			@options[:cloned] || cache_path.join('.git').join('tint-cloned').exist?
 		end
 	end
 end
