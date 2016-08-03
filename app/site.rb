@@ -42,8 +42,23 @@ module Tint
 		end
 
 		def clone
-			Git.clone(@options[:remote], cache_path.basename, path: cache_path.dirname, depth: 1)
-			open(cache_path.join('.git').join('tint-cloned'), 'w').close
+			begin
+				# First, do a shallow clone so that we are up and running
+				Git.clone(@options[:remote], cache_path.basename, path: cache_path.dirname, depth: 1)
+
+				# Make sure the UI can tell we are ready to rock
+				open(cache_path.join('.git').join('tint-cloned'), 'w').close
+			rescue
+				# Something went wrong.  Nuke the cache
+				cache_path.rmtree
+			end
+
+			begin
+				# Now, fetch the history for future use
+				git.fetch('origin', unshallow: true)
+			rescue
+				# Something went wrong, keep the shallow copy that at least works
+			end
 		end
 
 		def cloned?
