@@ -6,22 +6,22 @@ module Tint
 	module Helpers
 		module Rendering
 			def render_yml(value)
-				"#{
 				case value
 				when Hash
-					value.map { |k, v| render_value(k, v, "data[#{k}]") }.join
+					template = "inputs/hash"
 				when Array
-					"<ol data-key='data'>#{value.each_with_index.map { |v, i| "<li>#{render_value(nil, v, "data[#{i}]")}" }.join}</ol>"
+					template = "inputs/array"
 				else
 					raise TypeError, 'YAML root must be a Hash or Array'
 				end
-				}<script type='text/javascript' src='/yaml.js'></script>"
+
+				render_slim("inputs/yaml", template: template, value: value)
 			end
 
 			def render_value(key, value, name)
 				case value
 				when Hash
-					return render_slim(
+					render_slim(
 						"inputs/fieldset/hash",
 						legend: key,
 						name: name,
@@ -97,7 +97,7 @@ module Tint
 			end
 
 			def render_multiple_select(name, value, options)
-				return render_slim(
+				render_slim(
 					"inputs/multiple_select",
 					name: name,
 					value: Array(value),
@@ -125,7 +125,7 @@ module Tint
 
 			def initialize(locals)
 				locals.each do |key, value|
-					self.class.send(:define_method, key) { value }
+					define_singleton_method(key) { value }
 				end
 			end
 		end

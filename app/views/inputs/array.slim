@@ -1,0 +1,3 @@
+ol data-key='data'
+	- value.each_with_index do |v, i|
+		li== render_value(nil, v, "data[#{i}]")
