@@ -145,10 +145,12 @@ module Tint
 			erb :"site/index", locals: { site: site }
 		end
 
-		post "/:site/build" do
+		post "/:site/sync" do
 			# No harm in letting anyone rebuild
 			# This is also a webhook
 			skip_authorization
+
+			site.sync
 
 			prefix = Pathname.new(ENV["PREFIX"])
 			prefix.mkpath
