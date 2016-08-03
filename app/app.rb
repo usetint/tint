@@ -158,6 +158,15 @@ module Tint
 			redirect to(site.route)
 		end
 
+		delete "/:site/" do
+			authorize site, :destroy?
+
+			site.clear_cache!
+			DB[:sites].where(site_id: params[:site]).delete
+
+			redirect to("/")
+		end
+
 		post "/:site/sync" do
 			# No harm in letting anyone rebuild
 			# This is also a webhook

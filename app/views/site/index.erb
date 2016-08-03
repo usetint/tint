@@ -1,10 +1,17 @@
 <h1><%= site.fn %></h1>
 
-<nav>
-	<form method="post" action="<%= site.route("build") %>">
-		<button type="submit">Sync &amp; Build</button>
-	</form>
+<form method="post" action="<%= site.route("build") %>">
+	<button type="submit">Sync &amp; Build</button>
+</form>
 
+<% unless ENV["SITE_PATH"] %>
+	<form method="post" action="<%= site.route %>">
+		<input type="hidden" name="_method" value="DELETE" />
+		<button type="submit">Delete this site</button>
+	</form>
+<% end %>
+
+<nav>
 	<% if site.cloned? %>
 		<ul>
 			<li><a href="<%= site.route("files") %>">Edit Files</a></li>

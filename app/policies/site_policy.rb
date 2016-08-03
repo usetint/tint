@@ -15,6 +15,10 @@ module Tint
 			user && user[:user_id] == record.user_id
 		end
 
+		def destroy?
+			update?
+		end
+
 		class Scope < Scope
 			def initialize(user, scope)
 				super(user, scope == Tint::Site ? DB[:sites] : scope)
