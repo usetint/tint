@@ -45,9 +45,9 @@ module Tint
 
 			def render_input(key, value, name)
 				input = if [true, false].include? value
-					render_checkbox(name, value)
+					render_slim("inputs/checkbox", name: name, value: value)
 				elsif key.to_s.end_with?("_path")
-					render_file(name, value)
+					render_slim("inputs/file", name: name, value: value)
 				elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
 					time = Time.parse(value.to_s) if value.to_s != ""
 					render_slim("inputs/datetime", name: name, time: time)
@@ -57,9 +57,9 @@ module Tint
 				elsif value.is_a?(String) && value.length > 50
 					render_slim("inputs/textarea", name: name, value: value)
 				elsif key && (options = site.config.dig("options", key))
-					render_multiple_select(name, value, options)
+					render_slim("inputs/multiple_select", name: name, value: Array(value), options: format_options(options))
 				elsif key && (options = site.config.dig("options", ActiveSupport::Inflector.pluralize(key)))
-					render_select(name, value, options)
+					render_slim("inputs/select", name: name, value: value, options: format_options(options))
 				else
 					render_slim("inputs/text", name: name, value: value)
 				end
@@ -77,36 +77,6 @@ module Tint
 				Slim::Template.new("app/views/#{template}.slim").render(
 					Scope.new(locals.merge(site: site))
 				)
-			end
-
-			def render_checkbox(name, value)
-				render_slim("inputs/checkbox", name: name, value: value)
-			end
-
-			def render_file(name, value)
-				render_slim("inputs/file", name: name, value: value)
-			end
-
-			def render_select(name, value, options)
-				render_slim(
-					"inputs/select",
-					name: name,
-					value: value,
-					options: format_options(options)
-				)
-			end
-
-			def render_multiple_select(name, value, options)
-				render_slim(
-					"inputs/multiple_select",
-					name: name,
-					value: Array(value),
-					options: format_options(options)
-				)
-			end
-
-			def multiple_select?(key)
-				!!site.config.dig("options", key)
 			end
 
 			def format_options(options)
