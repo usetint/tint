@@ -125,6 +125,9 @@ module Tint
 
 		get "/:site" do
 			authorize site, :index?
+
+			site.clone unless site.git?
+
 			erb :"site/index", locals: { site: site }
 		end
 

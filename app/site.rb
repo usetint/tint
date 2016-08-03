@@ -36,5 +36,13 @@ module Tint
 		def git
 			@git ||= Git.open(cache_path)
 		end
+
+		def git?
+			cache_path.join('.git').directory?
+		end
+
+		def clone
+			Git.clone(@options[:remote], cache_path.basename, path: cache_path.dirname, depth: 1)
+		end
 	end
 end
