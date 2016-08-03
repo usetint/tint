@@ -4,7 +4,7 @@ gem "sinatra"
 gem "sinatra-contrib"
 
 gem "activesupport", "< 5.0.0" # For pundit
-gem "git"
+gem "git", github: "singpolyma/ruby-git"
 gem "omniauth"
 gem "omniauth-github"
 gem "omniauth-indieauth"
