@@ -11,10 +11,17 @@ form {
 	margin-bottom: 2rem;
 }
 
+$input-width: 20rem;
+
 label {
 	display: block;
 	margin: 0 0 1rem 0;
 	font-weight: normal;
+
+	img {
+		display: block;
+		max-width: $input-width;
+	}
 }
 
 input[type="text"],
@@ -25,7 +32,7 @@ select,
 textarea {
 	display: block;
 	padding: 1rem;
-	width: 20rem;
+	width: $input-width;
 	font-size: 1rem;
 	border: 1px solid #ccc;
 	border-radius: 2px;

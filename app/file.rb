@@ -32,9 +32,15 @@ module Tint
 		end
 
 		def text?
-			FileMagic.open(:mime) do |magic|
-				magic.file(path.to_s).split('/').first == 'text'
-			end
+			mime.split("/").first == "text"
+		end
+
+		def image?
+			mime.split("/").first == "image"
+		end
+
+		def mime
+			FileMagic.open(:mime) { |magic| magic.file(path.to_s) }
 		end
 
 		def markdown?
