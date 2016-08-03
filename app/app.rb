@@ -119,11 +119,23 @@ module Tint
 				erb :"site/index", locals: { site: site }
 			else
 				authorize Tint::Site, :index?
-				erb :index
+				erb :index, locals: { sites: policy_scope(Tint::Site) }
 			end
 		end
 
-		get "/:site" do
+		post "/" do
+			authorize Tint::Site, :create?
+
+			site_id = DB[:sites].insert(
+				user_id: pundit_user[:user_id],
+				fn: params["fn"],
+				remote: params["remote"]
+			)
+
+			redirect to("/#{site_id}/")
+		end
+
+		get "/:site/" do
 			authorize site, :index?
 
 			unless site.git?

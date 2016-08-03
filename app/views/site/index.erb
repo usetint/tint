@@ -13,3 +13,15 @@
 		<p>Please wait, we are syncing your remote...</p>
 	<% end %>
 </nav>
+
+<% unless ENV["SITE_PATH"] %>
+	<section>
+		<h1>Setup</h1>
+
+		<p>Add access for this SSH public key to your remote:</p>
+		<code><%= ENV.fetch('SSH_PUBLIC') %></code>
+
+		<p>And add this script as a post-receive hook:</p>
+		<pre><code><%= open('templates/post-receive').read.gsub(/http:\/\/localhost:9292/, ENV.fetch('APP_URL')) %></code></pre>
+	</section>
+<% end %>
