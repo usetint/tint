@@ -39,6 +39,10 @@ module Tint
 			mime.split("/").first == "image"
 		end
 
+		def size
+			path.size
+		end
+
 		def mime
 			FileMagic.open(:mime) { |magic| magic.file(path.to_s) }
 		end
