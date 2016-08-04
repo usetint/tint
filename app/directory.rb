@@ -47,10 +47,10 @@ module Tint
 			@files = files.sort_by { |f| [f.directory? ? 0 : 1, f.name] }
 		end
 
-		def upload(file)
+		def upload(file, name=file[:filename])
 			path.mkpath
 
-			path.join(file[:filename]).open("w") do |f|
+			path.join(name).open("w") do |f|
 				until file[:tempfile].eof?
 					f.write file[:tempfile].read(4096)
 				end

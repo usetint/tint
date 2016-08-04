@@ -9,10 +9,7 @@ form action=directory.route method="post"
 ul
 	- directory.files.each do |file|
 		li
-			- if file.text? || file.directory?
-				a href=file.route = file.name
-			- else
-				= file.name
+			a href=file.route = file.name
 
 			- unless file.directory?
 				form action=file.route method="post"

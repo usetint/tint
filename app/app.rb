@@ -236,7 +236,15 @@ module Tint
 					end
 				end
 			else
-				slim :error, locals: { message: "Editing binary files is not supported" }
+				authorize file, :edit?
+
+				if file.image? && file.size / 2**20 < 10
+					encoded_image = Base64.encode64(file.path.open.read)
+				end
+
+				slim :"layouts/files" do
+					slim :"files/binary", locals: { file: file, encoded_image: encoded_image }
+				end
 			end
 		end
 
@@ -244,8 +252,8 @@ module Tint
 			file = site.file(params["splat"].join("/"))
 			authorize file, :update?
 
-			if params["name"]
-				new = file.parent.file(params["name"])
+			if params[:name]
+				new = file.parent.file(params[:name])
 				if new.path.exist?
 					return slim :error, locals: { message: "A file with that name already exists" }
 				else
@@ -257,18 +265,26 @@ module Tint
 						file.path.rename(new.path)
 					end
 				end
-			elsif params["source"]
-				file.path.write params["source"].encode(universal_newline: true)
+			elsif params[:source]
+				file.path.write params[:source].encode(universal_newline: true)
 
 				site.git.add(file.path.to_s)
-
 				site.git.status.each do |f|
 					if f.path == file.relative_path.to_s && f.type
 						commit(site.git, "Modified #{file.relative_path}")
 					end
 				end
+			elsif params[:file]
+				file.parent.upload(params[:file], file.name)
+
+				site.git.add(file.path.to_s)
+				site.git.status.each do |f|
+					if f.path == file.relative_path.to_s && f.type
+						commit(site.git, "Updated #{file.relative_path}")
+					end
+				end
 			else
-				updated_data = process_form_data(params["data"], site.git)
+				updated_data = process_form_data(params[:data], site.git)
 
 				Tempfile.open("tint-save") do |tmp|
 					if updated_data
@@ -280,8 +296,8 @@ module Tint
 						end
 					end
 
-					if params.has_key?("content")
-						tmp.puts(params["content"].encode(universal_newline: true))
+					if params.has_key?(:content)
+						tmp.puts(params[:content].encode(universal_newline: true))
 					elsif !file.yml?
 						file.stream_content(&tmp.method(:puts))
 					end
