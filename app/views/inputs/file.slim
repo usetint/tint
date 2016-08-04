@@ -1,3 +1,6 @@
-div class="value"= value
 input type="hidden" name=name value=value
+- if encoded_image
+	img src="data:#{file.mime};base64,#{encoded_image}" alt=value
+- else
+	div class="value"= value
 input type="file" name=name

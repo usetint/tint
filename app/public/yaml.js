@@ -75,4 +75,26 @@ window.addEventListener("load", function() {
 
 	var hidden = document.querySelectorAll("form .hidden");
 	Array.prototype.forEach.call(hidden, function(el) { el.style.display = 'none'; });
+
+	Array.prototype.forEach.call(document.querySelectorAll("input[type='file']"), function(input) {
+		input.addEventListener("change", function() {
+			if (input.files && input.files[0]) {
+				var reader = new FileReader();
+
+				reader.onload = function (e) {
+					var image = input.previousElementSibling.nodeName === "IMG" &&
+					            input.previousElementSibling;
+
+					if(!image) {
+						image = document.createElement("img");
+						input.parentElement.insertBefore(image, input);
+					}
+
+					image.src = e.target.result;
+				}
+
+				reader.readAsDataURL(input.files[0]);
+			}
+		});
+	});
 });

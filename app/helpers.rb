@@ -1,4 +1,5 @@
 require "active_support/inflector/methods"
+require "base64"
 require "slim"
 require_relative "future"
 
@@ -47,7 +48,11 @@ module Tint
 				input = if [true, false].include? value
 					render_slim("inputs/checkbox", name: name, value: value)
 				elsif key.to_s.end_with?("_path")
-					render_slim("inputs/file", name: name, value: value)
+					file = Tint::File.new(site, value)
+					if file.image? && file.size / 2**20 < 10
+						encoded_image = Base64.encode64(file.path.open.read)
+					end
+					render_slim("inputs/file", name: name, value: value, file: file, encoded_image: encoded_image)
 				elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
 					time = Time.parse(value.to_s) if value.to_s != ""
 					render_slim("inputs/datetime", name: name, time: time)
