@@ -194,6 +194,11 @@ module Tint
 		get "/:site/files/?*" do
 			file = site.file(params['splat'].join('/'))
 
+			if params[:download] && file.exist? && !file.directory?
+				authorize file, :show?
+				return send_file file.path, filename: file.name, type: "Application/octet-stream"
+			end
+
 			if file.directory? || !file.exist?
 				authorize file.to_directory, :index?
 				render_directory file.to_directory
