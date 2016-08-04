@@ -1,0 +1,7 @@
+h1 = params["filename"]
+
+form action=file.route method="post" enctype="multipart/form-data"
+	input type="hidden" name="_method" value="PUT"
+	label
+		== slim :"inputs/file", locals: { name: "file", value: file.relative_path, file: file, encoded_image: encoded_image }
+	button type="submit" Update file
