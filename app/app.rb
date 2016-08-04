@@ -238,12 +238,8 @@ module Tint
 			else
 				authorize file, :edit?
 
-				if file.image? && file.size / 2**20 < 10
-					encoded_image = Base64.encode64(file.path.open.read)
-				end
-
 				slim :"layouts/files" do
-					slim :"files/binary", locals: { file: file, encoded_image: encoded_image }
+					slim :"files/binary", locals: { file: file, encoded_image: file.encoded_image }
 				end
 			end
 		end

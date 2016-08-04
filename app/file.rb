@@ -127,6 +127,10 @@ module Tint
 			Tint::Directory.new(site, relative_path)
 		end
 
+		def encoded_image
+			Base64.encode64(file.path.open.read) if file.image? && file.size / 2**20 < 10
+		end
+
 	protected
 
 		def extension
