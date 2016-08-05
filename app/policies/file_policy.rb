@@ -2,6 +2,10 @@ require_relative 'application_policy'
 
 module Tint
 	class FilePolicy < Tint::ApplicationPolicy
+		def show?
+			user && user[:user_id] == record.user_id
+		end
+
 		def index?
 			user && user[:user_id] == record.user_id
 		end

@@ -16,6 +16,8 @@ ul
 					input type="hidden" name="_method" value="DELETE"
 					button type="submit" Delete
 
+				a href="#{file.route}?download=true" Download
+
 			- unless file.name == ".."
 				form action=file.route method="post"
 					input type="hidden" name="_method" value="PUT"
