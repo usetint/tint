@@ -196,7 +196,7 @@ module Tint
 
 			if params[:download] && file.exist? && !file.directory?
 				authorize file, :show?
-				return send_file file.path, filename: file.name, type: "Application/octet-stream"
+				return send_file file.path, filename: file.name, type: file.mime, disposition: :attachment
 			end
 
 			if file.directory? || !file.exist?
