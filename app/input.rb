@@ -69,7 +69,7 @@ module Tint
 			end
 
 			def encoded_image
-				file.encoded_image
+				Base64.encode64(file.path.open.read) if file.image? && file.size / 2**20 < 10
 			end
 		end
 
