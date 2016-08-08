@@ -7,7 +7,11 @@ module Tint
 		def self.type(key, value, site)
 			return unless scalarish?(value)
 
-			if [true, false].include? value
+			if select_options(site, key)
+				MultipleSelect
+			elsif select_options(site, ActiveSupport::Inflector.pluralize(key.to_s))
+				Select
+			elsif [true, false].include? value
 				Checkbox
 			elsif key.to_s.end_with?("_path") || key.to_s.end_with?("_paths")
 				File
@@ -15,10 +19,6 @@ module Tint
 				DateTime
 			elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date"
 				Date
-			elsif select_options(site, key)
-				MultipleSelect
-			elsif select_options(site, ActiveSupport::Inflector.pluralize(key.to_s))
-				Select
 			elsif value.is_a?(String) && value.length > 50
 				Textarea
 			else
