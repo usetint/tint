@@ -8,6 +8,9 @@ form method="post" action=site.route("build")
 		input type="hidden" name="_method" value="DELETE"
 		button type="submit" Delete this site
 
+- if !valid_config
+	p.error We were unable to parse your .tint.yml file.
+
 nav
 	- if site.cloned?
 		ul: li: a href=site.route("files") Edit Files
