@@ -30,16 +30,7 @@ module Tint
 			!value.is_a?(Enumerable) || (value.is_a?(Array) && value.map { |v| !value.is_a?(Enumerable) })
 		end
 
-		class Base
-			attr_reader :key, :name, :value, :site
-
-			def initialize(key, name, value, site)
-				@key = key
-				@name = name
-				@value = value
-				@site = site
-			end
-
+		Base = Struct.new(:key, :name, :value, :site) do
 			def render
 				Slim::Template.new("app/views/inputs/#{template}.slim").render(self)
 			end
