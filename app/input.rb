@@ -15,12 +15,12 @@ module Tint
 				:datetime
 			elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date"
 				:date
-			elsif value.is_a?(String) && value.length > 50
-				:textarea
 			elsif select_options(site, key)
 				:multiple_select
 			elsif select_options(site, ActiveSupport::Inflector.pluralize(key))
 				:select
+			elsif value.is_a?(String) && value.length > 50
+				:textarea
 			else
 				:text
 			end
