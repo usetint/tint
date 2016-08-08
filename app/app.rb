@@ -22,6 +22,7 @@ require_relative "file"
 require_relative "helpers"
 require_relative "site"
 require_relative "tint_omniauth" # Monkeypatch
+require_relative "input"
 
 ENV["GIT_COMMITTER_NAME"] = "Tint"
 ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
@@ -244,7 +245,7 @@ module Tint
 				authorize file, :edit?
 
 				slim :"layouts/files" do
-					slim :"files/binary", locals: { file: file, encoded_image: file.encoded_image }
+					slim :"files/binary", locals: { file: file, input: Input::File.new("file", file.relative_path, site) }
 				end
 			end
 		end
