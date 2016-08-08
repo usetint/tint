@@ -13,6 +13,10 @@ engines:
       languages:
       - ruby
       - javascript
+ratings:
+  paths:
+  - "**.rb"
+  - "**.js"
 exclude_paths:
 - "app/public/tinymce/**/*"
 - "app/public/upndown.bundle.js"
