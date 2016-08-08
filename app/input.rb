@@ -7,7 +7,7 @@ module Tint
 		def self.type(key, value, site)
 			if [true, false].include? value
 				:checkbox
-			elsif key.to_s.end_with?("_path")
+			elsif key.to_s.end_with?("_path") || key.to_s.end_with?("_paths")
 				:file
 			elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
 				:datetime

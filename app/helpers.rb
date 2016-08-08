@@ -30,7 +30,7 @@ module Tint
 						value: value
 					)
 				when Array
-					if key.to_s.end_with?("_path") || key.to_s.end_with?("_paths")
+					if Input.type(key, value, site) == :file
 						render_slim(
 							"inputs/fieldset/array",
 							legend: key,
