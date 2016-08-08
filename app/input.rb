@@ -74,14 +74,14 @@ module Tint
 		end
 
 		class DateTime < Base
-			def time
-				Time.parse(value.to_s) if value.to_s != ""
+			def value
+				Time.parse(super.to_s) if super.to_s != ""
 			end
 		end
 
 		class Date < Base
-			def date
-				::Date.parse(value.to_s) if value.to_s != ""
+			def value
+				::Date.parse(super.to_s) if super.to_s != ""
 			end
 		end
 
