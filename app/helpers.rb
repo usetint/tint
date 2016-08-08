@@ -2,6 +2,7 @@ require "active_support/inflector/methods"
 require "base64"
 require "slim"
 require_relative "future"
+require_relative "input"
 
 module Tint
 	module Helpers
@@ -19,7 +20,7 @@ module Tint
 				render_slim("inputs/yaml", template: template, value: value)
 			end
 
-			def render_value(key, value, name)
+			def render_value(key, value, name, type=nil)
 				case value
 				when Hash
 					render_slim(
@@ -29,42 +30,32 @@ module Tint
 						value: value
 					)
 				when Array
-					if multiple_select_options(key)
-						render_input(key, value, name)
+					if key.to_s.end_with?("_path") || key.to_s.end_with?("_paths")
+						render_slim(
+							"inputs/fieldset/array",
+							legend: key,
+							name: name,
+							value: value,
+							type: :file
+						)
+					elsif Input.multiple_select_options(site, key)
+						render_input(key, value, name, type)
 					else
 						render_slim(
 							"inputs/fieldset/array",
 							legend: key,
 							name: name,
-							value: value
+							value: value,
+							type: type
 						)
 					end
 				else
-					render_input(key, value, name)
+					render_input(key, value, name, type)
 				end
 			end
 
-			def render_input(key, value, name)
-				input = if [true, false].include? value
-					render_slim("inputs/checkbox", name: name, value: value)
-				elsif key.to_s.end_with?("_path")
-					file = Tint::File.new(site, value)
-					render_slim("inputs/file", name: name, value: value, file: file, encoded_image: file.encoded_image)
-				elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
-					time = Time.parse(value.to_s) if value.to_s != ""
-					render_slim("inputs/datetime", name: name, time: time)
-				elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date"
-					date = Date.parse(value.to_s) if value.to_s != ""
-					render_slim("inputs/date", name: name, date: date)
-				elsif value.is_a?(String) && value.length > 50
-					render_slim("inputs/textarea", name: name, value: value)
-				elsif (options = multiple_select_options(key))
-					render_slim("inputs/multiple_select", name: name, value: Array(value), options: format_options(options))
-				elsif key && (options = site.config.dig("options", ActiveSupport::Inflector.pluralize(key)))
-					render_slim("inputs/select", name: name, value: value, options: format_options(options))
-				else
-					render_slim("inputs/text", name: name, value: value)
-				end
+			def render_input(key, value, name, type=nil)
+				input = Input::Base.build(key, name, value, site, type).render
 
 				if key
 					render_slim("inputs/labelled", label: key, input: input)
@@ -79,20 +70,6 @@ module Tint
 				Slim::Template.new("app/views/#{template}.slim").render(
 					Scope.new(locals.merge(site: site))
 				)
-			end
-
-			def multiple_select_options(key)
-				site.config.dig("options", key)
-			end
-
-			def format_options(options)
-				if options.is_a? Array
-					options.map { |value| [value, value] }
-				elsif options.is_a? Hash
-					options.map { |value, display| [value, display] }
-				else
-					fail ArgumentError, "options must be a Hash or an Array"
-				end
 			end
 		end
 
