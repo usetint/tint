@@ -1,6 +1,6 @@
 module Tint
 	module Input
-		def self.multiple_select_options(site, key)
+		def self.select_options(site, key)
 			site.config.dig("options", key)
 		end
 
@@ -17,9 +17,9 @@ module Tint
 				:date
 			elsif value.is_a?(String) && value.length > 50
 				:textarea
-			elsif multiple_select_options(site, key)
+			elsif select_options(site, key)
 				:multiple_select
-			elsif key && site.config.dig("options", ActiveSupport::Inflector.pluralize(key))
+			elsif select_options(site, ActiveSupport::Inflector.pluralize(key))
 				:select
 			else
 				:text
@@ -111,7 +111,7 @@ module Tint
 
 		class Select < Base
 			def options
-				format_options(site.config.dig("options", ActiveSupport::Inflector.pluralize(key)))
+				format_options(Input.select_options(site, ActiveSupport::Inflector.pluralize(key)))
 			end
 
 			def template
@@ -137,7 +137,7 @@ module Tint
 			end
 
 			def options
-				format_options(Input.multiple_select_options(site, key))
+				format_options(Input.select_options(site, key))
 			end
 
 			def template
