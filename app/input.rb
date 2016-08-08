@@ -5,6 +5,8 @@ module Tint
 		end
 
 		def self.type(key, value, site)
+			return unless scalarish?(value)
+
 			if [true, false].include? value
 				:checkbox
 			elsif key.to_s.end_with?("_path") || key.to_s.end_with?("_paths")
@@ -22,6 +24,10 @@ module Tint
 			else
 				:text
 			end
+		end
+
+		def self.scalarish?(value)
+			!value.is_a?(Enumerable) || (value.is_a?(Array) && value.map { |v| !value.is_a?(Enumerable) })
 		end
 
 		def self.build(key, name, value, site, type=nil)

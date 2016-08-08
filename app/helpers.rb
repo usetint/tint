@@ -30,15 +30,9 @@ module Tint
 						value: value
 					)
 				when Array
-					if Input.type(key, value, site) == :file
-						render_slim(
-							"inputs/fieldset/array",
-							legend: key,
-							name: name,
-							value: value,
-							type: :file
-						)
-					elsif Input.multiple_select_options(site, key)
+					input_type = Input.type(key, value, site)
+
+					if input_type == :multiple_select
 						render_input(key, value, name, type)
 					else
 						render_slim(
@@ -46,7 +40,7 @@ module Tint
 							legend: key,
 							name: name,
 							value: value,
-							type: type
+							type: input_type
 						)
 					end
 				else
