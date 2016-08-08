@@ -32,7 +32,7 @@ module Tint
 				when Array
 					input_type = Input.type(key, value, site)
 
-					if input_type == :multiple_select
+					if input_type == Input::MultipleSelect
 						render_input(key, value, name, type)
 					else
 						render_slim(

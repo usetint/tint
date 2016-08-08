@@ -8,21 +8,21 @@ module Tint
 			return unless scalarish?(value)
 
 			if [true, false].include? value
-				:checkbox
+				Checkbox
 			elsif key.to_s.end_with?("_path") || key.to_s.end_with?("_paths")
-				:file
+				File
 			elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
-				:datetime
+				DateTime
 			elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date"
-				:date
+				Date
 			elsif select_options(site, key)
-				:multiple_select
-			elsif select_options(site, ActiveSupport::Inflector.pluralize(key))
-				:select
+				MultipleSelect
+			elsif select_options(site, ActiveSupport::Inflector.pluralize(key.to_s))
+				Select
 			elsif value.is_a?(String) && value.length > 50
-				:textarea
+				Textarea
 			else
-				:text
+				Text
 			end
 		end
 
@@ -31,42 +31,36 @@ module Tint
 		end
 
 		def self.build(key, name, value, site, type=nil)
-			type ||= Input.type(key, value, site)
-			class_for(type).new(key, name, value, site)
-		end
-
-		def self.class_for(type)
-			{
-				file: File,
-				checkbox: Checkbox,
-				datetime: DateTime,
-				date: Date,
-				textarea: Textarea,
-				multiple_select: MultipleSelect,
-				select: Select,
-				text: Text
-			}.fetch(type)
+			type ||= type(key, value, site)
+			type.new(name, value, site, select_options(site, ActiveSupport::Inflector.pluralize(key.to_s)))
 		end
 
 		class Base
-			attr_reader :key, :name, :value, :site
+			attr_reader :name, :value, :site, :options
 
-			def initialize(key, name, value, site)
-				@key = key
+			def initialize(name, value, site, options=nil)
 				@name = name
 				@value = value
 				@site = site
+				@options = options
 			end
 
 			def render
 				Slim::Template.new("app/views/inputs/#{template}.slim").render(self)
 			end
+
+			def template
+				self.class.name.downcase.split("::").last
+			end
 		end
 
 		class Checkbox < Base
-			def template
-				:checkbox
-			end
+		end
+
+		class Text < Base
+		end
+
+		class Textarea < Base
 		end
 
 		class File < Base
@@ -77,19 +71,11 @@ module Tint
 			def encoded_image
 				file.encoded_image
 			end
-
-			def template
-				:file
-			end
 		end
 
 		class DateTime < Base
 			def time
 				Time.parse(value.to_s) if value.to_s != ""
-			end
-
-			def template
-				:datetime
 			end
 		end
 
@@ -97,25 +83,11 @@ module Tint
 			def date
 				::Date.parse(value.to_s) if value.to_s != ""
 			end
-
-			def template
-				:date
-			end
-		end
-
-		class Textarea < Base
-			def template
-				:textarea
-			end
 		end
 
 		class Select < Base
 			def options
-				format_options(Input.select_options(site, ActiveSupport::Inflector.pluralize(key)))
-			end
-
-			def template
-				:select
+				format_options(@options)
 			end
 
 		protected
@@ -137,17 +109,7 @@ module Tint
 			end
 
 			def options
-				format_options(Input.select_options(site, key))
-			end
-
-			def template
-				:multiple_select
-			end
-		end
-
-		class Text < Base
-			def template
-				:text
+				format_options(@options)
 			end
 		end
 	end
