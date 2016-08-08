@@ -30,19 +30,14 @@ module Tint
 			!value.is_a?(Enumerable) || (value.is_a?(Array) && value.map { |v| !value.is_a?(Enumerable) })
 		end
 
-		def self.build(key, name, value, site, type=nil)
-			type ||= type(key, value, site)
-			type.new(name, value, site, select_options(site, ActiveSupport::Inflector.pluralize(key.to_s)))
-		end
-
 		class Base
 			attr_reader :name, :value, :site, :options
 
-			def initialize(name, value, site, options=nil)
+			def initialize(key, name, value, site)
 				@name = name
 				@value = value
 				@site = site
-				@options = options
+				@options = Input.select_options(site, ActiveSupport::Inflector.pluralize(key.to_s))
 			end
 
 			def render

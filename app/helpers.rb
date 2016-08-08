@@ -49,7 +49,8 @@ module Tint
 			end
 
 			def render_input(key, value, name, type=nil)
-				input = Input.build(key, name, value, site, type).render
+				type ||= Input.type(key, value, site)
+				input = type.new(key, name, value, site).render
 
 				if key
 					render_slim("inputs/labelled", label: key, input: input)
