@@ -31,13 +31,13 @@ module Tint
 		end
 
 		class Base
-			attr_reader :name, :value, :site, :options
+			attr_reader :key, :name, :value, :site
 
 			def initialize(key, name, value, site)
+				@key = key
 				@name = name
 				@value = value
 				@site = site
-				@options = Input.select_options(site, ActiveSupport::Inflector.pluralize(key.to_s))
 			end
 
 			def render
@@ -82,7 +82,7 @@ module Tint
 
 		class Select < Base
 			def options
-				format_options(@options)
+				format_options(Input.select_options(site, ActiveSupport::Inflector.pluralize(key.to_s)))
 			end
 
 		protected
@@ -101,10 +101,6 @@ module Tint
 		class MultipleSelect < Select
 			def value
 				Array(@value)
-			end
-
-			def options
-				format_options(@options)
 			end
 		end
 	end
