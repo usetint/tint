@@ -4,6 +4,44 @@ module Tint
 			site.config.dig("options", key)
 		end
 
+		def self.type(key, value, site)
+			if [true, false].include? value
+				:checkbox
+			elsif key.to_s.end_with?("_path")
+				:file
+			elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
+				:datetime
+			elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date"
+				:date
+			elsif value.is_a?(String) && value.length > 50
+				:textarea
+			elsif multiple_select_options(site, key)
+				:multiple_select
+			elsif key && site.config.dig("options", ActiveSupport::Inflector.pluralize(key))
+				:select
+			else
+				:text
+			end
+		end
+
+		def self.build(key, name, value, site, type=nil)
+			type ||= Input.type(key, value, site)
+			class_for(type).new(key, name, value, site)
+		end
+
+		def self.class_for(type)
+			{
+				file: File,
+				checkbox: Checkbox,
+				datetime: DateTime,
+				date: Date,
+				textarea: Textarea,
+				multiple_select: MultipleSelect,
+				select: Select,
+				text: Text
+			}.fetch(type)
+		end
+
 		class Base
 			attr_reader :key, :name, :value, :site
 
@@ -12,47 +50,6 @@ module Tint
 				@name = name
 				@value = value
 				@site = site
-			end
-
-			def self.build(key, name, value, site, type=nil)
-				if type
-					class_for(type).new(key, name, value, site)
-				else
-					auto_class(key, name, value, site).new(key, name, value, site)
-				end
-			end
-
-			def self.auto_class(key, name, value, site)
-				if [true, false].include? value
-					Checkbox
-				elsif key.to_s.end_with?("_path")
-					File
-				elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
-					DateTime
-				elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date"
-					Date
-				elsif value.is_a?(String) && value.length > 50
-					Textarea
-				elsif Tint::Input.multiple_select_options(site, key)
-					MultipleSelect
-				elsif key && site.config.dig("options", ActiveSupport::Inflector.pluralize(key))
-					Select
-				else
-					Text
-				end
-			end
-
-			def self.class_for(type)
-				{
-					file: File,
-					checkbox: Checkbox,
-					datetime: DateTime,
-					date: Date,
-					textarea: Textarea,
-					multiple_select: MultipleSelect,
-					select: Select,
-					text: Text
-				}.fetch(type)
 			end
 
 			def render

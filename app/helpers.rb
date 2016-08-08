@@ -55,7 +55,7 @@ module Tint
 			end
 
 			def render_input(key, value, name, type=nil)
-				input = Input::Base.build(key, name, value, site, type).render
+				input = Input.build(key, name, value, site, type).render
 
 				if key
 					render_slim("inputs/labelled", label: key, input: input)
