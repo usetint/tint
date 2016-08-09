@@ -1,4 +1,4 @@
-require "minitest/autorun"
+require_relative "test_helper"
 require_relative "../app/site"
 require_relative "../app/file"
 
