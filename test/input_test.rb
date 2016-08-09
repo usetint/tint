@@ -1,5 +1,4 @@
 require "minitest/autorun"
-require_relative "../app/site"
 require_relative "../app/input"
 
 describe Tint::Input do
@@ -99,6 +98,14 @@ describe Tint::Input do
 
 		describe "when the key is date" do
 			let(:key) { "date" }
+
+			it "should return Date" do
+				assert_equal(Tint::Input::Date, subject)
+			end
+		end
+
+		describe "when the value is a Date" do
+			let(:tvalue) { Date.new }
 
 			it "should return Date" do
 				assert_equal(Tint::Input::Date, subject)

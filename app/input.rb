@@ -18,9 +18,9 @@ module Tint
 				Checkbox
 			elsif key.to_s.end_with?("_path") || key.to_s.end_with?("_paths")
 				File
-			elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(Time)
+			elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(::Time)
 				DateTime
-			elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date"
+			elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date" || value.is_a?(::Date)
 				Date
 			elsif value.is_a?(String) && value.length > 50
 				Textarea
