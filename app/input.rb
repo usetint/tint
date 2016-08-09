@@ -1,3 +1,5 @@
+require "active_support/inflector/methods"
+
 module Tint
 	module Input
 		def self.select_options(site, key)
