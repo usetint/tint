@@ -245,7 +245,7 @@ module Tint
 				authorize file, :edit?
 
 				slim :"layouts/files" do
-					slim :"files/binary", locals: { file: file, input: Input::File.new("file", file.relative_path, site) }
+					slim :"files/binary", locals: { file: file, input: Input::File.new(:file, "file", file.relative_path, site) }
 				end
 			end
 		end
@@ -277,12 +277,14 @@ module Tint
 					end
 				end
 			elsif params[:file]
-				file.parent.upload(params[:file], file.name)
+				if params[:file].is_a?(Hash) && params[:file][:tempfile]
+					file.parent.upload(params[:file], file.name)
 
-				site.git.add(file.path.to_s)
-				site.git.status.each do |f|
-					if f.path == file.relative_path.to_s && f.type
-						commit(site.git, "Updated #{file.relative_path}")
+					site.git.add(file.path.to_s)
+					site.git.status.each do |f|
+						if f.path == file.relative_path.to_s && f.type
+							commit(site.git, "Updated #{file.relative_path}")
+						end
 					end
 				end
 			else
