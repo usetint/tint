@@ -270,22 +270,11 @@ module Tint
 			elsif params[:source]
 				file.path.write params[:source].encode(universal_newline: true)
 
-				site.git.add(file.path.to_s)
-				site.git.status.each do |f|
-					if f.path == file.relative_path.to_s && f.type
-						commit(site.git, "Modified #{file.relative_path}")
-					end
-				end
+				add_and_commit(site, file, "Modified #{file.relative_path}")
 			elsif params[:file]
 				if params[:file].is_a?(Hash) && params[:file][:tempfile]
 					file.parent.upload(params[:file], file.name)
-
-					site.git.add(file.path.to_s)
-					site.git.status.each do |f|
-						if f.path == file.relative_path.to_s && f.type
-							commit(site.git, "Updated #{file.relative_path}")
-						end
-					end
+					add_and_commit(site, file, "Modified #{file.relative_path}")
 				end
 			else
 				updated_data = process_form_data(params[:data], site.git)
@@ -312,13 +301,7 @@ module Tint
 					FileUtils.mv(tmp.path, file.path.to_s, force: true)
 				end
 
-				site.git.add(file.path.to_s)
-
-				site.git.status.each do |f|
-					if f.path == file.relative_path.to_s && f.type
-						commit(site.git, "Modified #{file.relative_path}")
-					end
-				end
+				add_and_commit(site, file, "Modified #{file.relative_path}")
 			end
 
 			redirect to(file.parent.route)
@@ -330,13 +313,7 @@ module Tint
 
 			if params['file']
 				file = directory.upload(params['file'])
-
-				site.git.add(file.path.to_s)
-				site.git.status.each do |f|
-					if f.path == file.relative_path.to_s && f.type
-						commit(site.git, "Uploaded #{file.relative_path}")
-					end
-				end
+				add_and_commit(site, file, "Uploaded #{file.relative_path}")
 			elsif params['folder']
 				folder = Tint::Directory.new(site, directory.relative_path.join(params["folder"]))
 				return redirect to(folder.route)
@@ -396,6 +373,15 @@ module Tint
 			(field_name.end_with?("_date") || field_name == "date") &&
 				value.is_a?(String) &&
 				value.to_s != ""
+		end
+
+		def add_and_commit(site, file, message)
+			site.git.add(file.path.to_s)
+			site.git.status.each do |f|
+				if f.path == file.relative_path.to_s && f.type
+					commit(site.git, message)
+				end
+			end
 		end
 
 		def commit(git, message)
