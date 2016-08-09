@@ -29,7 +29,7 @@ module Tint
 		end
 
 		def self.scalarish?(value)
-			!value.is_a?(Enumerable) || (value.is_a?(Array) && value.map { |v| !value.is_a?(Enumerable) })
+			!value.is_a?(Enumerable) || (value.is_a?(Array) && value.all? { |v| !v.is_a?(Enumerable) })
 		end
 
 		Base = Struct.new(:key, :name, :value, :site) do

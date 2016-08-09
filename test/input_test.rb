@@ -3,7 +3,7 @@ require_relative "../app/site"
 require_relative "../app/input"
 
 describe Tint::Input do
-	describe "#type" do
+	describe ".type" do
 		subject { Tint::Input.type(key, tvalue, site) }
 
 		let(:site) { OpenStruct.new(config: { "options" => options }) }
@@ -110,6 +110,78 @@ describe Tint::Input do
 
 			it "should return Textarea" do
 				assert_equal(Tint::Input::Textarea, subject)
+			end
+		end
+
+		describe "arrays" do
+			describe "when array is scalarish" do
+				let(:tvalue) { ["one.ext", "two.ext"] }
+
+				describe "when key ends in _path" do
+					let(:key) { "file_path" }
+
+					it "should return File" do
+						assert_equal(Tint::Input::File, subject)
+					end
+				end
+
+				describe "when key ends in _paths" do
+					let(:key) { "image_paths" }
+
+					it "should return File" do
+						assert_equal(Tint::Input::File, subject)
+					end
+				end
+			end
+
+			describe "when array is not scalarish" do
+				let(:tvalue) { [{}, {}] }
+
+				it "should return nil" do
+					assert_equal(nil, subject)
+				end
+			end
+		end
+	end
+
+	describe ".scalarish?" do
+		subject { Tint::Input.scalarish?(tvalue) }
+
+		describe "when value is a string" do
+			let(:tvalue) { "totally a scalar" }
+
+			it { assert(subject) }
+		end
+
+		describe "when value is a number" do
+			let(:tvalue) { 1234 }
+
+			it { assert(subject) }
+		end
+
+		describe "when value is a hash" do
+			let(:tvalue) { {} }
+
+			it { assert(!subject) }
+		end
+
+		describe "when value is an array" do
+			describe "when the array is all scalar values" do
+				let(:tvalue) { ["one", "two"] }
+
+				it { assert(subject) }
+			end
+
+			describe "when the array is all non-scalar values" do
+				let(:tvalue) { [{}, {}] }
+
+				it { assert_equal(false, subject) }
+			end
+
+			describe "when the array is a mix of scalar and non-scalar values" do
+				let(:tvalue) { [{}, "one"] }
+
+				it { assert_equal(false, subject) }
 			end
 		end
 	end
