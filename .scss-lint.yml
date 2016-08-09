@@ -1,0 +1,6 @@
+scss_files: "assets/stylesheets/**/*.scss"
+
+linters:
+  Indentation:
+    character: tab
+    width: 1
