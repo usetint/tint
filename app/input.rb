@@ -1,4 +1,5 @@
 require "active_support/inflector/methods"
+require_relative "future"
 
 module Tint
 	module Input
