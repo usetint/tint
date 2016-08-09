@@ -1,11 +1,15 @@
 engines:
   rubocop:
     enabled: true
-  golint:
-    enabled: true
   eslint:
     enabled: true
   csslint:
+    enabled: true
+  scss-lint:
+    enabled: true
+  shellcheck:
+    enabled: true
+  fixme:
     enabled: true
   duplication:
     enabled: true
@@ -17,6 +21,10 @@ ratings:
   paths:
   - "**.rb"
   - "**.js"
+  - "**.css"
+  - "**.scss"
+  - "**.sh"
+  - "templates/**"
 exclude_paths:
 - "app/public/tinymce/**/*"
 - "app/public/upndown.bundle.js"
