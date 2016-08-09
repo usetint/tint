@@ -1,7 +1,5 @@
-require "active_support/inflector/methods"
 require "base64"
 require "slim"
-require_relative "future"
 require_relative "input"
 
 module Tint
