@@ -25,6 +25,15 @@ module Tint
 			@options[:cache_path]
 		end
 
+		def valid_config?
+			begin
+				unsafe_config
+				true
+			rescue
+				false
+			end
+		end
+
 		def unsafe_config
 			config_file = cache_path.join(".tint.yml")
 			config_file.exist? ? YAML.safe_load(config_file.open, [Date, Time]) : {}

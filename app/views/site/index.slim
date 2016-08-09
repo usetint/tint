@@ -8,7 +8,7 @@ form method="post" action=site.route("build")
 		input type="hidden" name="_method" value="DELETE"
 		button type="submit" Delete this site
 
-- if !valid_config
+- if !site.valid_config?
 	p.error We were unable to parse your .tint.yml file.
 
 nav

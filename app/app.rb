@@ -144,18 +144,11 @@ module Tint
 		get "/:site/" do
 			authorize site, :index?
 
-			if site.git?
-				valid_config = begin
-					site.unsafe_config
-					true
-				rescue
-					false
-				end
-			else
+			unless site.git?
 				Thread.new { site.clone }
 			end
 
-			slim :"site/index", locals: { site: site, valid_config: valid_config }
+			slim :"site/index", locals: { site: site }
 		end
 
 		put "/:site/" do
