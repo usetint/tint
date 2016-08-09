@@ -2,6 +2,8 @@ addons:
   apt:
     packages:
     - libmagic-dev
+  code_climate:
+    repo_token: cf0ed76b4b3a0473d6927b50f507c89103d9c6502f10601ef259ecffe5817eef
 language: ruby
 rvm:
 - 2.1.0
