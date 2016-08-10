@@ -14,6 +14,15 @@ describe Tint::Directory do
 	let(:path) { "directory" }
 	let(:subject) { Tint::Directory.new(site, path) }
 
+	describe "#parent" do
+		let(:parent) { "directory" }
+		let(:path) { "#{parent}/directory" }
+
+		it "should return the parent of this directory" do
+			assert_equal(Tint::Directory.new(site, parent), subject.parent)
+		end
+	end
+
 	describe "#path" do
 		describe "when inside the project directory" do
 			let(:path) { "directory" }

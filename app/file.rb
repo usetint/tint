@@ -15,10 +15,6 @@ module Tint
 			@name = name
 		end
 
-		def parent
-			@parent ||= Tint::Directory.new(site, relative_path.dirname)
-		end
-
 		def text?
 			mime.split("/").first == "text"
 		end

@@ -13,6 +13,10 @@ module Tint
 			@relative_path = Pathname.new(relative_path).cleanpath
 		end
 
+		def parent
+			@parent ||= Tint::Directory.new(site, relative_path.dirname)
+		end
+
 		def path
 			@path ||= begin
 				path = site.cache_path.join(relative_path).realdirpath
