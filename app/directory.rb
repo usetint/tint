@@ -1,11 +1,7 @@
-require "pathname"
-
 require_relative "resource"
 
 module Tint
 	class Directory < Resource
-		def_delegators :site, :user_id
-
 		def file(path)
 			site.file(relative_path.join(path))
 		end
