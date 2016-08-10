@@ -23,6 +23,12 @@ describe Tint::Directory do
 		end
 	end
 
+	describe "#route" do
+		it "should call route on site with 'files/:relative_path'" do
+			assert_method_called_on_member(subject, :site, :route, "files/#{path}")
+		end
+	end
+
 	describe "#path" do
 		describe "when inside the project directory" do
 			let(:path) { "directory" }

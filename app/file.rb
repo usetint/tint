@@ -35,10 +35,6 @@ module Tint
 			[".yaml", ".yml"].include? extension
 		end
 
-		def route
-			site.route("files/#{relative_path}")
-		end
-
 		def name
 			@name ||= path.basename.to_s
 		end

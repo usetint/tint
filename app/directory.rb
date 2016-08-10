@@ -6,10 +6,6 @@ module Tint
 	class Directory < Resource
 		def_delegators :site, :user_id
 
-		def route
-			site.route("files/#{relative_path}")
-		end
-
 		def file(path)
 			site.file(relative_path.join(path))
 		end
