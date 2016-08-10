@@ -1,6 +1,5 @@
 require "base64"
 require "filemagic"
-require "pathname"
 require "yaml"
 
 require_relative "resource"
