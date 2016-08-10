@@ -9,7 +9,7 @@ module Tint
 		def files
 			return @files if @files
 
-			files = path.exist? ? path.children(false).map(&method(:file)) : []
+			files = exist? ? children(false).map(&method(:file)) : []
 
 			if relative_path.to_s != "."
 				parent = Tint::File.new(site, relative_path.dirname, "..")
@@ -20,9 +20,9 @@ module Tint
 		end
 
 		def upload(file, name=file[:filename])
-			path.mkpath
+			mkpath
 
-			path.join(name).open("w") do |f|
+			join(name).open("w") do |f|
 				until file[:tempfile].eof?
 					f.write file[:tempfile].read(4096)
 				end

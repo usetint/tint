@@ -14,24 +14,6 @@ describe Tint::File do
 	let(:path) { "directory/file" }
 	let(:subject) { site.file(path) }
 
-	describe "#exist?" do
-		it "should call exist? on path" do
-			assert_method_called_on_member(subject, :path, :exist?)
-		end
-	end
-
-	describe "#directory?" do
-		it "should call directory? on path" do
-			assert_method_called_on_member(subject, :path,  :directory?)
-		end
-	end
-
-	describe "#size" do
-		it "should call size on path" do
-			assert_method_called_on_member(subject, :path, :size)
-		end
-	end
-
 	describe "#name" do
 		describe "when no name is passed" do
 			it "should use the name from the path" do

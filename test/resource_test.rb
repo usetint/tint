@@ -60,7 +60,7 @@ describe Tint::Resource do
 		end
 	end
 
-	path_methods = [:exist?, :directory?, :size, :open]
+	path_methods = [:exist?, :directory?, :size, :open, :rename, :write, :mkpath, :join, :children]
 
 	describe "#respond_to?" do
 		describe "our own methods" do
