@@ -22,7 +22,7 @@ describe Tint::Resource do
 
 	describe "#parent" do
 		it "should return a new Tint::Directory with the parent path" do
-			assert_equal(Tint::Directory.new(site, Pathname.new(path).dirname), subject.parent)
+			assert_equal(Tint::Directory.new(site, "directory"), subject.parent)
 		end
 	end
 
