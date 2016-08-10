@@ -1,35 +1,7 @@
-require "pathname"
+require_relative "resource"
 
 module Tint
-	class Directory
-		attr_reader :relative_path
-
-		def initialize(site, relative_path)
-			@site = site
-			@relative_path = Pathname.new(relative_path).cleanpath
-		end
-
-		def user_id
-			site.user_id
-		end
-
-		def route
-			site.route("files/#{relative_path}")
-		end
-
-		def path
-			unless @path
-				# Use realdirpath so that it works if directory does not exist
-				@path = site.cache_path.join(relative_path).realdirpath
-
-				unless @path.to_s.start_with?(site.cache_path.to_s)
-					raise "File is outside of project scope!"
-				end
-			end
-
-			@path
-		end
-
+	class Directory < Resource
 		def file(path)
 			site.file(relative_path.join(path))
 		end
@@ -37,7 +9,7 @@ module Tint
 		def files
 			return @files if @files
 
-			files = path.exist? ? path.children(false).map(&method(:file)) : []
+			files = exist? ? children(false).map(&method(:file)) : []
 
 			if relative_path.to_s != "."
 				parent = Tint::File.new(site, relative_path.dirname, "..")
@@ -48,9 +20,9 @@ module Tint
 		end
 
 		def upload(file, name=file[:filename])
-			path.mkpath
+			mkpath
 
-			path.join(name).open("w") do |f|
+			join(name).open("w") do |f|
 				until file[:tempfile].eof?
 					f.write file[:tempfile].read(4096)
 				end
@@ -58,10 +30,5 @@ module Tint
 
 			site.file(relative_path.join(file[:filename]))
 		end
-
-	protected
-
-		attr_reader :site
-
 	end
 end

@@ -2,7 +2,7 @@ require_relative "test_helper"
 require_relative "../app/site"
 require_relative "../app/file"
 
-describe File do
+describe Tint::File do
 	let(:site) do
 		Tint::Site.new(
 			site_id: 1,
@@ -11,22 +11,22 @@ describe File do
 			fn: "Test Site"
 		)
 	end
+	let(:path) { "directory/file" }
 	let(:subject) { site.file(path) }
 
-	describe "#directory?" do
-		describe "when path is directory" do
-			let(:path) { "directory" }
-
-			it "should be true" do
-				subject.directory?.must_equal true
+	describe "#name" do
+		describe "when no name is passed" do
+			it "should use the name from the path" do
+				assert_equal(path.split("/").last, subject.name)
 			end
 		end
 
-		describe "when path is not a directory" do
-			let(:path) { "directory/file" }
+		describe "when a name is explicitly passed" do
+			let(:subject) { Tint::File.new(site, path, tname) }
+			let(:tname) { ".." }
 
-			it "should be false" do
-				subject.directory?.must_equal false
+			it "should use the name that was given" do
+				assert_equal(tname, subject.name)
 			end
 		end
 	end

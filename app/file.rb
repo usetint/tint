@@ -1,35 +1,15 @@
 require "base64"
 require "filemagic"
-require "pathname"
 require "yaml"
 
+require_relative "resource"
 require_relative "directory"
 
 module Tint
-	class File
-		attr_reader :relative_path
-
+	class File < Resource
 		def initialize(site, relative_path, name=nil)
-			@site = site
-			@relative_path = Pathname.new(relative_path).cleanpath
-
+			super(site, relative_path)
 			@name = name
-		end
-
-		def user_id
-			site.user_id
-		end
-
-		def exist?
-			path.exist?
-		end
-
-		def directory?
-			path.directory?
-		end
-
-		def parent
-			@parent ||= Tint::Directory.new(site, relative_path.dirname)
 		end
 
 		def text?
@@ -38,10 +18,6 @@ module Tint
 
 		def image?
 			mime.split("/").first == "image"
-		end
-
-		def size
-			path.size
 		end
 
 		def mime
@@ -54,22 +30,6 @@ module Tint
 
 		def yml?
 			[".yaml", ".yml"].include? extension
-		end
-
-		def route
-			site.route("files/#{relative_path}")
-		end
-
-		def path
-			unless @path
-				@path = site.cache_path.join(relative_path).realdirpath
-
-				unless @path.to_s.start_with?(site.cache_path.to_s)
-					raise "File is outside of project scope!"
-				end
-			end
-
-			@path
 		end
 
 		def name
@@ -151,8 +111,5 @@ module Tint
 
 			@content_or_frontmatter = [!has_frontmatter, has_frontmatter]
 		end
-
-		attr_reader :site
-
 	end
 end

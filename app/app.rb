@@ -256,7 +256,7 @@ module Tint
 
 			if params[:name]
 				new = file.parent.file(params[:name])
-				if new.path.exist?
+				if new.exist?
 					return slim :error, locals: { message: "A file with that name already exists" }
 				else
 					begin
@@ -264,11 +264,11 @@ module Tint
 						commit(site.git, "Renamed #{file.relative_path} to #{new.name}")
 					rescue Git::GitExecuteError
 						# Not in git, so just rename
-						file.path.rename(new.path)
+						file.rename(new.path)
 					end
 				end
 			elsif params[:source]
-				file.path.write params[:source].encode(universal_newline: true)
+				file.write params[:source].encode(universal_newline: true)
 
 				add_and_commit(site, file, "Modified #{file.relative_path}")
 			elsif params[:file]
@@ -347,7 +347,7 @@ module Tint
 			when Hash
 				if data.keys.include?(:filename) && data.keys.include?(:tempfile)
 					uploads = Tint::Directory.new(site, Pathname.new("uploads").join(Time.now.strftime("%Y")))
-					uploads.path.mkpath
+					uploads.mkpath
 					file = uploads.upload(data.merge(filename: "#{SecureRandom.uuid}-#{data[:filename]}"))
 					git.add(file.path.to_s)
 					file.relative_path.to_s
