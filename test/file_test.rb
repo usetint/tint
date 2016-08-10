@@ -62,6 +62,23 @@ describe File do
 		end
 	end
 
+	describe "#name" do
+		describe "when no name is passed" do
+			it "should use the name from the path" do
+				assert_equal(path.split("/").last, subject.name)
+			end
+		end
+
+		describe "when a name is explicitly passed" do
+			let(:subject) { Tint::File.new(site, path, tname) }
+			let(:tname) { ".." }
+
+			it "should use the name that was given" do
+				assert_equal(tname, subject.name)
+			end
+		end
+	end
+
 	describe "#==" do
 		describe "when the paths are the same" do
 			let(:other) { Tint::File.new(site, path) }

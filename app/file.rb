@@ -11,9 +11,7 @@ module Tint
 		def_delegators :path, :exist?, :directory?, :size
 
 		def initialize(site, relative_path, name=nil)
-			@site = site
-			@relative_path = Pathname.new(relative_path).cleanpath
-
+			super(site, relative_path)
 			@name = name
 		end
 

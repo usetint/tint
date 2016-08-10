@@ -6,11 +6,6 @@ module Tint
 	class Directory < Resource
 		def_delegators :site, :user_id
 
-		def initialize(site, relative_path)
-			@site = site
-			@relative_path = Pathname.new(relative_path).cleanpath
-		end
-
 		def route
 			site.route("files/#{relative_path}")
 		end
