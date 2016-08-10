@@ -7,7 +7,7 @@ module Tint
 		end
 
 		def ==(other)
-			cache_path == other.cache_path
+			other.is_a?(Tint::Site) && cache_path == other.cache_path
 		end
 
 		def route(sub='')

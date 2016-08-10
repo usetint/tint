@@ -10,7 +10,7 @@ describe Tint::Site do
 	end
 
 	describe "#==" do
-		describe "when cache_path is the same" do
+		describe "when cache_path and type are the same" do
 			it "should be considered equal" do
 				assert_equal(Tint::Site.new(options), subject)
 			end

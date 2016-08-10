@@ -26,7 +26,7 @@ module Tint
 		end
 
 		def ==(other)
-			other.path == path
+			other.is_a?(Resource) && other.path == path
 		end
 
 	protected
