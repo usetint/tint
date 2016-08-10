@@ -7,25 +7,18 @@ require_relative "directory"
 
 module Tint
 	class File
+		extend Forwardable
+
 		attr_reader :relative_path
+
+		def_delegators :path, :exist?, :directory?, :size
+		def_delegators :site, :user_id
 
 		def initialize(site, relative_path, name=nil)
 			@site = site
 			@relative_path = Pathname.new(relative_path).cleanpath
 
 			@name = name
-		end
-
-		def user_id
-			site.user_id
-		end
-
-		def exist?
-			path.exist?
-		end
-
-		def directory?
-			path.directory?
 		end
 
 		def parent
@@ -38,10 +31,6 @@ module Tint
 
 		def image?
 			mime.split("/").first == "image"
-		end
-
-		def size
-			path.size
 		end
 
 		def mime
@@ -61,15 +50,15 @@ module Tint
 		end
 
 		def path
-			unless @path
-				@path = site.cache_path.join(relative_path).realdirpath
+			@path ||= begin
+				path = site.cache_path.join(relative_path).realdirpath
 
-				unless @path.to_s.start_with?(site.cache_path.to_s)
+				unless path.to_s.start_with?(site.cache_path.to_s)
 					raise "File is outside of project scope!"
 				end
-			end
 
-			@path
+				path
+			end
 		end
 
 		def name

@@ -11,23 +11,64 @@ describe File do
 			fn: "Test Site"
 		)
 	end
+	let(:path) { "directory/file" }
 	let(:subject) { site.file(path) }
 
-	describe "#directory?" do
-		describe "when path is directory" do
-			let(:path) { "directory" }
+	describe "#exist?" do
+		it "should call exist? on path" do
+			assert_method_called_on_member(subject, :path, :exist?)
+		end
+	end
 
-			it "should be true" do
-				subject.directory?.must_equal true
+	describe "#directory?" do
+		it "should call directory? on path" do
+			assert_method_called_on_member(subject, :path,  :directory?)
+		end
+	end
+
+	describe "#size" do
+		it "should call size on path" do
+			assert_method_called_on_member(subject, :path, :size)
+		end
+	end
+
+	describe "#user_id" do
+		it "should call user_id on site" do
+			assert_method_called_on_member(subject, :site, :user_id)
+		end
+	end
+
+	describe "#parent" do
+		it "should return a new Tint::Directory" do
+			assert_equal(Tint::Directory.new(site, Pathname.new(path).dirname), subject.parent)
+		end
+	end
+
+	describe "#path" do
+		describe "when inside the project directory" do
+			let(:path) { "directory/file" }
+
+			it "should return the path" do
+				assert_equal(site.cache_path.join(path).realdirpath, subject.path)
 			end
 		end
 
-		describe "when path is not a directory" do
-			let(:path) { "directory/file" }
+		describe "when outside the project directory" do
+			let(:path) { "../../stuff.md" }
 
-			it "should be false" do
-				subject.directory?.must_equal false
+			it "should raise an exception" do
+				assert_raises { subject.path }
 			end
+		end
+	end
+
+	def assert_method_called_on_member(subject, member, method)
+		mock = MiniTest::Mock.new
+		mock.expect method, true
+
+		subject.stub member, mock do
+			subject.public_send(method)
+			assert(mock.verify)
 		end
 	end
 end

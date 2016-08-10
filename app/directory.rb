@@ -18,16 +18,15 @@ module Tint
 		end
 
 		def path
-			unless @path
-				# Use realdirpath so that it works if directory does not exist
-				@path = site.cache_path.join(relative_path).realdirpath
+			@path ||= begin
+				path = site.cache_path.join(relative_path).realdirpath
 
-				unless @path.to_s.start_with?(site.cache_path.to_s)
+				unless path.to_s.start_with?(site.cache_path.to_s)
 					raise "File is outside of project scope!"
 				end
-			end
 
-			@path
+				path
+			end
 		end
 
 		def file(path)
@@ -57,6 +56,10 @@ module Tint
 			end
 
 			site.file(relative_path.join(file[:filename]))
+		end
+
+		def ==(other)
+			other.path == path
 		end
 
 	protected

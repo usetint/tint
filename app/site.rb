@@ -6,6 +6,10 @@ module Tint
 			@options = options
 		end
 
+		def ==(other)
+			cache_path == other.cache_path
+		end
+
 		def route(sub='')
 			"/#{@options[:site_id]}/#{sub}"
 		end
