@@ -1,32 +1,18 @@
 require "pathname"
 
+require_relative "resource"
+
 module Tint
-	class Directory
-		attr_reader :relative_path
+	class Directory < Resource
+		def_delegators :site, :user_id
 
 		def initialize(site, relative_path)
 			@site = site
 			@relative_path = Pathname.new(relative_path).cleanpath
 		end
 
-		def user_id
-			site.user_id
-		end
-
 		def route
 			site.route("files/#{relative_path}")
-		end
-
-		def path
-			@path ||= begin
-				path = site.cache_path.join(relative_path).realdirpath
-
-				unless path.to_s.start_with?(site.cache_path.to_s)
-					raise "File is outside of project scope!"
-				end
-
-				path
-			end
 		end
 
 		def file(path)
@@ -57,14 +43,5 @@ module Tint
 
 			site.file(relative_path.join(file[:filename]))
 		end
-
-		def ==(other)
-			other.path == path
-		end
-
-	protected
-
-		attr_reader :site
-
 	end
 end

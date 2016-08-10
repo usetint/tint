@@ -3,16 +3,12 @@ require "filemagic"
 require "pathname"
 require "yaml"
 
+require_relative "resource"
 require_relative "directory"
 
 module Tint
-	class File
-		extend Forwardable
-
-		attr_reader :relative_path
-
+	class File < Resource
 		def_delegators :path, :exist?, :directory?, :size
-		def_delegators :site, :user_id
 
 		def initialize(site, relative_path, name=nil)
 			@site = site
@@ -47,18 +43,6 @@ module Tint
 
 		def route
 			site.route("files/#{relative_path}")
-		end
-
-		def path
-			@path ||= begin
-				path = site.cache_path.join(relative_path).realdirpath
-
-				unless path.to_s.start_with?(site.cache_path.to_s)
-					raise "File is outside of project scope!"
-				end
-
-				path
-			end
 		end
 
 		def name
@@ -140,8 +124,5 @@ module Tint
 
 			@content_or_frontmatter = [!has_frontmatter, has_frontmatter]
 		end
-
-		attr_reader :site
-
 	end
 end

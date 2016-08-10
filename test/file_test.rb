@@ -62,13 +62,13 @@ describe File do
 		end
 	end
 
-	def assert_method_called_on_member(subject, member, method)
-		mock = MiniTest::Mock.new
-		mock.expect method, true
+	describe "#==" do
+		describe "when the paths are the same" do
+			let(:other) { Tint::File.new(site, path) }
 
-		subject.stub member, mock do
-			subject.public_send(method)
-			assert(mock.verify)
+			it "should be considered equal" do
+				assert_equal(other, subject)
+			end
 		end
 	end
 end

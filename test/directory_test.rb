@@ -32,6 +32,12 @@ describe Tint::Directory do
 		end
 	end
 
+	describe "#user_id" do
+		it "should call user_id on site" do
+			assert_method_called_on_member(subject, :site, :user_id)
+		end
+	end
+
 	describe "#==" do
 		describe "when the paths are the same" do
 			let(:other) { Tint::Directory.new(site, path) }
