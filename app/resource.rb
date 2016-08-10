@@ -37,6 +37,14 @@ module Tint
 			other.is_a?(Resource) && other.path == path
 		end
 
+		def respond_to?(method)
+			super || path.respond_to?(method)
+		end
+
+		def method_missing(method, *arguments, &block)
+			path.public_send(method, *arguments, &block)
+		end
+
 	protected
 
 		attr_reader :site

@@ -7,8 +7,6 @@ require_relative "directory"
 
 module Tint
 	class File < Resource
-		def_delegators :path, :exist?, :directory?, :size
-
 		def initialize(site, relative_path, name=nil)
 			super(site, relative_path)
 			@name = name

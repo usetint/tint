@@ -59,4 +59,30 @@ describe Tint::Resource do
 			end
 		end
 	end
+
+	path_methods = [:exist?, :directory?, :size, :open]
+
+	describe "#respond_to?" do
+		describe "our own methods" do
+			Tint::Resource.new(:site, "file").public_methods.each do |method|
+				it "should respond to #{method}" do
+					assert(subject.respond_to?(method))
+				end
+			end
+		end
+
+		describe "path methods we care about" do
+			path_methods.each do |method|
+				it "should respond to #{method} from path" do
+					assert(subject.respond_to?(method))
+				end
+			end
+		end
+	end
+
+	path_methods.each do |method|
+		it "should call #{method} on path" do
+			assert_method_called_on_member(subject, :path, method)
+		end
+	end
 end
