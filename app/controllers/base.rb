@@ -1,5 +1,4 @@
 require "sinatra"
-require "sinatra/json"
 require "sinatra/reloader"
 require "sinatra/streaming"
 require "sinatra/pundit"
