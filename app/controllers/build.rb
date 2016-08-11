@@ -73,7 +73,7 @@ module Tint
 				if job.status == :errored
 					slim :error, locals: { message:  "Something went wrong with the build" }
 				else
-					redirect to("/")
+					redirect to(site.route)
 				end
 			end
 		end
