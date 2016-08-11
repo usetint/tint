@@ -12,6 +12,10 @@ module Tint
 			other.is_a?(Tint::Site) && cache_path == other.cache_path
 		end
 
+		def to_h
+			@options.dup
+		end
+
 		def route(sub='')
 			"/#{@options[:site_id]}/#{sub}"
 		end
@@ -25,10 +29,11 @@ module Tint
 		end
 
 		def cache_path
-			@options[:cache_path] ||= Pathname.new(ENV.fetch("CACHE_PATH")).
-			                          realpath.join(@options[:site_id].to_s)
-			@options[:cache_path].mkpath
-			@options[:cache_path]
+			ensure_path(:cache_path, "CACHE_PATH")
+		end
+
+		def deploy_path
+			ensure_path(:deploy_path, "DEPLOY_PATH")
 		end
 
 		def valid_config?
@@ -62,11 +67,25 @@ module Tint
 		end
 
 		def status
-			@options[:status]
+			status = @options[:status] || if defined?(DB)
+				job = DB[:jobs].where(site_id: @options[:site_id]).order(:created_at).last
+				job && "build_#{BuildJob.get(job[:job_id]).status}".to_sym
+			end
+
+			status && status.to_sym
 		end
 
 		def remote
 			@options[:remote]
+		end
+
+		def build
+			job = BuildJob.new(self)
+			job.enqueue!
+
+			DB[:jobs].insert(job_id: job.job_id, site_id: @options[:site_id], created_at: Time.now) if defined?(DB)
+
+			job
 		end
 
 		def clone
@@ -77,7 +96,7 @@ module Tint
 				# Make sure the UI can tell we are ready to rock
 				open(cache_path.join('.git').join('tint-cloned'), 'w').close
 			rescue
-				DB[:sites].where(site_id: @options[:site_id]).update(status: "failed")
+				DB[:sites].where(site_id: @options[:site_id]).update(status: "clone_failed")
 
 				# Something went wrong.  Nuke the cache
 				clear_cache!
@@ -109,6 +128,15 @@ module Tint
 			elsif !git?
 				clone
 			end
+		end
+
+	protected
+
+		def ensure_path(key, env)
+			@options[key] ||= Pathname.new(ENV.fetch(env)).
+			                  realpath.join(@options[:site_id].to_s)
+			@options[key].mkpath
+			@options[key]
 		end
 	end
 end

@@ -11,13 +11,18 @@ form method="post" action=site.route("sync")
 - if !site.valid_config?
 	p.error We were unable to parse your .tint.yml file.
 
-nav
-	- if site.cloned?
+- if [:build_failed, :build_errored].include?(site.status)
+	p.error Your most recent build failed.
+- elsif [:build_created, :build_received, :build_started].include?(site.status)
+	p You have a build running...
+
+- if site.cloned?
+	nav
 		ul: li: a href=site.route("files") Edit Files
-	- elsif site.status == "failed"
-		p.error We were unable to clone your site. Please make sure the repository exists.
-	- else
-		p Please wait, we are syncing your remote...
+- elsif site.status == :clone_failed
+	p.error We were unable to clone your site. Please make sure the repository exists.
+- else
+	p Please wait, we are syncing your remote...
 
 form method="post" action=site.route
 	input type="hidden" name="_method" value="PUT"
