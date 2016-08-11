@@ -49,13 +49,7 @@ module Tint
 
 			def site
 				if ENV['SITE_PATH']
-					Tint::Site.new(
-						site_id: (params['site'] || 1).to_i,
-						user_id: 1,
-						cache_path: Pathname.new(ENV['SITE_PATH']).realpath,
-						cloned: true,
-						fn: "Local Site"
-					)
+					LocalJob.get(params['site']).site
 				else
 					Tint::Site.new(DB[:sites][site_id: params['site'].to_i])
 				end
