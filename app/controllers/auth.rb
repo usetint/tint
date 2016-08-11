@@ -2,6 +2,7 @@ require "omniauth"
 require "omniauth-github"
 require "omniauth-indieauth"
 
+require_relative "base"
 require_relative "../tint_omniauth" # Monkeypatch
 
 module Tint

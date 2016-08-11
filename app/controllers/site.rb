@@ -1,6 +1,7 @@
 require "pathname"
 require "shellwords"
 
+require_relative "base"
 require_relative "../site"
 
 module Tint
