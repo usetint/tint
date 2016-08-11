@@ -1,6 +1,6 @@
 h1 = site.fn
 
-form method="post" action=site.route("build")
+form method="post" action=site.route("sync")
 	button type="submit" Sync & Build
 
 - unless ENV["SITE_PATH"]
