@@ -134,32 +134,32 @@ module Tint
 			end
 
 			def source(file)
-				stream do |out|
-					html = slim :"layouts/files" do
-						slim :"files/source", locals: { path: file.route }
-					end
-					top, bottom = html.split('<textarea name="source">', 2)
-					out.puts top
-					out.puts '<textarea name="source">'
-					file.stream { |line, _| out.puts line }
-					out.puts bottom
+				html = slim :"layouts/files" do
+					slim :"files/source", locals: { path: file.route }
 				end
+
+				stream_into_element("<textarea name=\"source\">", html, file)
 			end
 
 			def editor(file)
 				frontmatter = file.frontmatter? && file.frontmatter
+				html = slim :"layouts/files" do
+					slim :"files/text", locals: {
+						frontmatter: frontmatter,
+						wysiwyg: file.markdown?,
+						path: file.route
+					}
+				end
+
+				stream_into_element("<textarea name=\"content\">", html, file)
+			end
+
+			def stream_into_element(el, html, file)
 				stream do |out|
-					html = slim :"layouts/files" do
-						slim :"files/text", locals: {
-							frontmatter: frontmatter,
-							wysiwyg: file.markdown?,
-							path: file.route
-						}
-					end
-					top, bottom = html.split('<textarea name="content">', 2)
+					top, bottom = html.split(el, 2)
 					out.puts top
-					out.puts '<textarea name="content">'
-					file.stream_content(&out.method(:puts))
+					out.puts el
+					file.stream { |*args| out.puts args.first }
 					out.puts bottom
 				end
 			end
