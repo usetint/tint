@@ -8,7 +8,7 @@ end
 
 require "sequel"
 
-require_relative "app/app"
+require_relative "app/controllers/asset"
 require_relative "app/controllers/auth"
 require_relative "app/controllers/site"
 require_relative "app/controllers/file"
@@ -21,7 +21,7 @@ module Tint
 end
 
 run Rack::Cascade.new([
-	Tint::App,
+	Tint::Controllers::Asset,
 	Tint::Controllers::Auth,
 	Tint::Controllers::Site,
 	Tint::Controllers::File
