@@ -10,25 +10,25 @@ describe Tint::Input do
 		let(:tvalue) { "generic_value" }
 		let(:options) { {} }
 
-		describe "when select options includes key" do
-			let(:key) { "many_options" }
+		describe "config defined select options" do
 			let(:options) do
 				{ "many_options" => ["option one", "option two"] }
 			end
 
-			it "should return MultipleSelect" do
-				assert_equal(Tint::Input::MultipleSelect, subject)
-			end
-		end
+			describe "when options includes key" do
+				let(:key) { "many_options" }
 
-		describe "when select options includes pluralized version of key" do
-			let(:key) { "pick_one" }
-			let(:options) do
-				{ "pick_ones" => ["option one", "option two"] }
+				it "should return MultipleSelect" do
+					assert_equal(Tint::Input::MultipleSelect, subject)
+				end
 			end
 
-			it "should return Select" do
-				assert_equal(Tint::Input::Select, subject)
+			describe "when options includes pluralized version of key" do
+				let(:key) { "many_option" }
+
+				it "should return Select" do
+					assert_equal(Tint::Input::Select, subject)
+				end
 			end
 		end
 
