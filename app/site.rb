@@ -73,7 +73,12 @@ module Tint
 		end
 
 		def status
-			@options[:status]
+			status = @options[:status] || if defined?(DB)
+				job = DB[:jobs].where(site_id: @options[:site_id]).order(:created_at).last
+				job && "build_#{BuildJob.get(job[:job_id]).status}".to_sym
+			end
+
+			status && status.to_sym
 		end
 
 		def remote
@@ -97,7 +102,7 @@ module Tint
 				# Make sure the UI can tell we are ready to rock
 				open(cache_path.join('.git').join('tint-cloned'), 'w').close
 			rescue
-				DB[:sites].where(site_id: @options[:site_id]).update(status: "failed")
+				DB[:sites].where(site_id: @options[:site_id]).update(status: "clone_failed")
 
 				# Something went wrong.  Nuke the cache
 				clear_cache!
