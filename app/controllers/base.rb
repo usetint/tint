@@ -7,19 +7,20 @@ require "sinatra/namespace"
 
 require "slim"
 
+require_relative "../site"
+
 module Tint
 	module Controllers
 		class Base < Sinatra::Base
 			set :root, ::File.expand_path("../../", __FILE__)
+			set :show_exceptions, :after_handler
 
 			register Sinatra::Pundit
 			register Sinatra::Namespace
 			helpers Sinatra::Streaming
 
-			configure do
-				error Pundit::NotAuthorizedError do
-					redirect to("/auth/login")
-				end
+			error Pundit::NotAuthorizedError do
+				redirect to("/auth/login")
 			end
 
 			enable :sessions

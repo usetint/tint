@@ -1,7 +1,4 @@
 require "json"
-require "omniauth"
-require "omniauth-github"
-require "omniauth-indieauth"
 require "pathname"
 require "sass"
 require "sequel"
@@ -9,7 +6,6 @@ require "shellwords"
 require "sprockets"
 
 require_relative "site"
-require_relative "tint_omniauth" # Monkeypatch
 require_relative "controllers/base"
 
 ENV["GIT_COMMITTER_NAME"] = "Tint"
@@ -19,16 +15,6 @@ module Tint
 	DB = Sequel.connect(ENV.fetch("DATABASE_URL")) unless ENV['SITE_PATH']
 
 	class App < Controllers::Base
-		use OmniAuth::Builder do
-			if ENV['GITHUB_KEY']
-				provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: "user,repo"
-			end
-
-			if ENV['APP_URL']
-				provider :indieauth, client_id: ENV['APP_URL']
-			end
-		end
-
 		set :sprockets, Sprockets::Environment.new
 		sprockets.append_path "assets/stylesheets"
 		sprockets.css_compressor = :scss
@@ -37,41 +23,6 @@ module Tint
 			skip_authorization
 			env["PATH_INFO"].sub!("/assets", "")
 			settings.sprockets.call(env)
-		end
-
-		get "/auth/login" do
-			skip_authorization
-			slim :login
-		end
-
-		delete "/auth/login" do
-			skip_authorization
-			session['user'] = nil
-			redirect to("/")
-		end
-
-		get "/auth/:provider/callback" do
-			skip_authorization
-
-			identity = DB[:identities][provider: params["provider"], uid: request.env["omniauth.auth"].uid]
-
-			if identity
-				session["user"] = identity[:user_id]
-			else
-				session['user'] = DB[:users].insert(
-					fn: request.env["omniauth.auth"].info.name,
-					email: request.env["omniauth.auth"].info.email
-				)
-
-				DB[:identities].insert(
-					provider: params["provider"],
-					uid: request.env["omniauth.auth"].uid,
-					omniauth: request.env["omniauth.auth"].to_json,
-					user_id: session["user"]
-				)
-			end
-
-			redirect to("/")
 		end
 
 		get "/" do
