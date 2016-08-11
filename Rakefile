@@ -14,7 +14,7 @@ end
 
 namespace :db do
 	desc "Create a new migration"
-	task :migration, [:name] => [:environment]  do |task, args|
+	task :migration, [:name] => [:environment]  do |_t, args|
 		path = "migrations/#{Time.now.to_i}_#{args[:name]}.rb"
 		File.open(path, "w") do |file|
 			file.write %{Sequel.migration do
@@ -25,7 +25,7 @@ end}
 	end
 
 	desc "Run migrations"
-	task :migrate, [:version] => [:environment] do |t, args|
+	task :migrate, [:version] => [:environment] do |_t, args|
 		require "sequel"
 
 		Sequel.extension :migration

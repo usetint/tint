@@ -66,7 +66,7 @@ module Tint
 		end
 
 		def stream_base64
-			stream(true) do |chunk, idx|
+			stream(true) do |chunk, _idx|
 				yield Base64.encode64(chunk)
 			end
 		end
