@@ -29,17 +29,11 @@ module Tint
 		end
 
 		def cache_path
-			@options[:cache_path] ||= Pathname.new(ENV.fetch("CACHE_PATH")).
-			                          realpath.join(@options[:site_id].to_s)
-			@options[:cache_path].mkpath
-			@options[:cache_path]
+			ensure_path(:cache_path, "CACHE_PATH")
 		end
 
 		def deploy_path
-			@options[:deploy_path] ||= Pathname.new(ENV.fetch("PREFIX")).
-			                           realpath.join(@options[:site_id].to_s)
-			@options[:deploy_path].mkpath
-			@options[:deploy_path]
+			ensure_path(:deploy_path, "DEPLOY_PATH")
 		end
 
 		def valid_config?
@@ -134,6 +128,15 @@ module Tint
 			elsif !git?
 				clone
 			end
+		end
+
+	protected
+
+		def ensure_path(key, env)
+			@options[key] ||= Pathname.new(ENV.fetch(env)).
+			                  realpath.join(@options[:site_id].to_s)
+			@options[key].mkpath
+			@options[key]
 		end
 	end
 end
