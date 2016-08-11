@@ -11,7 +11,7 @@ require_relative "../site"
 module Tint
 	module Controllers
 		class Base < Sinatra::Base
-			set :root, ::File.expand_path("../../", __FILE__)
+			set :root, Pathname.new(__FILE__).dirname.dirname
 
 			configure :development do
 				set :show_exceptions, :after_handler
