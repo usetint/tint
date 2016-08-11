@@ -12,6 +12,10 @@ module Tint
 			other.is_a?(Tint::Site) && cache_path == other.cache_path
 		end
 
+		def to_h
+			@options.dup
+		end
+
 		def route(sub='')
 			"/#{@options[:site_id]}/#{sub}"
 		end
@@ -74,6 +78,15 @@ module Tint
 
 		def remote
 			@options[:remote]
+		end
+
+		def build
+			job = BuildJob.new(self)
+			job.enqueue!
+
+			DB[:jobs].insert(job_id: job.job_id, site_id: @options[:site_id], created_at: Time.now) if defined?(DB)
+
+			job
 		end
 
 		def clone

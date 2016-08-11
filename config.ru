@@ -19,6 +19,7 @@ ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
 
 module Tint
 	DB = Sequel.connect(ENV.fetch("DATABASE_URL")) unless ENV['SITE_PATH']
+	BuildJob = ENV['TRAVIS_WORKER_BASE_DIR'] ? TravisJob : LocalJob
 end
 
 run Rack::Cascade.new([

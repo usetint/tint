@@ -61,25 +61,6 @@ module Tint
 
 					redirect to("/")
 				end
-
-				post "/sync" do
-					# No harm in letting anyone rebuild
-					# This is also a webhook
-					skip_authorization
-
-					site.sync
-
-					prefix = Pathname.new(ENV["PREFIX"])
-					prefix.mkpath
-					prefix = Shellwords.escape(prefix.realpath.to_s)
-					project = Shellwords.escape(site.cache_path.to_s)
-					success = system("env -i - PATH=\"#{ENV['PATH']}\" GEM_PATH=\"#{ENV['GEM_PATH']}\" /bin/sh -c 'cd #{project} && make PREFIX=#{prefix} && make install PREFIX=#{prefix}'")
-					if success
-						redirect to("/")
-					else
-						slim :error, locals: { message:  "Something went wrong with the build" }
-					end
-				end
 			end
 		end
 	end

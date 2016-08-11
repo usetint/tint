@@ -60,6 +60,22 @@ module Tint
 					end
 				end
 			end
+
+			post "/:site/sync" do
+				# No harm in letting anyone rebuild
+				# This is also a webhook
+				skip_authorization
+
+				Thread.new { site.sync }
+
+				job = site.build
+
+				if job.status == :errored
+					slim :error, locals: { message:  "Something went wrong with the build" }
+				else
+					redirect to("/")
+				end
+			end
 		end
 	end
 end
