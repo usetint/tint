@@ -31,6 +31,13 @@ module Tint
 			@options[:cache_path]
 		end
 
+		def deploy_path
+			@options[:deploy_path] ||= Pathname.new(ENV.fetch("PREFIX")).
+			                           realpath.join(@options[:site_id].to_s)
+			@options[:deploy_path].mkpath
+			@options[:deploy_path]
+		end
+
 		def valid_config?
 			begin
 				unsafe_config
