@@ -10,8 +10,9 @@ require "sequel"
 
 require_relative "app/controllers/asset"
 require_relative "app/controllers/auth"
-require_relative "app/controllers/site"
+require_relative "app/controllers/build"
 require_relative "app/controllers/file"
+require_relative "app/controllers/site"
 
 ENV["GIT_COMMITTER_NAME"] = "Tint"
 ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
@@ -23,6 +24,7 @@ end
 run Rack::Cascade.new([
 	Tint::Controllers::Asset,
 	Tint::Controllers::Auth,
-	Tint::Controllers::Site,
-	Tint::Controllers::File
+	Tint::Controllers::Build,
+	Tint::Controllers::File,
+	Tint::Controllers::Site
 ])
