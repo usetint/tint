@@ -12,7 +12,10 @@ module Tint
 	module Controllers
 		class Base < Sinatra::Base
 			set :root, ::File.expand_path("../../", __FILE__)
-			set :show_exceptions, :after_handler
+
+			configure :development do
+				set :show_exceptions, :after_handler
+			end
 
 			register Sinatra::Pundit
 			register Sinatra::Namespace
