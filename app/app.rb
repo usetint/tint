@@ -1,29 +1,15 @@
-require "sinatra"
-require "sinatra/json"
-require "sinatra/reloader"
-require "sinatra/streaming"
-require "sinatra/pundit"
-require "sinatra/namespace"
-
-require "git"
 require "json"
 require "omniauth"
 require "omniauth-github"
 require "omniauth-indieauth"
 require "pathname"
 require "sass"
-require "securerandom"
 require "sequel"
 require "shellwords"
-require "slim"
 require "sprockets"
 
-require_relative "directory"
-require_relative "file"
-require_relative "helpers"
 require_relative "site"
 require_relative "tint_omniauth" # Monkeypatch
-require_relative "input"
 require_relative "controllers/base"
 
 ENV["GIT_COMMITTER_NAME"] = "Tint"
@@ -33,6 +19,25 @@ module Tint
 	DB = Sequel.connect(ENV.fetch("DATABASE_URL")) unless ENV['SITE_PATH']
 
 	class App < Controllers::Base
+		use OmniAuth::Builder do
+			if ENV['GITHUB_KEY']
+				provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: "user,repo"
+			end
+
+			if ENV['APP_URL']
+				provider :indieauth, client_id: ENV['APP_URL']
+			end
+		end
+
+		set :sprockets, Sprockets::Environment.new
+		sprockets.append_path "assets/stylesheets"
+		sprockets.css_compressor = :scss
+
+		get "/assets/*" do
+			skip_authorization
+			env["PATH_INFO"].sub!("/assets", "")
+			settings.sprockets.call(env)
+		end
 
 		get "/auth/login" do
 			skip_authorization

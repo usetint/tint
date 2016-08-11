@@ -1,26 +1,20 @@
+require "sinatra"
+require "sinatra/json"
+require "sinatra/reloader"
+require "sinatra/streaming"
+require "sinatra/pundit"
+require "sinatra/namespace"
+
+require "slim"
+
 module Tint
 	module Controllers
 		class Base < Sinatra::Base
-			use OmniAuth::Builder do
-				if ENV['GITHUB_KEY']
-					provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: "user,repo"
-				end
-
-				if ENV['APP_URL']
-					provider :indieauth, client_id: ENV['APP_URL']
-				end
-			end
+			set :root, ::File.expand_path("../../", __FILE__)
 
 			register Sinatra::Pundit
 			register Sinatra::Namespace
-			helpers Sinatra::Streaming, Tint::Helpers::Rendering
-
-			set :views, ::File.expand_path('../../views', __FILE__)
-
-			configure :development do
-				set :show_exceptions, :after_handler
-				register Sinatra::Reloader
-			end
+			helpers Sinatra::Streaming
 
 			configure do
 				error Pundit::NotAuthorizedError do
@@ -30,11 +24,7 @@ module Tint
 
 			enable :sessions
 			set :session_secret, ENV["SESSION_SECRET"]
-			set :sprockets, Sprockets::Environment.new
 			set :method_override, true
-
-			sprockets.append_path "assets/stylesheets"
-			sprockets.css_compressor = :scss
 
 			current_user do
 				if ENV['SITE_PATH']
@@ -50,12 +40,6 @@ module Tint
 
 			after do
 				verify_authorized
-			end
-
-			get "/assets/*" do
-				skip_authorization
-				env["PATH_INFO"].sub!("/assets", "")
-				settings.sprockets.call(env)
 			end
 
 		protected

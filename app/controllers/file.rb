@@ -1,9 +1,17 @@
+require "pathname"
+require "securerandom"
 require "slim"
+
 require_relative "base"
+require_relative "../input"
+require_relative "../helpers"
+require_relative "../directory"
 
 module Tint
 	module Controllers
 		class File < Base
+			helpers Tint::Helpers::Rendering
+
 			namespace "/:site/files" do
 				get "/?*" do
 					file = site.file(params['splat'].join('/'))
