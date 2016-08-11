@@ -25,7 +25,6 @@ require_relative "site"
 require_relative "tint_omniauth" # Monkeypatch
 require_relative "input"
 require_relative "controllers/base"
-require_relative "controllers/file"
 
 ENV["GIT_COMMITTER_NAME"] = "Tint"
 ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
@@ -34,7 +33,6 @@ module Tint
 	DB = Sequel.connect(ENV.fetch("DATABASE_URL")) unless ENV['SITE_PATH']
 
 	class App < Controllers::Base
-		use Controllers::File
 
 		get "/auth/login" do
 			skip_authorization

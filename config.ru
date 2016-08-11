@@ -7,5 +7,6 @@ if !ENV["RACK_ENV"] || ENV["RACK_ENV"] == "development"
 end
 
 require_relative "app/app"
+require_relative "app/controllers/file"
 
-run Tint::App
+run Rack::Cascade.new([Tint::App, Tint::Controllers::File])
