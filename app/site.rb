@@ -1,4 +1,6 @@
 require "git"
+require_relative "file"
+require_relative "directory"
 
 module Tint
 	class Site
