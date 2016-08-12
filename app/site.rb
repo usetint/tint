@@ -1,4 +1,6 @@
 require "git"
+require "tmpdir"
+
 require_relative "file"
 require_relative "directory"
 
@@ -88,10 +90,10 @@ module Tint
 			job
 		end
 
-		def clone
+		def clone(remote=@options[:remote])
 			begin
 				# First, do a shallow clone so that we are up and running
-				Git.clone(@options[:remote], cache_path.basename, path: cache_path.dirname, depth: 1)
+				Git.clone(remote, cache_path.basename, path: cache_path.dirname, depth: 1)
 
 				# Make sure the UI can tell we are ready to rock
 				open(cache_path.join('.git').join('tint-cloned'), 'w').close
@@ -107,7 +109,7 @@ module Tint
 
 			begin
 				# Now, fetch the history for future use
-				git.fetch('origin', unshallow: true)
+				git.fetch(remote, unshallow: true)
 			rescue
 				# Something went wrong, keep the shallow copy that at least works
 			end
@@ -121,16 +123,59 @@ module Tint
 			@options[:cloned] || cache_path.join('.git').join('tint-cloned').exist?
 		end
 
-		def sync
+		def sync(remote=@options[:remote])
 			if git? && cloned?
-				git.fetch("origin")
-				git.reset_hard("origin/master")
+				git.fetch(remote)
+				git.reset_hard("FETCH_HEAD")
 			elsif !git?
-				clone
+				clone(remote)
+			end
+		end
+
+		def commit_with(message, user=nil, depth=1, &block)
+			raise "Push failed." if depth > 5
+
+			Dir.mktmpdir("tint-push") do |dir|
+				Git.clone(@options[:remote], "clone", path: dir, depth: 1)
+				path = Pathname.new(dir).join("clone")
+				git = Git.open(path.to_s)
+
+				block.call(path)
+				git.add(all: true)
+
+				if maybe_commit(git, message, user)
+					begin
+						if ENV["SITE_PATH"]
+							# If we push to a checked-out repository, we'll get nasty errors
+							sync(path.to_s)
+						else
+							git.push
+							sync
+						end
+					rescue Git::GitExecuteError
+						commit_with(message, user, depth+1, &block)
+					end
+				end
 			end
 		end
 
 	protected
+
+		def maybe_commit(git, message, user)
+			git.status.each do |f|
+				if f.type
+					if user && user[:email]
+						git.commit("#{message} via tint", author: "#{user[:fn]} <#{user[:email]}>")
+					else
+						git.commit("#{message} via tint")
+					end
+
+					return true
+				end
+			end
+
+			false
+		end
 
 		def ensure_path(key, env)
 			@options[key] ||= Pathname.new(ENV.fetch(env)).
