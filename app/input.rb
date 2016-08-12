@@ -54,11 +54,11 @@ module Tint
 
 		class File < Base
 			def file
-				Tint::File.new(site, value)
+				Tint::File.new(site, value) if value
 			end
 
 			def encoded_image
-				Base64.encode64(file.path.open.read) if file.image? && file.size / 2**20 < 10
+				Base64.encode64(file.path.open.read) if file && file.image? && file.size / 2**20 < 10
 			end
 		end
 
