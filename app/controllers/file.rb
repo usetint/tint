@@ -57,49 +57,40 @@ module Tint
 						if new.exist?
 							return slim :error, locals: { message: "A file with that name already exists" }
 						else
-							begin
-								site.git.lib.mv(file.relative_path.to_s, new.relative_path.to_s)
-								commit(site.git, "Renamed #{file.relative_path} to #{new.name}")
-							rescue Git::GitExecuteError
-								# Not in git, so just rename
-								file.rename(new.path)
+							site.commit_with("Renamed #{file.relative_path} to #{new.name}", pundit_user) do |dir|
+								dir.join(file.relative_path).rename(dir.join(new.relative_path))
 							end
 						end
 					elsif params[:source]
-						file.write params[:source].encode(universal_newline: true)
-
-						add_and_commit(site, file, "Modified #{file.relative_path}")
+						site.commit_with("Modified #{file.relative_path}", pundit_user) do |dir|
+							dir.join(file.relative_path).write params[:source].encode(universal_newline: true)
+						end
 					elsif params[:file]
 						if params[:file].is_a?(Hash) && params[:file][:tempfile]
-							file.parent.upload(params[:file], file.name)
-							add_and_commit(site, file, "Modified #{file.relative_path}")
+							site.commit_with("Modified #{file.relative_path}") do |dir|
+								upload(dir.join(file.parent.relative_path), params[:file], file.name)
+							end
 						end
 					else
-						updated_data = process_form_data(params[:data], site.git)
+						site.commit_with("Modified #{file.relative_path}") do |dir|
+							updated_data = process_form_data(params[:data], dir)
+							dir.join(file.relative_path).open("w") do |f|
+								if updated_data
+									if file.yml?
+										f.puts updated_data.to_yaml.sub(/\A---\r?\n?/, "")
+									else
+										f.puts updated_data.to_yaml
+										f.puts "---"
+									end
+								end
 
-						Tempfile.open("tint-save") do |tmp|
-							if updated_data
-								if file.yml?
-									tmp.puts updated_data.to_yaml.sub(/\A---\r?\n?/, "")
-								else
-									tmp.puts updated_data.to_yaml
-									tmp.puts "---"
+								if params.has_key?(:content)
+									f.puts(params[:content].encode(universal_newline: true))
+								elsif !file.yml?
+									file.stream_content(&f.method(:puts))
 								end
 							end
-
-							if params.has_key?(:content)
-								tmp.puts(params[:content].encode(universal_newline: true))
-							elsif !file.yml?
-								file.stream_content(&tmp.method(:puts))
-							end
-
-							tmp.flush
-							# We have to use FileUtils#mv because
-							# Pathname#rename does not work across filesystem boundaries
-							FileUtils.mv(tmp.path, file.path.to_s, force: true)
 						end
-
-						add_and_commit(site, file, "Modified #{file.relative_path}")
 					end
 
 					redirect to(file.parent.route)
@@ -110,8 +101,9 @@ module Tint
 					authorize directory, :update?
 
 					if params['file']
-						file = directory.upload(params['file'])
-						add_and_commit(site, file, "Uploaded #{file.relative_path}")
+						site.commit_with("Uploaded #{directory.relative_path.join(params['file'][:filename])}") do |dir|
+							upload(dir.join(directory.relative_path), params[:file])
+						end
 					elsif params['folder']
 						folder = Tint::Directory.new(site, directory.relative_path.join(params["folder"]))
 						return redirect to(folder.route)
@@ -124,8 +116,9 @@ module Tint
 					file = site.file(params["splat"].join("/"))
 					authorize file, :destroy?
 
-					site.git.remove(file.path.to_s)
-					commit(site.git, "Removed #{file.relative_path}")
+					site.commit_with("Removed #{file.relative_path}") do |dir|
+						dir.join(file.relative_path).delete
+					end
 
 					redirect to(file.parent.route)
 				end
@@ -170,28 +163,27 @@ module Tint
 				end
 			end
 
-			def process_form_data(data, git)
+			def process_form_data(data, dir)
 				case data
 				when Array
-					data.reject { |v| v.is_a?(String) && v.to_s == "" }.map { |v| process_form_data(v, git) }
+					data.reject { |v| v.is_a?(String) && v.to_s == "" }.map { |v| process_form_data(v, dir) }
 				when Hash
 					if data.keys.include?(:filename) && data.keys.include?(:tempfile)
-						uploads = Tint::Directory.new(site, Pathname.new("uploads").join(Time.now.strftime("%Y")))
-						uploads.mkpath
-						file = uploads.upload(data.merge(filename: "#{SecureRandom.uuid}-#{data[:filename]}"))
-						git.add(file.path.to_s)
-						file.relative_path.to_s
+						uploads = dir.join("uploads").join(Time.now.strftime("%Y"))
+						filename = "#{SecureRandom.uuid}-#{data[:filename]}"
+						upload(uploads, data, filename)
+						uploads.join(filename).to_s
 					elsif data.keys.include?('___checkbox_unchecked')
 						data.keys.include?('___checkbox_checked')
 					elsif data.keys.include?("___datetime_date")
 						datetime = "#{data["___datetime_date"]} #{data["___datetime_time"]}"
 						Time.parse(datetime) if datetime.to_s != ""
 					elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
-						data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map { |v| process_form_data(v, git) }
+						data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map { |v| process_form_data(v, dir) }
 					else
 						data.merge(data) do |k,v|
 							v = Date.parse(v) if is_date?(k, v)
-							process_form_data(v, git)
+							process_form_data(v, dir)
 						end
 					end
 				else
@@ -205,20 +197,14 @@ module Tint
 					value.to_s != ""
 			end
 
-			def add_and_commit(site, file, message)
-				site.git.add(file.path.to_s)
-				site.git.status.each do |f|
-					if f.path == file.relative_path.to_s && f.type
-						commit(site.git, message)
-					end
-				end
-			end
+			def upload(dir, file, name=file[:filename])
+				dir.mkpath
 
-			def commit(git, message)
-				if pundit_user && pundit_user[:email]
-					git.commit("#{message} via tint", author: "#{pundit_user[:fn]} <#{pundit_user[:email]}>")
-				else
-					git.commit("#{message} via tint")
+				dir.join(name).open("w") do |f|
+					file[:tempfile].rewind # In case of retry, rewind
+					until file[:tempfile].eof?
+						f.write file[:tempfile].read(4096)
+					end
 				end
 			end
 		end
