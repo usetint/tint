@@ -13,6 +13,7 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
+    addressable (2.4.0)
     awesome_print (1.6.1)
     backports (3.6.8)
     byebug (9.0.5)
@@ -20,10 +21,18 @@ GEM
       simplecov (>= 0.7.1, < 1.0.0)
     coderay (1.1.1)
     concurrent-ruby (1.0.2)
+    descendants_tracker (0.0.4)
+      thread_safe (~> 0.3, >= 0.3.1)
     docile (1.1.5)
     dotenv (2.1.1)
     faraday (0.9.2)
       multipart-post (>= 1.2, < 3)
+    github_api (0.14.5)
+      addressable (~> 2.4.0)
+      descendants_tracker (~> 0.0.4)
+      faraday (~> 0.8, < 0.10)
+      hashie (>= 3.4)
+      oauth2 (~> 1.0)
     hashie (3.4.4)
     i18n (0.7.0)
     json (1.8.3)
@@ -121,6 +130,7 @@ DEPENDENCIES
   codeclimate-test-reporter
   dotenv
   git!
+  github_api
   omniauth
   omniauth-github
   omniauth-indieauth

@@ -3,6 +3,7 @@ require "shellwords"
 
 require_relative "base"
 require_relative "../site"
+require_relative "../git_providers/github"
 
 module Tint
 	module Controllers
@@ -13,7 +14,14 @@ module Tint
 					slim :"site/index", locals: { site: site }
 				else
 					authorize Tint::Site, :index?
-					slim :index, locals: { sites: policy_scope(Tint::Site) }
+
+					git_providers = DB[:identities].where(user_id: pundit_user[:user_id]).map do |identity|
+						if identity[:provider] == "github"
+							GitProviders::Github.new(JSON.parse(identity[:omniauth])["credentials"]["token"])
+						end
+					end.compact
+
+					slim :index, locals: { sites: policy_scope(Tint::Site), git_providers: git_providers }
 				end
 			end
 
