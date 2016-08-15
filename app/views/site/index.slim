@@ -45,4 +45,4 @@ form method="post" action=site.route
 		p And add this script as a post-receive hook:
 		pre
 			code
-				= open('templates/post-receive').read.gsub(/http:\/\/localhost:9292\/1/, ENV.fetch('APP_URL') + "#{site.route}")
+				= open('templates/post-receive').read.gsub(/http:\/\/localhost:9292\/1\//, ENV.fetch('APP_URL') + "#{site.route}")
