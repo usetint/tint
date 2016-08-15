@@ -38,6 +38,18 @@ end}
 			Sequel::Migrator.run(db, "migrations")
 		end
 	end
+
+	desc "Open a console with the DB already required"
+	task :console => [:environment] do
+		raise "No DB in local mode" if ENV["SITE_PATH"]
+
+		require "irb"
+		require "irb/completion"
+		require_relative "app/db"
+
+		ARGV.clear
+		IRB.start
+	end
 end
 
 task default: [:test]
