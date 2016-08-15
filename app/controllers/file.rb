@@ -99,30 +99,27 @@ module Tint
 				end
 
 				post "/?*" do
-					directory = site.file(params["splat"].join("/")).to_directory
-					authorize directory, :update?
+					authorize resource, :update?
 
 					if params[:file]
-						site.commit_with("Uploaded #{directory.relative_path.join(params['file'][:filename])}") do |dir|
-							FormHelpers.upload(dir.join(directory.relative_path), params[:file])
+						site.commit_with("Uploaded #{resource.relative_path.join(params[:file][:filename])}") do |dir|
+							FormHelpers.upload(dir.join(resource.relative_path), params[:file])
 						end
+						redirect to(resource.route)
 					elsif params[:folder]
-						folder = Tint::Directory.new(site, directory.relative_path.join(params["folder"]))
-						return redirect to(folder.route)
+						new_folder = Tint::Directory.new(site, resource.relative_path.join(params[:folder]))
+						redirect to(new_folder.route)
 					end
-
-					redirect to(directory.route)
 				end
 
 				delete "/*" do
-					file = site.file(params["splat"].join("/"))
-					authorize file, :destroy?
+					authorize resource, :destroy?
 
-					site.commit_with("Removed #{file.relative_path}") do |dir|
-						dir.join(file.relative_path).delete
+					site.commit_with("Removed #{resource.relative_path}") do |dir|
+						dir.join(resource.relative_path).delete
 					end
 
-					redirect to(file.parent.route)
+					redirect to(resource.parent.route)
 				end
 			end
 
