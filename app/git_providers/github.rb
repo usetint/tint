@@ -3,6 +3,8 @@ require "json"
 require "net/http"
 require "uri"
 
+require_relative "../bad_http_response"
+
 module Tint
 	module GitProviders
 		class Github
@@ -26,7 +28,7 @@ module Tint
 
 			def repositories_page(uri)
 				resp = request("GET", uri, per_page: 100)
-				raise resp unless resp.is_a?(Net::HTTPOK)
+				raise BadHttpResponse.new(resp) unless resp.is_a?(Net::HTTPOK)
 				next_page = HttpLinkHeader.new(resp["Link"]).rel("next")
 				[
 					next_page && URI(next_page),
