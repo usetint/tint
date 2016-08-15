@@ -60,10 +60,6 @@ module Tint
 			@config ||= unsafe_config rescue {}
 		end
 
-		def file(path)
-			Tint::File.new(self, path)
-		end
-
 		def resource(path)
 			resource = Tint::Resource.new(self, path)
 			klass = if resource.directory? || !resource.exist?

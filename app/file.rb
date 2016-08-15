@@ -71,7 +71,7 @@ module Tint
 		end
 
 		def frontmatter
-			YAML.safe_load(open(path), [Date, Time])
+			YAML.safe_load(open(path), [Date, Time]) if frontmatter?
 		end
 
 		def to_directory
@@ -85,22 +85,22 @@ module Tint
 		end
 
 		def detect_content_or_frontmatter
-			return @content_or_frontmatter if @content_or_frontmatter
+			@content_or_frontmatter ||= begin
+				has_frontmatter = false
+				path.each_line.with_index do |line, idx|
+					line.chomp!
+					if line == '---' && idx == 0
+						has_frontmatter = true
+						next
+					end
 
-			has_frontmatter = false
-			path.each_line.with_index do |line, idx|
-				line.chomp!
-				if line == '---' && idx == 0
-					has_frontmatter = true
-					next
+					if has_frontmatter && line == '---'
+						return [true, has_frontmatter]
+					end
 				end
 
-				if has_frontmatter && line == '---'
-					return [true, has_frontmatter]
-				end
+				[!has_frontmatter, has_frontmatter]
 			end
-
-			@content_or_frontmatter = [!has_frontmatter, has_frontmatter]
 		end
 	end
 end
