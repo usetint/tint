@@ -3,14 +3,7 @@ require_relative "../app/site"
 require_relative "../app/resource"
 
 describe Tint::Resource do
-	let(:site) do
-		Tint::Site.new(
-			site_id: 1,
-			user_id: 1,
-			cache_path: Pathname.new(__FILE__).dirname.join("data"),
-			fn: "Test Site"
-		)
-	end
+	let(:site) { test_site }
 	let(:path) { "directory/file" }
 	let(:subject) { Tint::Resource.new(site, path) }
 

@@ -12,3 +12,12 @@ def assert_method_called_on_member(subject, member, method, args=[])
 		assert(mock.verify)
 	end
 end
+
+def test_site
+	Tint::Site.new(
+		site_id: 1,
+		user_id: 1,
+		cache_path: Pathname.new(__FILE__).dirname.join("data"),
+		fn: "Test Site"
+	)
+end
