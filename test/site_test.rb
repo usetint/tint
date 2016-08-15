@@ -381,27 +381,17 @@ describe Tint::Site do
 	end
 
 	describe "#resource" do
-		describe "when path is a directory" do
-			let(:path) { "directory" }
+		[
+			["directory", Tint::Directory],
+			["directory/file", Tint::File],
+			["directory/iamnotreal", Tint::Directory]
+		].each do |path, target_class|
+			describe "when path is #{path}" do
+				let(:path) { path }
 
-			it "should return a directory with self and the path" do
-				assert_equal(Tint::Directory.new(subject, path), subject.resource(path))
-			end
-		end
-
-		describe "when path is a file" do
-			let(:path) { "directory/file" }
-
-			it "should return a file with self and the path" do
-				assert_equal(Tint::File.new(subject, path), subject.resource(path))
-			end
-		end
-
-		describe "when path does not exist" do
-			let(:path) { "directory/iamnotreal" }
-
-			it "should return a directory with self and path" do
-				assert_equal(Tint::Directory.new(subject, path), subject.resource(path))
+				it "should return a #{target_class} with self and the path" do
+					assert_equal(Tint::Directory.new(subject, path), subject.resource(path))
+				end
 			end
 		end
 	end
