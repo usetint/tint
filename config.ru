@@ -6,8 +6,7 @@ if !ENV["RACK_ENV"] || ENV["RACK_ENV"] == "development"
 	Dotenv.load
 end
 
-require "sequel"
-
+require_relative "app/db"
 require_relative "app/controllers/asset"
 require_relative "app/controllers/auth"
 require_relative "app/controllers/build"
@@ -18,7 +17,6 @@ ENV["GIT_COMMITTER_NAME"] = "Tint"
 ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
 
 module Tint
-	DB = Sequel.connect(ENV.fetch("DATABASE_URL")) unless ENV['SITE_PATH']
 	BuildJob = ENV['TRAVIS_WORKER_BASE_DIR'] ? TravisJob : LocalJob
 end
 
