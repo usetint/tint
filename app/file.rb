@@ -7,11 +7,6 @@ require_relative "directory"
 
 module Tint
 	class File < Resource
-		def initialize(site, relative_path, name=nil)
-			super(site, relative_path)
-			@name = name
-		end
-
 		def text?
 			mime.split("/").first == "text"
 		end
@@ -30,10 +25,6 @@ module Tint
 
 		def yml?
 			[".yaml", ".yml"].include? extension
-		end
-
-		def name
-			@name ||= path.basename.to_s
 		end
 
 		def stream(force_binary=false)

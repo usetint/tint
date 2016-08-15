@@ -6,10 +6,6 @@ module Tint
 			user && user[:user_id] == record.user_id
 		end
 
-		def index?
-			user && user[:user_id] == record.user_id
-		end
-
 		def update?
 			user && user[:user_id] == record.user_id
 		end

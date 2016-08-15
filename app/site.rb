@@ -2,6 +2,7 @@ require "erb"
 require "git"
 require "tmpdir"
 
+require_relative "resource"
 require_relative "file"
 require_relative "directory"
 require_relative "path_helpers"
@@ -61,6 +62,17 @@ module Tint
 
 		def file(path)
 			Tint::File.new(self, path)
+		end
+
+		def resource(path)
+			resource = Tint::Resource.new(self, path)
+			klass = if resource.directory? || !resource.exist?
+				Tint::Directory
+			elsif resource.file?
+				Tint::File
+			end
+
+			klass.new(self, path)
 		end
 
 		def git
