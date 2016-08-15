@@ -6,6 +6,7 @@ require_relative "base"
 require_relative "../input"
 require_relative "../helpers"
 require_relative "../directory"
+require_relative "../form_helpers"
 
 module Tint
 	module Controllers
@@ -68,12 +69,12 @@ module Tint
 					elsif params[:file]
 						if params[:file].is_a?(Hash) && params[:file][:tempfile]
 							site.commit_with("Modified #{file.relative_path}") do |dir|
-								upload(dir.join(file.parent.relative_path), params[:file], file.name)
+								FormHelpers.upload(dir.join(file.parent.relative_path), params[:file], file.name)
 							end
 						end
 					else
 						site.commit_with("Modified #{file.relative_path}") do |dir|
-							updated_data = process_form_data(params[:data], dir)
+							updated_data = FormHelpers.process(params[:data], dir)
 							dir.join(file.relative_path).open("w") do |f|
 								if updated_data
 									if file.yml?
@@ -100,11 +101,11 @@ module Tint
 					directory = site.file(params["splat"].join("/")).to_directory
 					authorize directory, :update?
 
-					if params['file']
+					if params[:file]
 						site.commit_with("Uploaded #{directory.relative_path.join(params['file'][:filename])}") do |dir|
-							upload(dir.join(directory.relative_path), params[:file])
+							FormHelpers.upload(dir.join(directory.relative_path), params[:file])
 						end
-					elsif params['folder']
+					elsif params[:folder]
 						folder = Tint::Directory.new(site, directory.relative_path.join(params["folder"]))
 						return redirect to(folder.route)
 					end
@@ -160,51 +161,6 @@ module Tint
 					out.puts '<textarea name="content">'
 					file.stream_content(&out.method(:puts))
 					out.puts bottom
-				end
-			end
-
-			def process_form_data(data, dir)
-				case data
-				when Array
-					data.reject { |v| v.is_a?(String) && v.to_s == "" }.map { |v| process_form_data(v, dir) }
-				when Hash
-					if data.keys.include?(:filename) && data.keys.include?(:tempfile)
-						uploads = dir.join("uploads").join(Time.now.strftime("%Y"))
-						filename = "#{SecureRandom.uuid}-#{data[:filename]}"
-						upload(uploads, data, filename)
-						uploads.join(filename).to_s
-					elsif data.keys.include?('___checkbox_unchecked')
-						data.keys.include?('___checkbox_checked')
-					elsif data.keys.include?("___datetime_date")
-						datetime = "#{data["___datetime_date"]} #{data["___datetime_time"]}"
-						Time.parse(datetime) if datetime.to_s != ""
-					elsif data.keys.all? { |k| k =~ /\A\d+\Z/ }
-						data.to_a.sort_by {|x| x.first.to_i }.map(&:last).map { |v| process_form_data(v, dir) }
-					else
-						data.merge(data) do |k,v|
-							v = Date.parse(v) if is_date?(k, v)
-							process_form_data(v, dir)
-						end
-					end
-				else
-					data
-				end
-			end
-
-			def is_date?(field_name, value)
-				(field_name.end_with?("_date") || field_name == "date") &&
-					value.is_a?(String) &&
-					value.to_s != ""
-			end
-
-			def upload(dir, file, name=file[:filename])
-				dir.mkpath
-
-				dir.join(name).open("w") do |f|
-					file[:tempfile].rewind # In case of retry, rewind
-					until file[:tempfile].eof?
-						f.write file[:tempfile].read(4096)
-					end
 				end
 			end
 		end
