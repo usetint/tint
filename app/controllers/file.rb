@@ -13,13 +13,17 @@ module Tint
 		class File < Base
 			helpers Tint::Helpers::Rendering
 
-			namespace "/:site/files" do
-				get "/?*" do
-					if params[:download] && resource.exist? && resource.file?
-						authorize resource, :show?
-					  return send_file resource.path, filename: resource.name, type: resource.mime, disposition: :attachment
-					end
+			set(:query) { |val| condition { request.query_string == val } }
 
+			namespace "/:site/files" do
+				get "/?*", query: "download" do
+					if resource.exist? && resource.file?
+						authorize resource, :show?
+						send_file resource.path, filename: resource.name, type: resource.mime, disposition: :attachment
+					end
+				end
+
+				get "/?*" do
 					if resource.directory? || !resource.exist?
 						authorize resource, :index?
 						render_directory resource
