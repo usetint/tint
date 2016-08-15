@@ -11,3 +11,20 @@ form method="POST" action="/"
 		| Git remote:
 		input type="text" name="remote" required="required"
 	button type="submit" Add
+
+- if git_providers.length > 0
+	h1 Or, choose from the following repositories
+
+	- git_providers.each do |provider|
+		- provider_name = provider.class.name.split("::").last
+		h1 = "On #{provider_name}"
+
+		ul
+			- provider.repositories.each do |repo|
+				li
+					a href=repo[:link] title=repo[:description] = repo[:fn]
+					form method="POST" action="/"
+						input type="hidden" name="provider" value=provider_name.downcase
+						input type="hidden" name="fn" value=repo[:fn]
+						input type="hidden" name="remote" value=repo[:remote]
+						button type="submit" Add
