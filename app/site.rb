@@ -66,6 +66,8 @@ module Tint
 				Tint::Directory
 			elsif resource.file?
 				Tint::File
+			else
+				raise "This path is not a file or directory."
 			end
 
 			klass.new(self, path)
