@@ -17,20 +17,12 @@ module Tint
 				condition { request.query_string == val }
 			end
 
-			def self.directory(_)
-				condition { resource.directory? || !resource.exist? }
-			end
-
-			def self.text(_)
-				condition { resource.text? }
-			end
-
-			def self.yml(_)
-				condition { resource.yml? || !resource.content? }
-			end
-
 			def self.params(key)
 				condition { !!params[key] }
+			end
+
+			def self.if(block)
+				condition(&block)
 			end
 
 			namespace "/:site/files" do
@@ -57,7 +49,7 @@ module Tint
 					end
 				end
 
-				get "/?*", directory: true do
+				get "/?*", if: -> { resource.directory? || !resource.exist? } do
 					authorize resource, :index?
 
 					slim :"layouts/files", locals: { directory: resource } do
@@ -65,7 +57,7 @@ module Tint
 					end
 				end
 
-				get "/?*", yml: true do
+				get "/?*", if: -> { resource.yml? || !resource.content? } do
 					authorize resource, :edit?
 
 					slim :"layouts/files" do
@@ -76,7 +68,7 @@ module Tint
 					end
 				end
 
-				get "/?*", text: true do
+				get "/?*", if: -> { resource.text? } do
 					authorize resource, :edit?
 
 					frontmatter = resource.frontmatter? && resource.frontmatter
