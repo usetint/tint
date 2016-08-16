@@ -4,7 +4,11 @@ require "securerandom"
 
 module Tint
 	class TravisJob
-		QUEUE_DIR = Pathname.new(ENV["TRAVIS_WORKER_BASE_DIR"].to_s).realpath
+		QUEUE_DIR = begin
+			path = Pathname.new(ENV["TRAVIS_WORKER_BASE_DIR"].to_s)
+			path.mkpath
+			path.realpath
+		end
 
 		attr_reader :job_id, :site, :status
 
