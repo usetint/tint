@@ -68,11 +68,10 @@ module Tint
 			cache_path.join('.git').directory?
 		end
 
-		def status(db=nil, buildjob=nil)
-			status = @options[:status] || if db || (db = defined?(DB))
-				buildjob ||= BuildJob
-				job = db[:jobs].where(site_id: @options[:site_id]).order(:created_at).last
-				job && "build_#{buildjob.get(job[:job_id]).status}".to_sym
+		def status
+			status = @options[:status] || if defined?(DB)
+				job = DB[:jobs].where(site_id: @options[:site_id]).order(:created_at).last
+				job && "build_#{BuildJob.get(job[:job_id]).status}".to_sym
 			end
 
 			status && status.to_sym
