@@ -4,3 +4,17 @@ linters:
   Indentation:
     character: tab
     width: 1
+  LeadingZero:
+    style: include_zero
+  QualifyingElement:
+    allow_element_with_attribute: true
+  ColorVariable:
+    enabled: false
+  SelectorDepth:
+    enabled: false
+  BorderZero:
+    convention: none
+  NestingDepth:
+    enabled: false
+  StringQuotes:
+    style: double_quotes
