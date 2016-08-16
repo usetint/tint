@@ -1,3 +1,5 @@
+$input-width: 20rem;
+
 * {
 	box-sizing: border-box;
 }
@@ -34,8 +36,6 @@ form {
 		max-width: $input-width;
 	}
 }
-
-$input-width: 20rem;
 
 label {
 	display: block;
