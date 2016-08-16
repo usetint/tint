@@ -22,6 +22,8 @@ module Tint
 					if resource.exist? && resource.file?
 						authorize resource, :show?
 						send_file resource.path, filename: resource.name, type: resource.mime, disposition: :attachment
+					else
+						slim :error, locals: { message: "Only files may be downloaded." }
 					end
 				end
 
