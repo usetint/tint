@@ -66,12 +66,6 @@ describe Tint::File do
 		describe "#frontmatter?" do
 			it { assert_equal(false, subject.frontmatter?) }
 		end
-
-		describe "#frontmatter" do
-			it "should return no frontmatter" do
-				assert_equal(nil, subject.frontmatter)
-			end
-		end
 	end
 
 	describe "file with content and frontmatter" do
