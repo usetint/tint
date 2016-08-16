@@ -189,6 +189,10 @@ describe Tint::Site do
 		end
 
 		describe "when config file exists" do
+			after do
+				subject.cache_path.join(".tint.yml").delete
+			end
+
 			describe "when config file is valid YML" do
 				let(:config) { { "my_config_key" => "my config value" } }
 
@@ -234,6 +238,84 @@ describe Tint::Site do
 			it "should return an empty hash" do
 				subject.stub(:unsafe_config, -> { raise "uh oh!" }) do
 					assert_equal({}, subject.config)
+				end
+			end
+		end
+	end
+
+	describe "#git" do
+		it "should call Git.open with the cache path" do
+			mock = MiniTest::Mock.new
+			mock.expect :call, true, [subject.cache_path]
+
+			Git.stub(:open, mock) do
+				subject.git
+			end
+
+			mock.verify
+		end
+	end
+
+	describe "#git?" do
+		describe "when .git folder exists in cache_path" do
+			before { subject.cache_path.join(".git").mkpath }
+
+			it "should be true" do
+				assert(subject.git?)
+			end
+
+			after { subject.cache_path.join(".git").delete }
+		end
+
+		describe "when .git folder does not exist in cache_path" do
+			before { FileUtils.rm(subject.cache_path.join(".git"), force: true) }
+
+			it "should be false" do
+				refute(subject.git?)
+			end
+		end
+	end
+
+	describe "#status" do
+		describe "when status is passed via options" do
+			let(:options) { default_options.merge(status: status) }
+			let(:status) { :my_status }
+
+			it "should return it" do
+				assert_equal(status, subject.status)
+			end
+		end
+
+		describe "when status is not passed via options" do
+			describe "when DB is not defined" do
+				before { refute(defined?(Tint::DB)) }
+
+				it "should return nil" do
+					assert_equal(nil, subject.status)
+				end
+			end
+
+			describe "when DB is defined" do
+				it "should get the job out of the db and return its status" do
+					class BlackHole
+						def method_missing(*_)
+							self
+						end
+					end
+
+					class FakeDB < BlackHole
+						def last
+							{ job_id: 1 }
+						end
+					end
+
+					class FakeBuildJob < BlackHole
+						def status
+							:job_status
+						end
+					end
+
+					assert_equal(:build_job_status, subject.status(FakeDB.new, FakeBuildJob.new))
 				end
 			end
 		end

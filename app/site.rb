@@ -31,11 +31,11 @@ module Tint
 		end
 
 		def cache_path
-			ensure_path(:cache_path, "CACHE_PATH")
+			ensure_path(:cache_path)
 		end
 
 		def deploy_path
-			ensure_path(:deploy_path, "DEPLOY_PATH")
+			ensure_path(:deploy_path)
 		end
 
 		def valid_config?
@@ -68,10 +68,11 @@ module Tint
 			cache_path.join('.git').directory?
 		end
 
-		def status
-			status = @options[:status] || if defined?(DB)
-				job = DB[:jobs].where(site_id: @options[:site_id]).order(:created_at).last
-				job && "build_#{BuildJob.get(job[:job_id]).status}".to_sym
+		def status(db=nil, buildjob=nil)
+			status = @options[:status] || if db || (db = defined?(DB))
+				buildjob ||= BuildJob
+				job = db[:jobs].where(site_id: @options[:site_id]).order(:created_at).last
+				job && "build_#{buildjob.get(job[:job_id]).status}".to_sym
 			end
 
 			status && status.to_sym
@@ -177,7 +178,7 @@ module Tint
 			false
 		end
 
-		def ensure_path(key, env)
+		def ensure_path(key, env=key.to_s.upcase)
 			@options[key] ||= Pathname.new(ENV.fetch(env)).join(@options[:site_id].to_s)
 			@options[key].mkpath
 			@options[key].realpath
