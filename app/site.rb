@@ -178,10 +178,9 @@ module Tint
 		end
 
 		def ensure_path(key, env)
-			@options[key] ||= Pathname.new(ENV.fetch(env)).
-			                  realpath.join(@options[:site_id].to_s)
+			@options[key] ||= Pathname.new(ENV.fetch(env)).join(@options[:site_id].to_s)
 			@options[key].mkpath
-			@options[key]
+			@options[key].realpath
 		end
 	end
 end
