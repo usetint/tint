@@ -22,3 +22,7 @@ def test_site
 		fn: "Test Site"
 	)
 end
+
+def test_data_path
+	Pathname.new(__FILE__).dirname.join("data")
+end
