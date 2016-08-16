@@ -2,14 +2,10 @@ require "json"
 require "pathname"
 require "securerandom"
 
+require_relative "path_helpers"
+
 module Tint
 	class TravisJob
-		QUEUE_DIR = begin
-			path = Pathname.new(ENV["TRAVIS_WORKER_BASE_DIR"].to_s)
-			path.mkpath
-			path.realpath
-		end
-
 		attr_reader :job_id, :site, :status
 
 		def initialize(site_or_payload, job_id=SecureRandom.uuid, status=nil)
@@ -26,10 +22,10 @@ module Tint
 
 		def self.get(job_id)
 			{
-				created: QUEUE_DIR.join("10-created.d"),
-				received: QUEUE_DIR.join("30-received.d"),
-				started: QUEUE_DIR.join("50-started.d"),
-				finished: QUEUE_DIR.join("70-finished.d")
+				created: queue_dir.join("10-created.d"),
+				received: queue_dir.join("30-received.d"),
+				started: queue_dir.join("50-started.d"),
+				finished: queue_dir.join("70-finished.d")
 			}.each do |status, dir|
 				if (path = dir.join("#{job_id}.json")).exist?
 					if dir.join("#{job_id}.state").exist?
@@ -42,7 +38,7 @@ module Tint
 		end
 
 		def log_path
-			QUEUE_DIR.join("log").join("#{job_id}.log")
+			queue_dir.join("log").join("#{job_id}.log")
 		end
 
 		def enqueue!
@@ -51,12 +47,17 @@ module Tint
 			end
 
 			@status = :created
-			QUEUE_DIR.join("10-created.d").join("#{job_id}.json").open('w') do |f|
+			self.class.queue_dir.join("10-created.d").join("#{job_id}.json").open('w') do |f|
 				f.puts(JSON.dump(
 					job: { id: job_id },
 					site: site.to_h
 				))
 			end
+		end
+
+		def self.queue_dir
+			return unless ENV["TRAVIS_WORKER_BASE_DIR"]
+			PathHelpers.ensure(ENV["TRAVIS_WORKER_BASE_DIR"])
 		end
 	end
 end

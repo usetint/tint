@@ -3,6 +3,7 @@ require "tmpdir"
 
 require_relative "file"
 require_relative "directory"
+require_relative "path_helpers"
 
 module Tint
 	class Site
@@ -178,9 +179,9 @@ module Tint
 		end
 
 		def ensure_path(key, env=key.to_s.upcase)
-			@options[key] ||= Pathname.new(ENV.fetch(env)).join(@options[:site_id].to_s)
-			@options[key].mkpath
-			@options[key].realpath
+			PathHelpers.ensure(
+				@options[key] || Pathname.new(ENV.fetch(env)).join(@options[:site_id].to_s)
+			)
 		end
 	end
 end
