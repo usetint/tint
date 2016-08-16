@@ -25,6 +25,14 @@ module Tint
 				condition(&block)
 			end
 
+			def slim(template, options)
+				return super(template, options) if template == :error
+
+				super :"layouts/files" do
+					super :"files/#{template}", options
+				end
+			end
+
 			namespace "/:site/files" do
 				get "/?*", query: "download" do
 					if resource.exist? && resource.file?
@@ -39,10 +47,7 @@ module Tint
 					authorize resource, :edit?
 
 					if resource.text?
-						html = slim :"layouts/files" do
-							slim :"files/source", locals: { path: resource.route }
-						end
-
+						slim :source, locals: { path: resource.route }
 						stream_into_element("<textarea name=\"source\">", html, resource)
 					else
 						slim :error, locals: { message: "Only text files may be edited by source" }
@@ -51,46 +56,34 @@ module Tint
 
 				get "/?*", if: -> { resource.directory? || !resource.exist? } do
 					authorize resource, :index?
-
-					slim :"layouts/files", locals: { directory: resource } do
-						slim :"files/index", locals: { directory: resource }
-					end
+					slim :index, locals: { directory: resource }
 				end
 
 				get "/?*", if: -> { resource.yml? || !resource.content? } do
 					authorize resource, :edit?
 
-					slim :"layouts/files" do
-						slim :"files/yml", locals: {
-							data: resource.frontmatter,
-							path: resource.route
-						}
-					end
+					slim :yml, locals: { data: resource.frontmatter, path: resource.route }
 				end
 
 				get "/?*", if: -> { resource.text? } do
 					authorize resource, :edit?
 
 					frontmatter = resource.frontmatter? && resource.frontmatter
-					html = slim :"layouts/files" do
-						slim :"files/text", locals: {
-							frontmatter: frontmatter,
-							wysiwyg: resource.markdown?,
-							path: resource.route
-						}
-					end
+					slim :text, locals: {
+						frontmatter: frontmatter,
+						wysiwyg: resource.markdown?,
+						path: resource.route
+					}
 
 					stream_into_element("<textarea name=\"content\">", html, resource)
 				end
 
 				get "/?*" do
 					authorize resource, :edit?
-					slim :"layouts/files" do
-						slim :"files/binary", locals: {
-							file: resource,
-							input: Input::File.new(:file, "file", resource.relative_path, site)
-						}
-					end
+					slim :binary, locals: {
+						file: resource,
+						input: Input::File.new(:file, "file", resource.relative_path, site)
+					}
 				end
 
 				put "/*", params: :name do
