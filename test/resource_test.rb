@@ -53,7 +53,24 @@ describe Tint::Resource do
 		end
 	end
 
-	path_methods = [:exist?, :directory?, :size, :open, :rename, :write, :mkpath, :join, :children]
+	describe "#name" do
+		describe "when no name is passed" do
+			it "should use the name from the path" do
+				assert_equal(path.split("/").last, subject.name)
+			end
+		end
+
+		describe "when a name is explicitly passed" do
+			let(:subject) { Tint::Resource.new(site, path, tname) }
+			let(:tname) { ".." }
+
+			it "should use the name that was given" do
+				assert_equal(tname, subject.name)
+			end
+		end
+	end
+
+	path_methods = [:exist?, :directory?, :size, :open, :rename, :write, :mkpath, :join, :children, :file?]
 
 	describe "#respond_to?" do
 		describe "our own methods" do

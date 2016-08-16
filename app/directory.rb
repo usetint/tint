@@ -2,17 +2,17 @@ require_relative "resource"
 
 module Tint
 	class Directory < Resource
-		def file(path)
-			site.file(relative_path.join(path))
+		def resource(path)
+			site.resource(relative_path.join(path))
 		end
 
 		def files
 			return @files if @files
 
-			files = exist? ? children(false).map(&method(:file)) : []
+			files = exist? ? children(false).map(&method(:resource)) : []
 
 			if relative_path.to_s != "."
-				parent = Tint::File.new(site, relative_path.dirname, "..")
+				parent = self.class.new(site, relative_path.dirname, "..")
 				files.unshift(parent)
 			end
 

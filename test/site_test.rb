@@ -379,4 +379,20 @@ describe Tint::Site do
 			end
 		end
 	end
+
+	describe "#resource" do
+		[
+			["directory", Tint::Directory],
+			["directory/file", Tint::File],
+			["directory/iamnotreal", Tint::Directory]
+		].each do |path, target_class|
+			describe "when path is #{path}" do
+				let(:path) { path }
+
+				it "should return a #{target_class} with self and the path" do
+					assert_equal(Tint::Directory.new(subject, path), subject.resource(path))
+				end
+			end
+		end
+	end
 end

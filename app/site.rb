@@ -2,6 +2,7 @@ require "erb"
 require "git"
 require "tmpdir"
 
+require_relative "resource"
 require_relative "file"
 require_relative "directory"
 require_relative "path_helpers"
@@ -59,8 +60,17 @@ module Tint
 			@config ||= unsafe_config rescue {}
 		end
 
-		def file(path)
-			Tint::File.new(self, path)
+		def resource(path)
+			resource = Tint::Resource.new(self, path)
+			klass = if resource.directory? || !resource.exist?
+				Tint::Directory
+			elsif resource.file?
+				Tint::File
+			else
+				raise "This path is not a file or directory."
+			end
+
+			klass.new(self, path)
 		end
 
 		def git

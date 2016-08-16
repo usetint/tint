@@ -8,9 +8,10 @@ module Tint
 
 		def_delegators :site, :user_id
 
-		def initialize(site, relative_path)
+		def initialize(site, relative_path, name=nil)
 			@site = site
 			@relative_path = Pathname.new(relative_path).cleanpath
+			@name = name
 		end
 
 		def parent
@@ -35,6 +36,10 @@ module Tint
 
 		def ==(other)
 			other.is_a?(Resource) && other.path == path
+		end
+
+		def name
+			@name ||= path.basename.to_s
 		end
 
 		def respond_to?(method)

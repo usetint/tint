@@ -7,11 +7,6 @@ require_relative "directory"
 
 module Tint
 	class File < Resource
-		def initialize(site, relative_path, name=nil)
-			super(site, relative_path)
-			@name = name
-		end
-
 		def text?
 			mime.split("/").first == "text"
 		end
@@ -30,10 +25,6 @@ module Tint
 
 		def yml?
 			[".yaml", ".yml"].include? extension
-		end
-
-		def name
-			@name ||= path.basename.to_s
 		end
 
 		def stream(force_binary=false)
@@ -94,22 +85,22 @@ module Tint
 		end
 
 		def detect_content_or_frontmatter
-			return @content_or_frontmatter if @content_or_frontmatter
+			@content_or_frontmatter ||= begin
+				has_frontmatter = false
+				path.each_line.with_index do |line, idx|
+					line.chomp!
+					if line == '---' && idx == 0
+						has_frontmatter = true
+						next
+					end
 
-			has_frontmatter = false
-			path.each_line.with_index do |line, idx|
-				line.chomp!
-				if line == '---' && idx == 0
-					has_frontmatter = true
-					next
+					if has_frontmatter && line == '---'
+						return [true, has_frontmatter]
+					end
 				end
 
-				if has_frontmatter && line == '---'
-					return [true, has_frontmatter]
-				end
+				[!has_frontmatter, has_frontmatter]
 			end
-
-			@content_or_frontmatter = [!has_frontmatter, has_frontmatter]
 		end
 	end
 end

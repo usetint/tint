@@ -13,153 +13,182 @@ module Tint
 		class File < Base
 			helpers Tint::Helpers::Rendering
 
+			def self.query(val)
+				condition { request.query_string == val }
+			end
+
+			def self.params(key)
+				condition { !!params[key] }
+			end
+
+			def self.if(block)
+				condition(&block)
+			end
+
+			def slim(template, options)
+				return super(template, options) if template == :error
+
+				super :"layouts/files" do
+					super :"files/#{template}", options
+				end
+			end
+
 			namespace "/:site/files" do
-				get "/?*" do
-					file = site.file(params['splat'].join('/'))
-
-					if params[:download] && file.exist? && !file.directory?
-						authorize file, :show?
-						return send_file file.path, filename: file.name, type: file.mime, disposition: :attachment
-					end
-
-					if file.directory? || !file.exist?
-						authorize file.to_directory, :index?
-						render_directory file.to_directory
-					elsif file.text?
-						authorize file, :edit?
-
-						if params.has_key?('source')
-							source(file)
-						elsif file.yml? || !file.content?
-							slim :"layouts/files" do
-								slim :"files/yml", locals: {
-									data: file.frontmatter,
-									path: file.route
-								}
-							end
-						else
-							editor(file)
-						end
+				get "/?*", query: "download" do
+					if resource.exist? && resource.file?
+						authorize resource, :show?
+						send_file resource.path, filename: resource.name, type: resource.mime, disposition: :attachment
 					else
-						authorize file, :edit?
+						slim :error, locals: { message: "Only files may be downloaded." }
+					end
+				end
 
-						slim :"layouts/files" do
-							slim :"files/binary", locals: { file: file, input: Input::File.new(:file, "file", file.relative_path, site) }
+				get "/?*", query: "source" do
+					authorize resource, :edit?
+
+					if resource.text?
+						slim :source, locals: { path: resource.route }
+						stream_into_element("<textarea name=\"source\">", html, resource)
+					else
+						slim :error, locals: { message: "Only text files may be edited by source" }
+					end
+				end
+
+				get "/?*", if: -> { resource.directory? || !resource.exist? } do
+					authorize resource, :index?
+					slim :index, locals: { directory: resource }
+				end
+
+				get "/?*", if: -> { resource.yml? || !resource.content? } do
+					authorize resource, :edit?
+
+					slim :yml, locals: { data: resource.frontmatter, path: resource.route }
+				end
+
+				get "/?*", if: -> { resource.text? } do
+					authorize resource, :edit?
+
+					frontmatter = resource.frontmatter? && resource.frontmatter
+					slim :text, locals: {
+						frontmatter: frontmatter,
+						wysiwyg: resource.markdown?,
+						path: resource.route
+					}
+
+					stream_into_element("<textarea name=\"content\">", html, resource)
+				end
+
+				get "/?*" do
+					authorize resource, :edit?
+					slim :binary, locals: {
+						file: resource,
+						input: Input::File.new(:file, "file", resource.relative_path, site)
+					}
+				end
+
+				put "/*", params: :name do
+					authorize resource, :update?
+
+					new = resource.parent.resource(params[:name])
+					if new.exist?
+						slim :error, locals: { message: "A file with that name already exists" }
+					else
+						site.commit_with("Renamed #{resource.relative_path} to #{new.name}", pundit_user) do |dir|
+							dir.join(resource.relative_path).rename(dir.join(new.relative_path))
+						end
+
+						redirect to(resource.parent.route)
+					end
+				end
+
+				put "/*", params: :source do
+					authorize resource, :update?
+
+					site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
+						dir.join(resource.relative_path).write params[:source].encode(universal_newline: true)
+					end
+
+					redirect to(resource.parent.route)
+				end
+
+				put "/*", params: :file do
+					authorize resource, :update?
+
+					if params[:file].is_a?(Hash) && params[:file][:tempfile]
+						site.commit_with("Modified #{resource.relative_path}") do |dir|
+							FormHelpers.upload(dir.join(resource.parent.relative_path), params[:file], resource.name)
 						end
 					end
+
+					redirect to(resource.parent.route)
 				end
 
 				put "/*" do
-					file = site.file(params["splat"].join("/"))
-					authorize file, :update?
+					authorize resource, :update?
 
-					if params[:name]
-						new = file.parent.file(params[:name])
-						if new.exist?
-							return slim :error, locals: { message: "A file with that name already exists" }
-						else
-							site.commit_with("Renamed #{file.relative_path} to #{new.name}", pundit_user) do |dir|
-								dir.join(file.relative_path).rename(dir.join(new.relative_path))
-							end
-						end
-					elsif params[:source]
-						site.commit_with("Modified #{file.relative_path}", pundit_user) do |dir|
-							dir.join(file.relative_path).write params[:source].encode(universal_newline: true)
-						end
-					elsif params[:file]
-						if params[:file].is_a?(Hash) && params[:file][:tempfile]
-							site.commit_with("Modified #{file.relative_path}") do |dir|
-								FormHelpers.upload(dir.join(file.parent.relative_path), params[:file], file.name)
-							end
-						end
-					else
-						site.commit_with("Modified #{file.relative_path}") do |dir|
-							updated_data = FormHelpers.process(params[:data], dir)
-							dir.join(file.relative_path).open("w") do |f|
-								if updated_data
-									if file.yml?
-										f.puts updated_data.to_yaml.sub(/\A---\r?\n?/, "")
-									else
-										f.puts updated_data.to_yaml
-										f.puts "---"
-									end
+					site.commit_with("Modified #{resource.relative_path}") do |dir|
+						updated_data = FormHelpers.process(params[:data], dir)
+						dir.join(resource.relative_path).open("w") do |f|
+							if updated_data
+								if resource.yml?
+									f.puts updated_data.to_yaml.sub(/\A---\r?\n?/, "")
+								else
+									f.puts updated_data.to_yaml
+									f.puts "---"
 								end
+							end
 
-								if params.has_key?(:content)
-									f.puts(params[:content].encode(universal_newline: true))
-								elsif !file.yml?
-									file.stream_content(&f.method(:puts))
-								end
+							if params.has_key?(:content)
+								f.puts(params[:content].encode(universal_newline: true))
+							elsif !resource.yml?
+								resource.stream_content(&f.method(:puts))
 							end
 						end
 					end
 
-					redirect to(file.parent.route)
+					redirect to(resource.parent.route)
 				end
 
-				post "/?*" do
-					directory = site.file(params["splat"].join("/")).to_directory
-					authorize directory, :update?
+				post "/?*", params: :file do
+					authorize resource, :update?
 
-					if params[:file]
-						site.commit_with("Uploaded #{directory.relative_path.join(params['file'][:filename])}") do |dir|
-							FormHelpers.upload(dir.join(directory.relative_path), params[:file])
-						end
-					elsif params[:folder]
-						folder = Tint::Directory.new(site, directory.relative_path.join(params["folder"]))
-						return redirect to(folder.route)
+					site.commit_with("Uploaded #{resource.relative_path.join(params[:file][:filename])}") do |dir|
+						FormHelpers.upload(dir.join(resource.relative_path), params[:file])
 					end
 
-					redirect to(directory.route)
+					redirect to(resource.route)
+				end
+
+				post "/?*", params: :folder do
+					authorize resource, :update?
+
+					new_folder = Tint::Directory.new(site, resource.relative_path.join(params[:folder]))
+					redirect to(new_folder.route)
 				end
 
 				delete "/*" do
-					file = site.file(params["splat"].join("/"))
-					authorize file, :destroy?
+					authorize resource, :destroy?
 
-					site.commit_with("Removed #{file.relative_path}") do |dir|
-						dir.join(file.relative_path).delete
+					site.commit_with("Removed #{resource.relative_path}") do |dir|
+						dir.join(resource.relative_path).delete
 					end
 
-					redirect to(file.parent.route)
+					redirect to(resource.parent.route)
 				end
 			end
 
 		protected
 
-			def render_directory(directory)
-				slim :"layouts/files", locals: { directory: directory } do
-					slim :"files/index", locals: { directory: directory }
-				end
+			def resource
+				site.resource(params[:splat].join("/"))
 			end
 
-			def source(file)
+			def stream_into_element(el, html, resource)
 				stream do |out|
-					html = slim :"layouts/files" do
-						slim :"files/source", locals: { path: file.route }
-					end
-					top, bottom = html.split('<textarea name="source">', 2)
+					top, bottom = html.split(el, 2)
 					out.puts top
-					out.puts '<textarea name="source">'
-					file.stream { |line, _| out.puts line }
-					out.puts bottom
-				end
-			end
-
-			def editor(file)
-				frontmatter = file.frontmatter? && file.frontmatter
-				stream do |out|
-					html = slim :"layouts/files" do
-						slim :"files/text", locals: {
-							frontmatter: frontmatter,
-							wysiwyg: file.markdown?,
-							path: file.route
-						}
-					end
-					top, bottom = html.split('<textarea name="content">', 2)
-					out.puts top
-					out.puts '<textarea name="content">'
-					file.stream_content(&out.method(:puts))
+					out.puts el
+					resource.stream { |*args| out.puts args.first }
 					out.puts bottom
 				end
 			end
