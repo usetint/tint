@@ -17,6 +17,18 @@ module Tint
 				condition { request.query_string == val }
 			end
 
+			def self.directory(_)
+				condition { resource.directory? || !resource.exist? }
+			end
+
+			def self.text(_)
+				condition { resource.text? }
+			end
+
+			def self.yml(_)
+				condition { resource.yml? || !resource.content? }
+			end
+
 			namespace "/:site/files" do
 				get "/?*", query: "download" do
 					if resource.exist? && resource.file?
@@ -41,24 +53,47 @@ module Tint
 					end
 				end
 
+				get "/?*", directory: true do
+					authorize resource, :index?
+
+					slim :"layouts/files", locals: { directory: resource } do
+						slim :"files/index", locals: { directory: resource }
+					end
+				end
+
+				get "/?*", yml: true do
+					authorize resource, :edit?
+
+					slim :"layouts/files" do
+						slim :"files/yml", locals: {
+							data: resource.frontmatter,
+							path: resource.route
+						}
+					end
+				end
+
+				get "/?*", text: true do
+					authorize resource, :edit?
+
+					frontmatter = resource.frontmatter? && resource.frontmatter
+					html = slim :"layouts/files" do
+						slim :"files/text", locals: {
+							frontmatter: frontmatter,
+							wysiwyg: resource.markdown?,
+							path: resource.route
+						}
+					end
+
+					stream_into_element("<textarea name=\"content\">", html, resource)
+				end
+
 				get "/?*" do
-					if resource.directory? || !resource.exist?
-						authorize resource, :index?
-						render_directory resource
-					elsif resource.text?
-						authorize resource, :edit?
-
-						if resource.yml? || !resource.content?
-							yml_editor(resource)
-						else
-							text_editor(resource)
-						end
-					else
-						authorize file, :edit?
-
-						slim :"layouts/files" do
-							slim :"files/binary", locals: { file: resource, input: Input::File.new(:file, "file", resource.relative_path, site) }
-						end
+					authorize resource, :edit?
+					slim :"layouts/files" do
+						slim :"files/binary", locals: {
+							file: resource,
+							input: Input::File.new(:file, "file", resource.relative_path, site)
+						}
 					end
 				end
 
@@ -138,34 +173,6 @@ module Tint
 
 			def resource
 				site.resource(params[:splat].join("/"))
-			end
-
-			def render_directory(directory)
-				slim :"layouts/files", locals: { directory: directory } do
-					slim :"files/index", locals: { directory: directory }
-				end
-			end
-
-			def yml_editor(resource)
-				slim :"layouts/files" do
-					slim :"files/yml", locals: {
-						data: resource.frontmatter,
-						path: resource.route
-					}
-				end
-			end
-
-			def text_editor(resource)
-				frontmatter = resource.frontmatter? && resource.frontmatter
-				html = slim :"layouts/files" do
-					slim :"files/text", locals: {
-						frontmatter: frontmatter,
-						wysiwyg: resource.markdown?,
-						path: resource.route
-					}
-				end
-
-				stream_into_element("<textarea name=\"content\">", html, resource)
 			end
 
 			def stream_into_element(el, html, resource)
