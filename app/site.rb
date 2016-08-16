@@ -1,3 +1,4 @@
+require "erb"
 require "git"
 require "tmpdir"
 
@@ -19,7 +20,8 @@ module Tint
 		end
 
 		def route(sub='')
-			"/#{@options[:site_id]}/#{sub}"
+			path = sub.split("/").map { |s| ERB::Util.url_encode(s) }.join("/")
+			"/#{@options[:site_id]}/#{path}"
 		end
 
 		def fn
