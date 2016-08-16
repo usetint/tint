@@ -32,11 +32,11 @@ module Tint
 		end
 
 		def cache_path
-			ensure_path(:cache_path)
+			@cache_path ||= ensure_path(:cache_path)
 		end
 
 		def deploy_path
-			ensure_path(:deploy_path)
+			@deploy_path ||= ensure_path(:deploy_path)
 		end
 
 		def valid_config?
