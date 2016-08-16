@@ -7,11 +7,13 @@ describe Tint::Site do
 		{
 			site_id: site_id,
 			cache_path: Pathname.new(__FILE__).dirname.join(cache_path),
+			deploy_path: Pathname.new(__FILE__).dirname.join(deploy_path),
 			fn: "my test site",
 			user_id: "3"
 		}
 	end
 	let(:cache_path) { "data" }
+	let(:deploy_path) { "deploy" }
 	let(:options) { default_options }
 	let(:site_id) { 1 }
 
@@ -70,95 +72,94 @@ describe Tint::Site do
 		end
 	end
 
-	describe "#cache_path" do
-		describe "when cache_path is passed in" do
-			describe "when it does not exist on the file system" do
-				let(:cache_path) { "data/nonexistent" }
-
-				before do
-					FileUtils.rmtree default_options[:cache_path]
-				end
-
-				it "should create the path" do
-					refute(default_options[:cache_path].exist?)
-					subject.cache_path
-					assert(default_options[:cache_path].exist?)
-				end
-
-				it "should return the path" do
-					assert_equal(default_options[:cache_path], subject.cache_path)
-				end
-
-				after do
-					FileUtils.rmtree default_options[:cache_path]
-				end
-			end
-
-			describe "when it does exist on the file system" do
-				it "should return the path" do
-					assert_equal(default_options[:cache_path], subject.cache_path)
-				end
-			end
-		end
-
-		describe "when no cache_path is passed in" do
-			let(:options) do
-				options = default_options
-				options.delete(:cache_path)
-				options
-			end
-
-			describe "when it exists in the environment" do
-				before do
-					ENV["CACHE_PATH"] = default_options[:cache_path].to_s
-				end
-
-				after do
-					ENV.delete("CACHE_PATH")
-				end
-
+	[:cache_path, :deploy_path].each do |path_method|
+		describe "##{path_method}" do
+			describe "when #{path_method} is passed in" do
 				describe "when it does not exist on the file system" do
-					let(:cache_path) { "data/nonexistent" }
-					let(:expected_path) { default_options[:cache_path].join(site_id.to_s) }
+					let(path_method) { "data/#{path_method}_nonexistent" }
 
 					before do
-						FileUtils.rmtree expected_path
+						FileUtils.rmtree default_options[path_method]
 					end
 
 					it "should create the path" do
-						refute(expected_path.exist?)
-						subject.cache_path
-						assert(expected_path.exist?)
+						refute(default_options[path_method].exist?)
+						subject.public_send(path_method)
+						assert(default_options[path_method].exist?)
 					end
 
-					it "should return the path with the site_id" do
-						assert_equal(
-							expected_path,
-							subject.cache_path
-						)
+					it "should return the path" do
+						assert_equal(default_options[path_method], subject.public_send(path_method))
 					end
 
 					after do
-						FileUtils.rmtree expected_path
+						FileUtils.rmtree default_options[path_method]
 					end
 				end
 
 				describe "when it does exist on the file system" do
-					it "should return the path with the site_id" do
-						assert_equal(
-							default_options[:cache_path].join(site_id.to_s),
-							subject.cache_path
-						)
+					it "should return the path" do
+						assert_equal(default_options[path_method], subject.public_send(path_method))
 					end
 				end
 			end
 
-			describe "when it does not exist in the environment" do
-				before { ENV.delete("CACHE_PATH") }
+			describe "when no cache_path is passed in" do
+				let(:options) do
+					options = default_options
+					options.delete(path_method)
+					options
+				end
 
-				it "should raise an exception" do
-					assert_raises KeyError do
-						subject.cache_path
+				describe "when it exists in the environment" do
+					before do
+						ENV[path_method.to_s.upcase] = default_options[path_method].to_s
+					end
+
+					after do
+						ENV.delete(path_method.to_s.upcase)
+					end
+
+					describe "when it does not exist on the file system" do
+						let(:cache_path) { "data/#{path_method}_nonexistent" }
+						let(:expected_path) { default_options[path_method].join(site_id.to_s) }
+
+						before do
+							FileUtils.rmtree expected_path
+						end
+
+						it "should create the path" do
+							refute(expected_path.exist?)
+							subject.public_send(path_method)
+							assert(expected_path.exist?)
+						end
+
+						it "should return the path with the site_id" do
+							assert_equal(expected_path, subject.public_send(path_method))
+						end
+
+						after do
+							FileUtils.rmtree expected_path
+						end
+					end
+
+					describe "when it does exist on the file system" do
+						it "should return the path with the site_id" do
+							assert_equal(
+								default_options[path_method].join(site_id.to_s),
+								subject.public_send(path_method)
+							)
+						end
+					end
+				end
+
+				describe "when it does not exist in the environment" do
+					before { ENV.delete(path_method.to_s.upcase) }
+
+					it "should raise an exception" do
+						assert_raises KeyError do
+							subject.public_send(path_method)
+						end
 					end
 				end
 			end
