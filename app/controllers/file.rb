@@ -29,20 +29,8 @@ module Tint
 				condition { resource.yml? || !resource.content? }
 			end
 
-			def self.rename(_)
-				condition { !!params[:name] }
-			end
-
-			def self.source(_)
-				condition { !!params[:source] }
-			end
-
-			def self.upload(_)
-				condition { !!params[:file] }
-			end
-
-			def self.new_folder(_)
-				condition { !!params[:folder] }
+			def self.params(key)
+				condition { !!params[key] }
 			end
 
 			namespace "/:site/files" do
@@ -113,7 +101,7 @@ module Tint
 					end
 				end
 
-				put "/*", rename: true do
+				put "/*", params: :name do
 					authorize resource, :update?
 
 					new = resource.parent.resource(params[:name])
@@ -128,7 +116,7 @@ module Tint
 					end
 				end
 
-				put "/*", source: true do
+				put "/*", params: :source do
 					authorize resource, :update?
 
 					site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
@@ -138,7 +126,7 @@ module Tint
 					redirect to(resource.parent.route)
 				end
 
-				put "/*", upload: true do
+				put "/*", params: :file do
 					authorize resource, :update?
 
 					if params[:file].is_a?(Hash) && params[:file][:tempfile]
@@ -176,7 +164,7 @@ module Tint
 					redirect to(resource.parent.route)
 				end
 
-				post "/?*", upload: true do
+				post "/?*", params: :file do
 					authorize resource, :update?
 
 					site.commit_with("Uploaded #{resource.relative_path.join(params[:file][:filename])}") do |dir|
@@ -186,7 +174,7 @@ module Tint
 					redirect to(resource.route)
 				end
 
-				post "/?*", new_folder: true do
+				post "/?*", params: :folder do
 					authorize resource, :update?
 
 					new_folder = Tint::Directory.new(site, resource.relative_path.join(params[:folder]))
