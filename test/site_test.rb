@@ -256,26 +256,6 @@ describe Tint::Site do
 		end
 	end
 
-	describe "#git?" do
-		describe "when .git folder exists in cache_path" do
-			before { subject.cache_path.join(".git").mkpath }
-
-			it "should be true" do
-				assert(subject.git?)
-			end
-
-			after { subject.cache_path.join(".git").delete }
-		end
-
-		describe "when .git folder does not exist in cache_path" do
-			before { FileUtils.rm(subject.cache_path.join(".git"), force: true) }
-
-			it "should be false" do
-				refute(subject.git?)
-			end
-		end
-	end
-
 	describe "#status" do
 		describe "when status is passed via options" do
 			let(:options) { default_options.merge(status: status) }
@@ -340,22 +320,27 @@ describe Tint::Site do
 		end
 	end
 
-	describe "#cloned?" do
-		describe "when tint-cloned path exists" do
-			before { subject.cache_path.join(".git/tint-cloned").mkpath }
+	[
+		[:git?, ".git"],
+		[:cloned?, ".git/tint-cloned"]
+	].each do |method, path|
+		describe method do
+			describe "when #{path} exists" do
+				before { subject.cache_path.join(path).mkpath }
 
-			it "should return true" do
-				assert(subject.cloned?)
+				it "should return true" do
+					assert(subject.public_send(method))
+				end
+
+				after { subject.cache_path.join(path).rmtree }
 			end
 
-			after { subject.cache_path.join(".git/tint-cloned").delete }
-		end
+			describe "when #{path} does not exist" do
+				before { FileUtils.rm_r(subject.cache_path.join(path), force: true) }
 
-		describe "when tint-cloned does not exist" do
-			before { FileUtils.rm(subject.cache_path.join(".git/tint-cloned"), force: true) }
-
-			it "should return false" do
-				refute(subject.cloned?)
+				it "should return false" do
+					refute(subject.public_send(method))
+				end
 			end
 		end
 	end
