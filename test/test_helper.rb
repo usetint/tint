@@ -2,6 +2,7 @@ require "codeclimate-test-reporter"
 CodeClimate::TestReporter.start
 
 require "minitest/autorun"
+require "pry"
 
 def assert_method_called_on_member(subject, member, method, args=[])
 	mock = MiniTest::Mock.new

@@ -31,11 +31,11 @@ module Tint
 		end
 
 		def cache_path
-			ensure_path(:cache_path, "CACHE_PATH")
+			ensure_path(:cache_path)
 		end
 
 		def deploy_path
-			ensure_path(:deploy_path, "DEPLOY_PATH")
+			ensure_path(:deploy_path)
 		end
 
 		def valid_config?
@@ -177,11 +177,10 @@ module Tint
 			false
 		end
 
-		def ensure_path(key, env)
-			@options[key] ||= Pathname.new(ENV.fetch(env)).
-			                  realpath.join(@options[:site_id].to_s)
+		def ensure_path(key, env=key.to_s.upcase)
+			@options[key] ||= Pathname.new(ENV.fetch(env)).join(@options[:site_id].to_s)
 			@options[key].mkpath
-			@options[key]
+			@options[key].realpath
 		end
 	end
 end
