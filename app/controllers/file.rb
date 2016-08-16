@@ -13,7 +13,9 @@ module Tint
 		class File < Base
 			helpers Tint::Helpers::Rendering
 
-			set(:query) { |val| condition { request.query_string == val } }
+			def self.query(val)
+				condition { request.query_string == val }
+			end
 
 			namespace "/:site/files" do
 				get "/?*", query: "download" do
