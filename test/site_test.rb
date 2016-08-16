@@ -320,4 +320,43 @@ describe Tint::Site do
 			end
 		end
 	end
+
+	describe "#remote" do
+		let(:options) { default_options.merge(remote: :remote_control) }
+
+		it "should return the remote from options" do
+			assert_equal(options[:remote], subject.remote)
+		end
+	end
+
+	describe "#clear_cache!" do
+		let(:cache_path) { "data/clearable" }
+
+		it "should remove the cache_path directory" do
+			subject.cache_path
+			assert(options[:cache_path].exist?)
+			subject.clear_cache!
+			refute(options[:cache_path].exist?)
+		end
+	end
+
+	describe "#cloned?" do
+		describe "when tint-cloned path exists" do
+			before { subject.cache_path.join(".git/tint-cloned").mkpath }
+
+			it "should return true" do
+				assert(subject.cloned?)
+			end
+
+			after { subject.cache_path.join(".git/tint-cloned").delete }
+		end
+
+		describe "when tint-cloned does not exist" do
+			before { FileUtils.rm(subject.cache_path.join(".git/tint-cloned"), force: true) }
+
+			it "should return false" do
+				refute(subject.cloned?)
+			end
+		end
+	end
 end
