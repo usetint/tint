@@ -57,6 +57,12 @@ describe Tint::Site do
 				path = "path/to/something"
 				assert_equal("/#{site_id}/#{path}", subject.route(path))
 			end
+
+			it "should url encode the path" do
+				path = "path/to/new folder"
+				expected_path = path.split("/").map { |s| ERB::Util.url_encode(s) }.join("/")
+				assert_equal("/#{site_id}/#{expected_path}", subject.route(path))
+			end
 		end
 	end
 
