@@ -17,21 +17,29 @@ module Tint
 
 					git_providers = DB[:identities].where(user_id: pundit_user[:user_id]).map do |identity|
 						if identity[:provider] == "github"
-							GitProviders::Github.new(JSON.parse(identity[:omniauth])["credentials"]["token"])
+							GitProviders::Github.new(identity[:omniauth])
 						end
 					end.compact
 
-					slim :index, locals: { sites: policy_scope(Tint::Site), git_providers: git_providers }
+					sites = policy_scope(Tint::Site)
+					repos = sites.map { |site| site.remote }
+
+					slim :index, locals: { sites: sites, repos: repos, git_providers: git_providers }
 				end
 			end
 
 			post "/" do
 				authorize Tint::Site, :create?
 
+				if params[:provider] == "github"
+					identity = DB[:identities][user_id: pundit_user[:user_id], provider: "github"]
+					GitProviders::Github.new(identity[:omniauth]).add_deploy_key(params[:remote])
+				end
+
 				site_id = DB[:sites].insert(
 					user_id: pundit_user[:user_id],
-					fn: params["fn"],
-					remote: params["remote"]
+					fn: params[:fn],
+					remote: params[:remote]
 				)
 
 				redirect to("/#{site_id}/")
