@@ -274,59 +274,37 @@ describe Tint::Site do
 		end
 
 		describe "when status is not passed via options" do
-			describe "when DB is not defined" do
-				before { refute(defined?(Tint::DB)) }
+			describe "when Tint.db is nil" do
+				before { ENV["SITE_PATH"] = "totallyapath" }
 
 				it "should return nil" do
 					assert_equal(nil, subject.status)
 				end
+
+				after { ENV.delete("SITE_PATH") }
 			end
 
-			describe "when DB is defined" do
-				class BlackHole
-					def method_missing(*_)
-						self
-					end
-				end
+			describe "when Tint.db is not nil" do
+				include Tint::Test::StubDB
 
-				class FakeDB < BlackHole
-					def last
-						{ job_id: 1 }
-					end
-				end
-
-				class FakeBuildJob < BlackHole
-					def status
-						:job_status
-					end
+				let(:database) do
+					{
+						jobs: [{ job_id: 1, site_id: options[:site_id] }]
+					}
 				end
 
 				before do
-					if defined?(Tint::DB)
-						Tint::OldDB = Tint::DB
+					class FakeBuildJob
+						def self.get(*_)
+							new
+						end
+
+						def status
+							:job_status
+						end
 					end
 
-					if defined?(Tint::BuildJob)
-						Tint::OldBuildJob = Tint::BuildJob
-					end
-
-					Tint::DB = FakeDB.new
-					Tint::BuildJob = FakeBuildJob.new
-				end
-
-				after do
-					Tint.send(:remove_const, :DB)
-					Tint.send(:remove_const, :BuildJob)
-
-					if defined?(Tint::OldDB)
-						Tint::DB = Tint::OldDB
-						Tint.send(:remove_const, :OldDB)
-					end
-
-					if defined?(Tint::OldBuildJob)
-						Tint::BuildJob = Tint::OldBuildJob
-						Tint.send(:remove_const, :OldBuildJob)
-					end
+					Tint::BuildJob = FakeBuildJob
 				end
 
 				it "should get the job out of the db and return its status" do

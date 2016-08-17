@@ -33,19 +33,19 @@ module Tint
 				get "/:provider/callback" do
 					skip_authorization
 
-					identity = DB[:identities][provider: params[:provider], uid: request.env["omniauth.auth"].uid]
+					identity = Tint.db[:identities][provider: params[:provider], uid: request.env["omniauth.auth"].uid]
 
 					if identity
-						DB[:identities].where(provider: params[:provider], uid: request.env["omniauth.auth"].uid).
+						Tint.db[:identities].where(provider: params[:provider], uid: request.env["omniauth.auth"].uid).
 							update(omniauth: request.env["omniauth.auth"].to_json)
 						session["user"] = identity[:user_id]
 					else
-						session['user'] = DB[:users].insert(
+						session['user'] = Tint.db[:users].insert(
 							fn: request.env["omniauth.auth"].info.name,
 							email: request.env["omniauth.auth"].info.email
 						)
 
-						DB[:identities].insert(
+						Tint.db[:identities].insert(
 							provider: params["provider"],
 							uid: request.env["omniauth.auth"].uid,
 							omniauth: request.env["omniauth.auth"].to_json,
