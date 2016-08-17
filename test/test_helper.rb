@@ -4,8 +4,11 @@ CodeClimate::TestReporter.start
 require "minitest/autorun"
 require "rack/test"
 require "pry"
+require "securerandom"
 
 require_relative "db"
+
+ENV["SESSION_SECRET"] = SecureRandom.uuid
 
 def assert_method_called_on_member(subject, member, method, args=[])
 	mock = MiniTest::Mock.new
