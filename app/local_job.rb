@@ -47,7 +47,8 @@ module Tint
 				tmp.puts(Tint.build_script(
 					job_id,
 					site.to_h[:site_id],
-					site.remote
+					site.remote,
+					Tint.token(job_id)
 				))
 				tmp.flush
 				if system("env -i - PATH=\"#{ENV['PATH']}\" GEM_PATH=\"#{ENV['GEM_PATH']}\" /bin/sh #{Shellwords.escape(tmp.path)}")
