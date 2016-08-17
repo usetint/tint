@@ -82,8 +82,8 @@ module Tint
 		end
 
 		def status
-			status = @options[:status] || if defined?(DB)
-				job = DB[:jobs].where(site_id: @options[:site_id]).order(:created_at).last
+			status = @options[:status] || if Tint.db
+				job = Tint.db[:jobs].where(site_id: @options[:site_id]).order(:created_at).last
 				job && "build_#{BuildJob.get(job[:job_id]).status}".to_sym
 			end
 

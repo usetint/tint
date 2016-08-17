@@ -15,7 +15,7 @@ module Tint
 				else
 					authorize Tint::Site, :index?
 
-					git_providers = DB[:identities].where(user_id: pundit_user[:user_id]).map do |identity|
+					git_providers = Tint.db[:identities].where(user_id: pundit_user[:user_id]).map do |identity|
 						if identity[:provider] == "github"
 							GitProviders::Github.new(identity[:omniauth])
 						end
@@ -32,13 +32,13 @@ module Tint
 				authorize Tint::Site, :create?
 
 				if params[:provider] == "github"
-					identity = DB[:identities][user_id: pundit_user[:user_id], provider: "github"]
+					identity = Tint.db[:identities][user_id: pundit_user[:user_id], provider: "github"]
 					github = GitProviders::Github.new(identity[:omniauth])
 					github.add_deploy_key(params[:remote])
 					github.subscribe(params[:remote], "#{ENV.fetch("APP_URL")}/#{site_id}/sync")
 				end
 
-				site_id = DB[:sites].insert(
+				site_id = Tint.db[:sites].insert(
 					user_id: pundit_user[:user_id],
 					fn: params[:fn],
 					remote: params[:remote]
@@ -61,7 +61,7 @@ module Tint
 				put "/" do
 					authorize site, :update?
 
-					DB[:sites].where(site_id: params[:site]).update(
+					Tint.db[:sites].where(site_id: params[:site]).update(
 						fn: params[:fn],
 						remote: params[:remote],
 					)
@@ -75,7 +75,7 @@ module Tint
 					authorize site, :destroy?
 
 					site.clear_cache!
-					DB[:sites].where(site_id: params[:site]).delete
+					Tint.db[:sites].where(site_id: params[:site]).delete
 
 					redirect to("/")
 				end

@@ -7,6 +7,7 @@ require "sinatra/namespace"
 require "slim"
 
 require_relative "../site"
+require_relative "../db"
 
 module Tint
 	module Controllers
@@ -33,7 +34,7 @@ module Tint
 				if ENV['SITE_PATH']
 					{ user_id: 1 }
 				else
-					DB[:users][user_id: session['user'].to_i] if session['user']
+					Tint.db[:users][user_id: session['user'].to_i] if session['user']
 				end
 			end
 
@@ -51,7 +52,7 @@ module Tint
 				if ENV['SITE_PATH']
 					LocalJob.get(params['site']).site
 				else
-					Tint::Site.new(DB[:sites][site_id: params['site'].to_i])
+					Tint::Site.new(Tint.db[:sites][site_id: params['site'].to_i])
 				end
 			end
 
