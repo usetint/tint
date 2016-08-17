@@ -26,21 +26,17 @@ describe Tint::Test do
 		let(:subject) { Tint::Test::Table }
 
 		describe "#==" do
-			describe "when rows are equal" do
-				let(:table1) { subject.new(data[:sites]) }
-				let(:table2) { subject.new(data[:sites]) }
+			[
+				[:sites, :sites, :assert_equal, nil],
+				[:sites, :users, :refute_equal, "not"]
+			].each do |row1, row2, assertion, message|
+				describe "when #{message} equal" do
+					let(:table1) { subject.new(data[row1]) }
+					let(:table2) { subject.new(data[row2]) }
 
-				it "should be equal" do
-					assert_equal(table1, table2)
-				end
-			end
-
-			describe "when rows are not equal" do
-				let(:table1) { subject.new(data[:sites]) }
-				let(:table2) { subject.new(data[:users]) }
-
-				it "should not be equal" do
-					refute_equal(table1, table2)
+					it "should be #{message} true" do
+						self.send(assertion, table1, table2)
+					end
 				end
 			end
 		end
