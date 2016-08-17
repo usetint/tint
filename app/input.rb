@@ -94,7 +94,7 @@ module Tint
 
 		class MultipleSelect < Select
 			def value
-				Array(@value)
+				Array(super)
 			end
 		end
 	end

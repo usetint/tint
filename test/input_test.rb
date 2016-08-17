@@ -192,4 +192,26 @@ describe Tint::Input do
 			end
 		end
 	end
+
+	describe Tint::Input::MultipleSelect do
+		let(:subject) { Tint::Input::MultipleSelect.new(nil, nil, tvalue, nil) }
+
+		describe "#value" do
+			describe "when value is nil" do
+				let(:tvalue) { nil }
+
+				it "should return an empty array" do
+					assert_equal([], subject.value)
+				end
+			end
+
+			describe "when value is an array" do
+				let(:tvalue) { [:one, :two, :three] }
+
+				it "should return it" do
+					assert_equal(tvalue, subject.value)
+				end
+			end
+		end
+	end
 end
