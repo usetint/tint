@@ -1,9 +1,11 @@
 require "omniauth"
 require "omniauth-github"
+require "omniauth-gitlab"
 require "omniauth-indieauth"
 
-require_relative "base"
+require_relative "../future"
 require_relative "../tint_omniauth" # Monkeypatch
+require_relative "base"
 
 module Tint
 	module Controllers
@@ -15,6 +17,18 @@ module Tint
 
 				if ENV['APP_URL']
 					provider :indieauth, client_id: ENV['APP_URL']
+
+					provider :gitlab, redirect_url: "#{ENV['APP_URL']}/auth/gitlab/callback", setup: ->(env) {
+						if env.dig("rack.request.form_hash", "site")
+							env['omniauth.strategy'].options[:client_id] = env.dig("rack.request.form_hash", "client_id")
+							env['omniauth.strategy'].options[:client_secret] = env.dig("rack.request.form_hash", "client_secret")
+							env['omniauth.strategy'].options[:site] = env.dig("rack.request.form_hash", "site")
+						else
+							env['omniauth.strategy'].options[:client_id] = env.dig("rack.session", "omniauth.params", "client_id")
+							env['omniauth.strategy'].options[:client_secret] = env.dig("rack.session", "omniauth.params", "client_secret")
+							env['omniauth.strategy'].options[:site] = env.dig("rack.session", "omniauth.params", "site")
+						end
+					}
 				end
 			end
 
@@ -33,10 +47,18 @@ module Tint
 				get "/:provider/callback" do
 					skip_authorization
 
-					identity = Tint.db[:identities][provider: params[:provider], uid: request.env["omniauth.auth"].uid]
+					omniauth = request.env["omniauth.params"]
+					uid = request.env["omniauth.auth"].uid
+
+					if params[:provider] == "gitlab"
+						uid = "#{omniauth["site"]}:#{uid}"
+						request.env["omniauth.auth"].merge!(site: omniauth["site"])
+					end
+
+					identity = Tint.db[:identities][provider: params[:provider], uid: uid]
 
 					if identity
-						Tint.db[:identities].where(provider: params[:provider], uid: request.env["omniauth.auth"].uid).
+						Tint.db[:identities].where(provider: params[:provider], uid: uid).
 							update(omniauth: request.env["omniauth.auth"].to_json)
 						session["user"] = identity[:user_id]
 					else
@@ -47,7 +69,7 @@ module Tint
 
 						Tint.db[:identities].insert(
 							provider: params["provider"],
-							uid: request.env["omniauth.auth"].uid,
+							uid: uid,
 							omniauth: request.env["omniauth.auth"].to_json,
 							user_id: session["user"]
 						)
