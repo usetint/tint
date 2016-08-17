@@ -1,3 +1,4 @@
+require "digest"
 require "github_api"
 require "json"
 
@@ -33,6 +34,16 @@ module Tint
 				)
 			rescue ::Github::Error::UnprocessableEntity => e
 				raise e unless e.data[:errors].find { |err| err[:message] == "key is already in use" }
+			end
+
+			def subscribe(remote, callback)
+				match_data = remote.match(/github\.com:([^\/]+)\/(.+)\.git$/)
+				@github.repos.pubsubhubbub.subscribe(
+					"https://github.com/#{match_data[1]}/#{match_data[2]}/events/push",
+					callback,
+					verify: 'sync',
+					secret: Digest::SHA256.hexdigest("github#{ENV.fetch('SESSION_SECRET')}")
+				)
 			end
 		end
 	end

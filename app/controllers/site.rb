@@ -33,7 +33,9 @@ module Tint
 
 				if params[:provider] == "github"
 					identity = DB[:identities][user_id: pundit_user[:user_id], provider: "github"]
-					GitProviders::Github.new(identity[:omniauth]).add_deploy_key(params[:remote])
+					github = GitProviders::Github.new(identity[:omniauth])
+					github.add_deploy_key(params[:remote])
+					github.subscribe(params[:remote], "#{ENV.fetch("APP_URL")}/#{site_id}/sync")
 				end
 
 				site_id = DB[:sites].insert(

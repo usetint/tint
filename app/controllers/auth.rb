@@ -10,7 +10,7 @@ module Tint
 		class Auth < Base
 			use OmniAuth::Builder do
 				if ENV['GITHUB_KEY']
-					provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: "user,repo"
+					provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: "user,repo,write:repo_hook"
 				end
 
 				if ENV['APP_URL']
