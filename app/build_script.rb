@@ -2,7 +2,7 @@ require "digest"
 require "shellwords"
 
 module Tint
-	def self.build_script(job_id, site_id, remote)
+	def self.build_script(job_id, site_id, remote, token)
 		job_id = Shellwords.escape(job_id.to_s)
 		site_id = Shellwords.escape(site_id.to_s)
 		remote = Shellwords.escape(remote.to_s)
@@ -28,7 +28,7 @@ module Tint
 		cd /tmp
 		tar --posix --one-file-system --owner=33 --group=33 \\
 			-cf #{tar} #{job_id}/
-		curl -u #{job_id}:#{Tint.token(job_id)} \\
+		curl -u #{job_id}:#{token} \\
 			#{app_url}/#{site_id}/deploy \\
 			--data-binary @#{tar}
 

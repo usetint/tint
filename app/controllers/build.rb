@@ -19,7 +19,8 @@ module Tint
 				Tint.build_script(
 					payload['job']['id'],
 					payload['site']['site_id'],
-					payload['site']['remote']
+					payload['site']['remote'],
+					payload['job']['token']
 				)
 			end
 
