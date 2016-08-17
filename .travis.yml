@@ -5,6 +5,7 @@ addons:
   code_climate:
     repo_token: cf0ed76b4b3a0473d6927b50f507c89103d9c6502f10601ef259ecffe5817eef
 language: ruby
+cache: bundler
 rvm:
 - 2.1.0
 - 2.2.0
