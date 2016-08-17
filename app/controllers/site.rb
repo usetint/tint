@@ -1,9 +1,11 @@
 require "pathname"
 require "shellwords"
 
-require_relative "base"
-require_relative "../site"
+require_relative "../git_providers/git_providers"
 require_relative "../git_providers/github"
+require_relative "../git_providers/gitlab"
+require_relative "../site"
+require_relative "base"
 
 module Tint
 	module Controllers
@@ -16,9 +18,7 @@ module Tint
 					authorize Tint::Site, :index?
 
 					git_providers = Tint.db[:identities].where(user_id: pundit_user[:user_id]).map do |identity|
-						if identity[:provider] == "github"
-							GitProviders::Github.new(identity[:omniauth])
-						end
+						GitProviders.build(identity[:provider], identity[:omniauth])
 					end.compact
 
 					sites = policy_scope(Tint::Site)
@@ -31,18 +31,23 @@ module Tint
 			post "/" do
 				authorize Tint::Site, :create?
 
-				if params[:provider] == "github"
-					identity = Tint.db[:identities][user_id: pundit_user[:user_id], provider: "github"]
-					github = GitProviders::Github.new(identity[:omniauth])
-					github.add_deploy_key(params[:remote])
-					github.subscribe(params[:remote], "#{ENV.fetch("APP_URL")}/#{site_id}/sync")
-				end
+				site_id = Tint.db.transaction do
+					site_id = Tint.db[:sites].insert(
+						user_id: pundit_user[:user_id],
+						fn: params[:fn],
+						remote: params[:remote]
+					)
 
-				site_id = Tint.db[:sites].insert(
-					user_id: pundit_user[:user_id],
-					fn: params[:fn],
-					remote: params[:remote]
-				)
+					if params[:provider]
+						identity = Tint.db[:identities][user_id: pundit_user[:user_id], provider: params[:provider]]
+						if identity && (provider = GitProviders.build(identity[:provider], identity[:omniauth]))
+							provider.add_deploy_key(params[:remote])
+							provider.subscribe(params[:remote], "#{ENV.fetch("APP_URL")}/#{site_id}/sync")
+						end
+					end
+
+					site_id
+				end
 
 				redirect to("/#{site_id}/")
 			end

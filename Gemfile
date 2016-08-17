@@ -6,6 +6,7 @@ gem "sinatra-contrib"
 gem "activesupport", "< 5.0.0" # For pundit
 gem "git", github: "singpolyma/ruby-git"
 gem "github_api"
+gem "gitlab"
 gem "omniauth"
 gem "omniauth-github"
 gem "omniauth-gitlab"
