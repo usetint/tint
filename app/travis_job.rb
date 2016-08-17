@@ -13,7 +13,7 @@ module Tint
 				@site = site_or_payload
 			else
 				@payload = site_or_payload
-				@site = Tint::Site.new(DB[:sites][site_id: @payload['site']['site_id']])
+				@site = Tint::Site.new(Tint.db[:sites][site_id: @payload['site']['site_id']])
 			end
 
 			@job_id = job_id

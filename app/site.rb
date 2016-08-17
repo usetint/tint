@@ -98,7 +98,7 @@ module Tint
 			job = BuildJob.new(self)
 			job.enqueue!
 
-			DB[:jobs].insert(job_id: job.job_id, site_id: @options[:site_id], created_at: Time.now) if defined?(DB)
+			Tint.db[:jobs].insert(job_id: job.job_id, site_id: @options[:site_id], created_at: Time.now) if Tint.db
 
 			job
 		end
@@ -111,14 +111,14 @@ module Tint
 				# Make sure the UI can tell we are ready to rock
 				open(cache_path.join('.git').join('tint-cloned'), 'w').close
 			rescue
-				DB[:sites].where(site_id: @options[:site_id]).update(status: "clone_failed")
+				Tint.db[:sites].where(site_id: @options[:site_id]).update(status: "clone_failed")
 
 				# Something went wrong.  Nuke the cache
 				clear_cache!
 				return
 			end
 
-			DB[:sites].where(site_id: @options[:site_id]).update(status: nil)
+			Tint.db[:sites].where(site_id: @options[:site_id]).update(status: nil)
 
 			begin
 				# Now, fetch the history for future use

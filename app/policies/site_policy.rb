@@ -21,7 +21,7 @@ module Tint
 
 		class Scope < Scope
 			def initialize(user, scope)
-				super(user, scope == Tint::Site ? DB[:sites] : scope)
+				super(user, scope == Tint::Site ? Tint.db[:sites] : scope)
 			end
 
 			def resolve
