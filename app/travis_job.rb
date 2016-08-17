@@ -2,6 +2,7 @@ require "json"
 require "pathname"
 require "securerandom"
 
+require_relative "db"
 require_relative "path_helpers"
 
 module Tint
