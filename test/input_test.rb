@@ -152,43 +152,100 @@ describe Tint::Input do
 	end
 
 	describe ".scalarish?" do
-		subject { Tint::Input.scalarish?(tvalue) }
+		subject { Tint::Input.scalarish?(val) }
 
 		describe "when value is a string" do
-			let(:tvalue) { "totally a scalar" }
+			let(:val) { "totally a scalar" }
 
 			it { assert(subject) }
 		end
 
 		describe "when value is a number" do
-			let(:tvalue) { 1234 }
+			let(:val) { 1234 }
 
 			it { assert(subject) }
 		end
 
 		describe "when value is a hash" do
-			let(:tvalue) { {} }
+			let(:val) { {} }
 
 			it { assert(!subject) }
 		end
 
 		describe "when value is an array" do
 			describe "when the array is all scalar values" do
-				let(:tvalue) { ["one", "two"] }
+				let(:val) { ["one", "two"] }
 
 				it { assert(subject) }
 			end
 
 			describe "when the array is all non-scalar values" do
-				let(:tvalue) { [{}, {}] }
+				let(:val) { [{}, {}] }
 
 				it { assert_equal(false, subject) }
 			end
 
 			describe "when the array is a mix of scalar and non-scalar values" do
-				let(:tvalue) { [{}, "one"] }
+				let(:val) { [{}, "one"] }
 
 				it { assert_equal(false, subject) }
+			end
+		end
+	end
+
+	describe Tint::Input::Select do
+		let(:subject) { Tint::Input::Select.new(nil, nil, val, nil) }
+
+		describe "#options" do
+			[
+				[
+					[1, 2, 3],
+					[[1, 1, true], [2, 2, false], [3, 3, false]],
+					"single value"
+				],
+				[
+					{ 1 => "one", 2 => "two", 3 => "three" },
+					[[1, "one", true], [2, "two", false], [3, "three", false]],
+					"value and display"
+				]
+			].each do |options, expected, desc|
+				describe "when options are a #{desc}" do
+					let(:options) { options }
+
+					["1", 1].each do |value|
+						describe "when value is a #{value.class}" do
+							let(:val) { value }
+
+							it "should return the options with the value selected" do
+								Tint::Input.stub(:select_options, options) do
+									assert_equal(expected, subject.options)
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	describe Tint::Input::MultipleSelect do
+		let(:subject) { Tint::Input::MultipleSelect.new(nil, nil, val, nil) }
+
+		describe "#value" do
+			describe "when value is nil" do
+				let(:val) { nil }
+
+				it "should return an empty array" do
+					assert_equal([], subject.value)
+				end
+			end
+
+			describe "when value is an array" do
+				let(:val) { [:one, :two, :three] }
+
+				it "should return it" do
+					assert_equal(val, subject.value)
+				end
 			end
 		end
 	end

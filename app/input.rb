@@ -76,7 +76,11 @@ module Tint
 
 		class Select < Base
 			def options
-				format_options(Input.select_options(site, ActiveSupport::Inflector.pluralize(key.to_s)))
+				format_options(
+					Input.select_options(site, ActiveSupport::Inflector.pluralize(key.to_s))
+				).map do |v, d|
+					[v, d, Array(value).map(&:to_s).include?(v.to_s)]
+				end
 			end
 
 		protected
@@ -94,7 +98,7 @@ module Tint
 
 		class MultipleSelect < Select
 			def value
-				Array(@value)
+				Array(super)
 			end
 		end
 	end

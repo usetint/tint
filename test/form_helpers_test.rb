@@ -83,6 +83,10 @@ describe Tint::FormHelpers do
 						it "should return the parsed Date at that key" do
 							assert_equal({ key => parsed }, subject.process(data, dir))
 						end
+
+						it "should return a Hash" do
+							assert_equal(Hash, subject.process(data, dir).class)
+						end
 					end
 				end
 			end

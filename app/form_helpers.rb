@@ -78,7 +78,7 @@ module Tint
 				merge(self) do |k,v|
 					v = Date.parse(v) if is_date?(k, v)
 					FormHelpers.process(v, dir)
-				end
+				end.to_h
 			end
 
 			def is_date?(field_name, value)
