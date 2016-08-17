@@ -7,16 +7,16 @@ module Tint
 		end
 
 		def files
-			return @files if @files
+			@files ||= begin
+				files = exist? ? children(false).map(&method(:resource)) : []
 
-			files = exist? ? children(false).map(&method(:resource)) : []
+				if relative_path.to_s != "."
+					parent = self.class.new(site, relative_path.dirname, "..")
+					files.unshift(parent)
+				end
 
-			if relative_path.to_s != "."
-				parent = self.class.new(site, relative_path.dirname, "..")
-				files.unshift(parent)
+				files.sort_by { |f| [f.directory? ? 0 : 1, f.name] }
 			end
-
-			@files = files.sort_by { |f| [f.directory? ? 0 : 1, f.name] }
 		end
 	end
 end

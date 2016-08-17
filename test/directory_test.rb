@@ -15,4 +15,29 @@ describe Tint::Directory do
 			assert_equal(Tint::Directory.new(site, parent), subject.parent)
 		end
 	end
+
+	describe "#files" do
+		let(:sub) { Tint::Directory.new(site, dir) }
+		let(:dir) do
+			dir = subject.path.join("dirtest")
+			dir.mkpath
+			dir
+		end
+
+		before do
+			files = [:one, :two, :three, :four].map { |name| dir.join(name.to_s) }
+			FileUtils.touch files
+		end
+
+		after do
+			dir.rmtree
+		end
+
+		it "should list and sort files and directories" do
+			assert_equal(
+				["..", "four", "one", "three", "two"],
+				sub.files.map(&:name)
+			)
+		end
+	end
 end
