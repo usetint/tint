@@ -1,4 +1,4 @@
 input type="hidden" name="#{name}[]"
 select name="#{name}[]" multiple="multiple"
-	- options.each do |ovalue, display|
-		option value=ovalue selected=("selected" if value.map(&:to_s).include?(ovalue.to_s)) = display
+	- options.each do |value, display, selected|
+		option value=value selected=("selected" if selected) = display

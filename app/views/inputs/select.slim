@@ -1,4 +1,4 @@
 select name=name
 	option
-	- options.each do |option, display|
-		option value=option selected=("selected" if option.to_s == value) = display
+	- options.each do |value, display, selected|
+		option value=value selected=("selected" if selected) = display
