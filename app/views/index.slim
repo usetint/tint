@@ -20,7 +20,7 @@ form method="POST" action="/"
 		h1 = "On #{provider_name}"
 
 		ul
-			- provider.repositories.each do |repo|
+			- provider.repositories(exclude: repos).each do |repo|
 				li
 					a href=repo[:link] title=repo[:description] = repo[:fn]
 					form method="POST" action="/"
