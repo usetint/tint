@@ -24,10 +24,10 @@ module Tint
 			end
 
 			def add_deploy_key(remote)
-				match_data = remote.match(/github\.com:([^\/]+)\/(.+)\.git$/)
+				user, repo = GitProviders.extract_from_remote(remote)
 				@github.repos.keys.create(
-					user: match_data[1],
-					repo: match_data[2],
+					user: user,
+					repo: repo,
 					key: ENV.fetch("SSH_PUBLIC"),
 					title: "tint",
 					read_only: false
@@ -37,9 +37,9 @@ module Tint
 			end
 
 			def subscribe(remote, callback)
-				match_data = remote.match(/github\.com:([^\/]+)\/(.+)\.git$/)
+				user, repo = GitProviders.extract_from_remote(remote)
 				@github.repos.pubsubhubbub.subscribe(
-					"https://github.com/#{match_data[1]}/#{match_data[2]}/events/push",
+					"https://github.com/#{user}/#{repo}/events/push",
 					callback,
 					verify: 'sync',
 					secret: Digest::SHA256.hexdigest("github#{ENV.fetch('SESSION_SECRET')}")

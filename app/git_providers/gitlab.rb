@@ -38,9 +38,9 @@ module Tint
 			end
 
 			def subscribe(remote, callback)
-				repo = remote.match(/:([^\/]+\/.+)\.git$/)[1]
+				user, repo = GitProviders.extract_from_remote(remote)
 				@gitlab.add_project_hook(
-					repo.gsub(/\//, '%2F'),
+					"#{user}%2F#{repo}",
 					callback,
 					push_events: 1
 				)
