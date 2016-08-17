@@ -2,29 +2,37 @@ require "json"
 require "securerandom"
 require "shellwords"
 
+require_relative "db"
+
 module Tint
 	class LocalJob
-		attr_reader :site, :status
+		attr_reader :job_id, :site, :status
 
-		def initialize(site)
+		def initialize(site, job_id=nil)
 			@site = site
+			@job_id = job_id || SecureRandom.uuid
 		end
 
-		def job_id
-			"local_job"
+		def self.local_site(site_id=nil)
+			Tint::Site.new(
+				site_id: (site_id || 1).to_i,
+				user_id: 1,
+				remote: "file://#{Pathname.new(ENV.fetch('SITE_PATH')).realpath}",
+				cache_path: Pathname.new(ENV.fetch('SITE_PATH')).realpath,
+				deploy_path: Pathname.new(ENV.fetch('PREFIX')).realpath,
+				cloned: true,
+				fn: "Local Site"
+			)
 		end
 
 		def self.get(job_id)
 			LocalJob.new(
-				Tint::Site.new(
-					site_id: (job_id || 1).to_i,
-					user_id: 1,
-					remote: "file://#{Pathname.new(ENV['SITE_PATH']).realpath}",
-					cache_path: Pathname.new(ENV['SITE_PATH']).realpath,
-					deploy_path: Pathname.new(ENV['PREFIX']).realpath,
-					cloned: true,
-					fn: "Local Site"
-				)
+				if Tint.db
+					Tint::Site.new(Tint.db[:jobs].join(:sites, site_id: :site_id)[job_id: job_id])
+				else
+					local_site
+				end,
+				job_id
 			)
 		end
 

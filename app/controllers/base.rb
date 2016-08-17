@@ -50,7 +50,7 @@ module Tint
 
 			def site
 				if ENV['SITE_PATH']
-					LocalJob.get(params['site']).site
+					LocalJob.local_site(params['site'])
 				else
 					Tint::Site.new(Tint.db[:sites][site_id: params['site'].to_i])
 				end
