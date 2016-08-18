@@ -13,7 +13,7 @@ describe Tint::Controllers::File do
 		{
 			site_id: 1,
 			user_id: 1,
-			cache_path: Pathname.new(__FILE__).dirname.join("data"),
+			cache_path: Pathname.new(__FILE__).dirname.join("data/site"),
 			fn: "Test Site"
 		}
 	end
@@ -34,6 +34,20 @@ describe Tint::Controllers::File do
 	describe "files root" do
 		it "should render without error" do
 			get site.route("files"), {}, {
+				"rack.session" => { "user" => site_options[:user_id] }
+			}
+			assert(last_response.ok?)
+		end
+	end
+
+	describe "getting a text file" do
+		let(:file) { site.cache_path.join("index.html") }
+
+		before { file.open("w") { |f| f.write "hello!"  } }
+		after { file.delete }
+
+		it "should render without error" do
+			get site.route("files/index.html"), {}, {
 				"rack.session" => { "user" => site_options[:user_id] }
 			}
 			assert(last_response.ok?)

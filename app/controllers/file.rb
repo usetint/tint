@@ -69,7 +69,7 @@ module Tint
 					authorize resource, :edit?
 
 					frontmatter = resource.frontmatter? && resource.frontmatter
-					slim :text, locals: {
+					html = slim :text, locals: {
 						frontmatter: frontmatter,
 						wysiwyg: resource.markdown?,
 						path: resource.route
