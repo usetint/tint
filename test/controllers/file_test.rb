@@ -26,31 +26,23 @@ describe Tint::Controllers::File do
 	end
 
 	let(:site) { Tint::Site.new(site_options) }
+	let(:file) { site.cache_path.join("index.html") }
 
 	before do
 		Tint.db.tables = database
+		file.open("w") { |f| f.write "hello!"  }
 	end
 
-	describe "files root" do
-		it "should render without error" do
-			get site.route("files"), {}, {
-				"rack.session" => { "user" => site_options[:user_id] }
-			}
-			assert(last_response.ok?)
-		end
-	end
+	after { file.delete }
 
-	describe "getting a text file" do
-		let(:file) { site.cache_path.join("index.html") }
-
-		before { file.open("w") { |f| f.write "hello!"  } }
-		after { file.delete }
-
-		it "should render without error" do
-			get site.route("files/index.html"), {}, {
-				"rack.session" => { "user" => site_options[:user_id] }
-			}
-			assert(last_response.ok?)
+	["files", "files/index.html"].each do |route|
+		describe "get /#{route}" do
+			it "should render without error" do
+				get site.route(route), {}, {
+					"rack.session" => { "user" => site_options[:user_id] }
+				}
+				assert(last_response.ok?)
+			end
 		end
 	end
 end
