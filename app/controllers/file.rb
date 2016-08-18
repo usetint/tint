@@ -75,7 +75,7 @@ module Tint
 						path: resource.route
 					}
 
-					stream_into_element("<textarea name=\"content\">", html, resource)
+					stream_into_element("<textarea name=\"content\">", html, resource, :stream_content)
 				end
 
 				get "/?*" do
@@ -183,12 +183,12 @@ module Tint
 				site.resource(params[:splat].join("/"))
 			end
 
-			def stream_into_element(el, html, resource)
+			def stream_into_element(el, html, resource, stream_method=:stream)
 				stream do |out|
 					top, bottom = html.split(el, 2)
 					out.puts top
 					out.puts el
-					resource.stream { |*args| out.puts args.first }
+					resource.public_send(stream_method) { |*args| out.puts args.first }
 					out.puts bottom
 				end
 			end
