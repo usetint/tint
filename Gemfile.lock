@@ -131,7 +131,7 @@ GEM
     temple (0.7.7)
     terminal-table (1.6.0)
     thread_safe (0.3.5)
-    tilt (2.0.5)
+    tilt (1.4.0)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
 
@@ -163,6 +163,7 @@ DEPENDENCIES
   slim
   sprockets
   sqlite3
+  tilt (= 1.4)
 
 BUNDLED WITH
    1.12.5

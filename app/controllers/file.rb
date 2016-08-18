@@ -56,7 +56,7 @@ module Tint
 
 				get "/?*", if: -> { resource.directory? || !resource.exist? } do
 					authorize resource, :index?
-					slim :index, locals: { directory: resource }
+					respond_with :index, resource
 				end
 
 				get "/?*", if: -> { resource.yml? || !resource.content? } do

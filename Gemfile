@@ -17,6 +17,7 @@ gem "sequel"
 gem "sinatra-pundit"
 gem "slim"
 gem "sprockets"
+gem "tilt", "1.4"
 
 group :development do
 	gem "awesome_print"

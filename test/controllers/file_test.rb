@@ -27,6 +27,7 @@ describe Tint::Controllers::File do
 
 	let(:site) { Tint::Site.new(site_options) }
 	let(:file) { site.cache_path.join("index.html") }
+	let(:session) { { "rack.session" => { "user" => site_options[:user_id] } } }
 
 	before do
 		Tint.db.tables = database
@@ -38,11 +39,16 @@ describe Tint::Controllers::File do
 	["files", "files/index.html"].each do |route|
 		describe "get /#{route}" do
 			it "should render without error" do
-				get site.route(route), {}, {
-					"rack.session" => { "user" => site_options[:user_id] }
-				}
-				assert(last_response.ok?)
+				response = get site.route(route), {}, session.merge("HTTP_ACCEPT" => "text/html")
+				assert(response.ok?)
 			end
+		end
+	end
+
+	describe "get /files json" do
+		it "should return content type json" do
+			response = get site.route("files.json"), {}, session.merge("HTTP_ACCEPT" => "application/json")
+			assert_equal("application/json", response.headers["Content-Type"])
 		end
 	end
 end

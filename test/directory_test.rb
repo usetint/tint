@@ -16,7 +16,7 @@ describe Tint::Directory do
 		end
 	end
 
-	describe "#files" do
+	describe "#children" do
 		let(:sub) { Tint::Directory.new(site, dir) }
 		let(:dir) do
 			dir = subject.path.join("dirtest")
@@ -36,7 +36,7 @@ describe Tint::Directory do
 		it "should list and sort files and directories" do
 			assert_equal(
 				["..", "four", "one", "three", "two"],
-				sub.files.map(&:name)
+				sub.children.map(&:name)
 			)
 		end
 	end

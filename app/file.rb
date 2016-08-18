@@ -74,8 +74,8 @@ module Tint
 			YAML.safe_load(open(path), [Date, Time])
 		end
 
-		def to_directory
-			Tint::Directory.new(site, relative_path)
+		def to_h(_=nil)
+			super.merge(mime: mime)
 		end
 
 	protected
