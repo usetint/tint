@@ -1,0 +1,22 @@
+{
+  "name": "tint",
+  "homepage": "https://github.com/ericroberts/tint",
+  "authors": [
+    "Eric Roberts <ericroberts@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+	"directory": "app/public/components",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "mustache.js": "mustache#^2.2.1"
+  }
+}
