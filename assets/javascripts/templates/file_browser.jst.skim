@@ -1,0 +1,8 @@
+form action=@route method="post" enctype="multipart/form-data"
+	input type="file" name="file" required="required"
+	button type="submit" Upload
+
+ol
+	- for child in @children
+		li: a href=child.route data-type=child.type data-path=child.path = child.name
+

@@ -1,7 +1,6 @@
 require "pathname"
 require "securerandom"
 require "slim"
-require "slim/mustache"
 
 require_relative "base"
 require_relative "../input"
