@@ -1,6 +1,7 @@
 require "pathname"
 require "securerandom"
 require "slim"
+require "slim/mustache"
 
 require_relative "base"
 require_relative "../input"
@@ -62,7 +63,11 @@ module Tint
 				get "/?*", if: -> { resource.yml? || !resource.content? } do
 					authorize resource, :edit?
 
-					slim :yml, locals: { data: resource.frontmatter, path: resource.route }
+					slim :yml, locals: {
+						data: resource.frontmatter,
+						path: resource.route,
+						root:	site.route("files")
+					}
 				end
 
 				get "/?*", if: -> { resource.text? } do

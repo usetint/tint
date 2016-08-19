@@ -16,6 +16,7 @@ gem "sass"
 gem "sequel"
 gem "sinatra-pundit"
 gem "slim"
+gem "slim-mustache"
 gem "sprockets"
 gem "tilt", "1.4"
 

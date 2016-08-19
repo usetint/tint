@@ -35,8 +35,8 @@ window.addEventListener("load", function() {
 					var reader = new FileReader();
 
 					reader.onload = function (e) {
-						var image = input.previousElementSibling.nodeName === "IMG" &&
-												input.previousElementSibling;
+						var image = input.previousElementSibling.previousElementSibling.nodeName === "IMG" &&
+												input.previousElementSibling.previousElementSibling;
 
 						if(!image) {
 							image = document.createElement("img");

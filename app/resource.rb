@@ -54,6 +54,7 @@ module Tint
 			{
 				name: name,
 				route: route,
+				path: relative_path.to_s,
 				type: self.class.name.to_s.split("::").last.downcase
 			}
 		end

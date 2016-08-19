@@ -8,7 +8,7 @@
   "main": "",
   "license": "MIT",
   "private": true,
-	"directory": "app/public/components",
+  "directory": "app/public/components",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -17,6 +17,6 @@
     "tests"
   ],
   "dependencies": {
-    "mustache.js": "mustache#^2.2.1"
+    "mustache.js": "^2.2.1"
   }
 }

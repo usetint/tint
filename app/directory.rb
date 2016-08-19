@@ -21,7 +21,9 @@ module Tint
 
 		def to_h(include_children=true)
 			if include_children
-				super.merge(children: children.map { |f| f.to_h(false) })
+				super.merge(
+					children: children.map { |f| f.to_h(false) }
+				)
 			else
 				super
 			end
