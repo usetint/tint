@@ -68,7 +68,18 @@ window.addEventListener("load", function() {
 	}
 
 	Array.prototype.forEach.call(document.querySelectorAll("input[type='file']"), function(fileInput) {
-		fileInput.addEventListener("click", function(event) {
+		var pathInput = fileInput.previousElementSibling;
+
+		var button = document.createElement("button");
+		button.type = "button";
+		button.textContent = "Choose File";
+
+		fileInput.parentElement.insertBefore(button, fileInput.nextSibling);
+
+		fileInput.style.display = "none";
+		pathInput.style.display = "none";
+
+		button.addEventListener("click", function(event) {
 			event.preventDefault();
 			getPath().then(function(path) {
 				fileInput.previousElementSibling.value = path;
