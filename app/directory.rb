@@ -22,7 +22,7 @@ module Tint
 					children.unshift(parent)
 				end
 
-				children.sort_by { |f| [f.directory? ? 0 : 1, f.name] }
+				children.sort_by { |f| [f.directory? ? 0 : 1, f.fn] }
 			end
 		end
 

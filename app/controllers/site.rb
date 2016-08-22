@@ -66,10 +66,13 @@ module Tint
 				put "/" do
 					authorize site, :update?
 
-					Tint.db[:sites].where(site_id: params[:site]).update(
-						fn: params[:fn],
-						remote: params[:remote],
-					)
+					updated_attributes = [:fn, :remote, :show_config_warning].select { |key|
+						params.has_key?(key.to_s)
+					}.each_with_object({}) { |key, update|
+						update[key] = translate(params[key])
+					}
+
+					Tint.db[:sites].where(site_id: params[:site]).update(updated_attributes)
 
 					site.clear_cache!
 
@@ -83,6 +86,19 @@ module Tint
 					Tint.db[:sites].where(site_id: params[:site]).delete
 
 					redirect to("/")
+				end
+			end
+
+		protected
+
+			def translate(value)
+				case value
+				when "false"
+					false
+				when "true"
+					true
+				else
+					value
 				end
 			end
 		end

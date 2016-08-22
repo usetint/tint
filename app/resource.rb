@@ -8,10 +8,10 @@ module Tint
 
 		def_delegators :site, :user_id
 
-		def initialize(site, relative_path, name=nil)
+		def initialize(site, relative_path, fn=nil)
 			@site = site
 			@relative_path = Pathname.new(relative_path).cleanpath
-			@name = name
+			@fn = fn
 		end
 
 		def parent
@@ -39,7 +39,11 @@ module Tint
 		end
 
 		def name
-			@name ||= relative_path == Pathname.new(".") ? "files" : path.basename.to_s
+			path.basename.to_s
+		end
+
+		def fn
+			@fn ||= path == site.cache_path ? "files" : name
 		end
 
 		def respond_to?(method)
@@ -52,7 +56,7 @@ module Tint
 
 		def to_h(_=nil)
 			{
-				name: name,
+				fn: fn,
 				route: route,
 				path: relative_path.to_s,
 				type: self.class.name.to_s.split("::").last.downcase

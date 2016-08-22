@@ -17,10 +17,6 @@ module Tint
 				condition { request.query_string == val }
 			end
 
-			def self.params(key)
-				condition { !!params[key] }
-			end
-
 			def self.if(block)
 				condition(&block)
 			end
@@ -156,6 +152,23 @@ module Tint
 					redirect to(resource.parent.route)
 				end
 
+				["Makefile", ".tint.yml"].each do |template|
+					post "/#{template}", params: :build_system do
+						build_system = valid_build_system(params[:build_system])
+
+						raise ArgumentError, "Must specify a valid build system" unless build_system
+
+						site.commit_with("Created default #{build_system} #{template}") do |dir|
+							FileUtils.cp(
+								Pathname.new(__FILE__).join("../../../templates/#{build_system}/#{template}"),
+								dir.join(template)
+							)
+						end
+
+						redirect to(site.route)
+					end
+				end
+
 				post "/?*", params: :file do
 					authorize resource, :update?
 
@@ -186,6 +199,11 @@ module Tint
 
 		protected
 
+			def valid_build_system(build_system)
+				build_systems = [:jekyll]
+				build_systems.find { |bs| bs.to_s == build_system.to_s }
+			end
+
 			def resource
 				site.resource(params[:splat].join("/"))
 			end
@@ -203,7 +221,8 @@ module Tint
 			def breadcrumbs
 				fragments = Array(params["splat"]).join("/").split("/")
 				breadcrumbs = fragments.each_with_index.map { |_, i| site.resource(fragments[0..i].join("/")) }
-				breadcrumbs.unshift(OpenStruct.new(name: "files", route: site.route("files")))
+				files = OpenStruct.new(fn: "files", route: site.route("files"))
+				[site, files] + breadcrumbs
 			end
 		end
 	end

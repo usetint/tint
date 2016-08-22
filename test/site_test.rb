@@ -373,4 +373,24 @@ describe Tint::Site do
 			end
 		end
 	end
+
+	describe "#makefile?" do
+		describe "when it has a Makefile" do
+			before { FileUtils.touch(subject.cache_path.join("Makefile").to_s) }
+
+			after { FileUtils.rm(subject.cache_path.join("Makefile").to_s, force: true) }
+
+			it "should be true" do
+				assert(subject.makefile?)
+			end
+		end
+
+		describe "when it does not have a Makefile" do
+			before { FileUtils.rm(subject.cache_path.join("Makefile").to_s, force: true) }
+
+			it "should be false" do
+				refute(subject.makefile?)
+			end
+		end
+	end
 end

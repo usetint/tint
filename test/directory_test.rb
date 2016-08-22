@@ -36,7 +36,7 @@ describe Tint::Directory do
 		it "should list and sort files and directories" do
 			assert_equal(
 				["..", "four", "one", "three", "two"],
-				sub.children.map(&:name)
+				sub.children.map(&:fn)
 			)
 		end
 
@@ -45,7 +45,7 @@ describe Tint::Directory do
 			site.stub(:config, { "hidden_paths" => [".*"] }) do
 				assert_equal(
 					["..", "four", "one", "three", "two"],
-					sub.children.map(&:name)
+					sub.children.map(&:fn)
 				)
 			end
 		end
