@@ -90,10 +90,21 @@ window.addEventListener("load", function() {
 				fileInput.previousElementSibling.value = details.path;
 				if(details.image) {
 					var src = "data:" + details.mime +";base64," + details.image;
-					// TODO: make sure we assign this properly (handle case where there is no image)
-					fileInput.previousElementSibling.previousElementSibling.src = src;
+					replaceFileImage(fileInput, src);
 				}
 			});
 		});
 	});
+
+	function replaceFileImage(input, src) {
+		var image = input.previousElementSibling.previousElementSibling.nodeName === "IMG" &&
+		            input.previousElementSibling.previousElementSibling;
+
+		if(!image) {
+			image = document.createElement("img");
+			input.parentElement.insertBefore(image, input.previousElementSibling);
+		}
+
+		image.src = src;
+	}
 });
