@@ -3,30 +3,31 @@ h1 = site.fn
 form method="post" action=site.route("sync")
 	button type="submit" Sync & Build
 
-- unless site.makefile?
-	p.error YOU DO NOT HAVE A MAKEFILE. THIS IS VERY BAD.
-	form method="post" action=site.route("files/Makefile")
-		label
-			| Select your build system
-			select name="build_system"
-				option value="jekyll" Jekyll
-		button type="submit" Add a default Makefile
-
-- if site.show_config_warning? && !site.config_file.exist?
-	p.error You do not have a .tint.yml file. This is not terrible, but maybe you should add one.
-
-	div style="background: #ccc; padding: 1rem"
-		form method="post" action=site.route("files/.tint.yml")
+- if site.cloned?
+	- unless site.makefile?
+		p.error YOU DO NOT HAVE A MAKEFILE. THIS IS VERY BAD.
+		form method="post" action=site.route("files/Makefile")
 			label
 				| Select your build system
 				select name="build_system"
 					option value="jekyll" Jekyll
-			button type="submit" Add a default .tint.yml
+			button type="submit" Add a default Makefile
 
-		form method="post" action=site.route
-			input type="hidden" name="_method" value="PUT"
-			input type="hidden" name="show_config_warning" value="false"
-			button type="submit" Stop telling me about this
+	- if site.show_config_warning? && !site.config_file.exist?
+		p.error You do not have a .tint.yml file. This is not terrible, but maybe you should add one.
+
+		div style="background: #ccc; padding: 1rem"
+			form method="post" action=site.route("files/.tint.yml")
+				label
+					| Select your build system
+					select name="build_system"
+						option value="jekyll" Jekyll
+				button type="submit" Add a default .tint.yml
+
+			form method="post" action=site.route
+				input type="hidden" name="_method" value="PUT"
+				input type="hidden" name="show_config_warning" value="false"
+				button type="submit" Stop telling me about this
 
 - unless ENV["SITE_PATH"]
 	form method="post" action=site.route
