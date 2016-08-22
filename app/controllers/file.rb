@@ -64,8 +64,7 @@ module Tint
 
 					slim :yml, locals: {
 						data: resource.frontmatter,
-						path: resource.route,
-						root:	site.route("files")
+						path: resource.route
 					}
 				end
 
