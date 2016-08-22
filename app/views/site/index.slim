@@ -3,6 +3,15 @@ h1 = site.fn
 form method="post" action=site.route("sync")
 	button type="submit" Sync & Build
 
+- unless site.makefile?
+	p.error YOU DO NOT HAVE A MAKEFILE. THIS IS VERY BAD.
+	form method="post" action=site.route("files/Makefile")
+		label
+			| Select your build system
+			select name="build_system"
+				option value="jekyll" Jekyll
+		button type="submit" Add a default Makefile
+
 - unless ENV["SITE_PATH"]
 	form method="post" action=site.route
 		input type="hidden" name="_method" value="DELETE"

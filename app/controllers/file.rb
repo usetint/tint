@@ -156,6 +156,20 @@ module Tint
 					redirect to(resource.parent.route)
 				end
 
+				post "/Makefile" do
+					build_systems = [:jekyll]
+					build_system = build_systems.find { |bs| params[:build_system] }
+
+					site.commit_with("Created default #{build_system} Makefile") do |dir|
+						FileUtils.cp(
+							Pathname.new(__FILE__).dirname.dirname.dirname.join("templates/#{build_system}/Makefile"),
+							dir.join("Makefile")
+						)
+					end
+
+					redirect to(site.route)
+				end
+
 				post "/?*", params: :file do
 					authorize resource, :update?
 
