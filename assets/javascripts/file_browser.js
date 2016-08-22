@@ -53,7 +53,7 @@ window.addEventListener("load", function() {
 						} else {
 							resolve({
 								path: link.dataset.path,
-								image: link.dataset.image,
+								route: link.href,
 								mime: link.dataset.mime
 							});
 							modal.style.display = "none";
@@ -90,9 +90,8 @@ window.addEventListener("load", function() {
 			event.preventDefault();
 			getFileDetails().then(function(details) {
 				fileInput.previousElementSibling.value = details.path;
-				if(details.image) {
-					var src = "data:" + details.mime +";base64," + details.image;
-					replaceFileImage(fileInput, src);
+				if(details.mime.split("/")[0] === "image") {
+					replaceFileImage(fileInput, details.route);
 				}
 			});
 		});
@@ -107,6 +106,6 @@ window.addEventListener("load", function() {
 			input.parentElement.insertBefore(image, input.previousElementSibling);
 		}
 
-		image.src = src;
+		image.src = src + "?download";
 	}
 });
