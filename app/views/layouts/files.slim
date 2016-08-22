@@ -1,11 +1,9 @@
 nav
 	ul
-		- fragments = (["files"] + Array(params["splat"])).join("/").split("/")
-		- fragments.each_with_index do |fragment, i|
+		- breadcrumbs.each do |fragment|
 			li
-				- if fragment == fragments.last
-					= fragment
+				- if fragment == breadcrumbs.last
+					= fragment.name
 				- else
-					- path = site.route(fragments[0..i].join("/"))
-					a href=path = fragment
+					a href=fragment.route = fragment.name
 == yield

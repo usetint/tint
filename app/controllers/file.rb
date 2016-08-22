@@ -28,7 +28,7 @@ module Tint
 			def slim(template, options)
 				return super(template, options) if template == :error
 
-				super :"layouts/files" do
+				super :"layouts/files", locals: { breadcrumbs: breadcrumbs } do
 					super :"files/#{template}", options
 				end
 			end
@@ -195,6 +195,12 @@ module Tint
 					resource.public_send(stream_method) { |*args| out.puts args.first }
 					out.puts bottom
 				end
+			end
+
+			def breadcrumbs
+				fragments = Array(params["splat"]).join("/").split("/")
+				breadcrumbs = fragments.each_with_index.map { |_, i| site.resource(fragments[0..i].join("/")) }
+				breadcrumbs.unshift(OpenStruct.new(name: "files", route: site.route("files")))
 			end
 		end
 	end
