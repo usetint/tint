@@ -28,28 +28,6 @@ window.addEventListener("load", function() {
 			var item = li.cloneNode(true);
 			renameAppendHydrate(ol, item, nameRegexp);
 		});
-
-		forEach(li.querySelectorAll("input[type='file']"), function(input) {
-			input.addEventListener("change", function() {
-				if (input.files && input.files[0]) {
-					var reader = new FileReader();
-
-					reader.onload = function (e) {
-						var image = input.previousElementSibling.nodeName === "IMG" &&
-												input.previousElementSibling;
-
-						if(!image) {
-							image = document.createElement("img");
-							input.parentElement.insertBefore(image, input);
-						}
-
-						image.src = e.target.result;
-					}
-
-					reader.readAsDataURL(input.files[0]);
-				}
-			});
-		});
 	}
 
 	function renameAppendHydrate(ol, item, nameRegexp, resetValue) {
@@ -62,8 +40,8 @@ window.addEventListener("load", function() {
 
 		if(resetValue) {
 			forEach(item.querySelectorAll("input[type='file']"), function(input) {
-				var image = input.previousElementSibling.nodeName === "IMG" &&
-										input.previousElementSibling;
+				var image = input.previousElementSibling.previousElementSibling.nodeName === "IMG" &&
+										input.previousElementSibling.previousElementSibling;
 
 				if(image) {
 					image.parentNode.removeChild(image);

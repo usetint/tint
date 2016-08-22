@@ -1,5 +1,6 @@
 require "sass"
 require "sprockets"
+require "skim"
 
 require_relative "base"
 
@@ -8,6 +9,7 @@ module Tint
 		class Asset < Controllers::Base
 			set :sprockets, Sprockets::Environment.new
 			sprockets.append_path "assets/stylesheets"
+			sprockets.append_path "assets/javascripts"
 			sprockets.css_compressor = :scss
 
 			get "/assets/*" do

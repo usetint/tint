@@ -56,10 +56,6 @@ module Tint
 			def file
 				Tint::File.new(site, value) if value
 			end
-
-			def encoded_image
-				Base64.encode64(file.path.open.read) if file && file.image? && file.size / 2**20 < 10
-			end
 		end
 
 		class DateTime < Base

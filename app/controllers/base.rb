@@ -1,8 +1,9 @@
 require "sinatra"
-require "sinatra/reloader"
-require "sinatra/streaming"
-require "sinatra/pundit"
 require "sinatra/namespace"
+require "sinatra/pundit"
+require "sinatra/reloader"
+require "sinatra/respond_with"
+require "sinatra/streaming"
 
 require "slim"
 
@@ -20,6 +21,7 @@ module Tint
 
 			register Sinatra::Pundit
 			register Sinatra::Namespace
+			register Sinatra::RespondWith
 			helpers Sinatra::Streaming
 
 			error Pundit::NotAuthorizedError do

@@ -15,8 +15,10 @@ gem "ruby-filemagic"
 gem "sass"
 gem "sequel"
 gem "sinatra-pundit"
+gem "skim"
 gem "slim"
 gem "sprockets"
+gem "tilt", "1.4"
 
 group :development do
 	gem "awesome_print"

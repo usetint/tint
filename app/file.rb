@@ -1,4 +1,3 @@
-require "base64"
 require "filemagic"
 require "yaml"
 
@@ -56,12 +55,6 @@ module Tint
 			end
 		end
 
-		def stream_base64
-			stream(true) do |chunk, _idx|
-				yield Base64.encode64(chunk)
-			end
-		end
-
 		def content?
 			detect_content_or_frontmatter[0]
 		end
@@ -74,8 +67,8 @@ module Tint
 			YAML.safe_load(open(path), [Date, Time])
 		end
 
-		def to_directory
-			Tint::Directory.new(site, relative_path)
+		def to_h(_=nil)
+			super.merge(mime: mime)
 		end
 
 	protected

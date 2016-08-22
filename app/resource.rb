@@ -19,7 +19,7 @@ module Tint
 		end
 
 		def route
-			site.route("files/#{relative_path}")
+			site.route(Pathname.new("files").join(relative_path).to_s)
 		end
 
 		def path
@@ -39,7 +39,7 @@ module Tint
 		end
 
 		def name
-			@name ||= path.basename.to_s
+			@name ||= relative_path == Pathname.new(".") ? "files" : path.basename.to_s
 		end
 
 		def respond_to?(method)
@@ -48,6 +48,19 @@ module Tint
 
 		def method_missing(method, *arguments, &block)
 			path.public_send(method, *arguments, &block)
+		end
+
+		def to_h(_=nil)
+			{
+				name: name,
+				route: route,
+				path: relative_path.to_s,
+				type: self.class.name.to_s.split("::").last.downcase
+			}
+		end
+
+		def to_json(*args)
+			to_h.to_json(*args)
 		end
 
 	protected

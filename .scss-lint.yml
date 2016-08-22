@@ -18,3 +18,5 @@ linters:
     enabled: false
   StringQuotes:
     style: double_quotes
+  IdSelector:
+    enabled: false

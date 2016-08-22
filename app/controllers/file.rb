@@ -25,10 +25,14 @@ module Tint
 				condition(&block)
 			end
 
-			def slim(template, options)
+			def slim(template, options={})
 				return super(template, options) if template == :error
 
-				super :"layouts/files" do
+				if options[:layout].nil?
+					super :"layouts/files", locals: { breadcrumbs: breadcrumbs } do
+						super :"files/#{template}", options
+					end
+				else
 					super :"files/#{template}", options
 				end
 			end
@@ -56,13 +60,16 @@ module Tint
 
 				get "/?*", if: -> { resource.directory? || !resource.exist? } do
 					authorize resource, :index?
-					slim :index, locals: { directory: resource }
+					respond_with :index, resource
 				end
 
 				get "/?*", if: -> { resource.yml? || !resource.content? } do
 					authorize resource, :edit?
 
-					slim :yml, locals: { data: resource.frontmatter, path: resource.route }
+					slim :yml, locals: {
+						data: resource.frontmatter,
+						path: resource.route
+					}
 				end
 
 				get "/?*", if: -> { resource.text? } do
@@ -191,6 +198,12 @@ module Tint
 					resource.public_send(stream_method) { |*args| out.puts args.first }
 					out.puts bottom
 				end
+			end
+
+			def breadcrumbs
+				fragments = Array(params["splat"]).join("/").split("/")
+				breadcrumbs = fragments.each_with_index.map { |_, i| site.resource(fragments[0..i].join("/")) }
+				breadcrumbs.unshift(OpenStruct.new(name: "files", route: site.route("files")))
 			end
 		end
 	end
