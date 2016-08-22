@@ -1,4 +1,3 @@
-require "base64"
 require "filemagic"
 require "yaml"
 
@@ -53,12 +52,6 @@ module Tint
 				end
 
 				yield line
-			end
-		end
-
-		def stream_base64
-			stream(true) do |chunk, _idx|
-				yield Base64.encode64(chunk)
 			end
 		end
 
