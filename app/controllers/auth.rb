@@ -1,4 +1,5 @@
 require "omniauth"
+require "omniauth-bitbucket"
 require "omniauth-github"
 require "omniauth-gitlab"
 require "omniauth-indieauth"
@@ -13,6 +14,10 @@ module Tint
 			use OmniAuth::Builder do
 				if ENV['GITHUB_KEY']
 					provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: "user,repo,write:repo_hook"
+				end
+
+				if ENV["BITBUCKET_KEY"]
+					provider :bitbucket, ENV["BITBUCKET_KEY"], ENV["BITBUCKET_SECRET"]
 				end
 
 				if ENV['APP_URL']
