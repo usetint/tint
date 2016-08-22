@@ -25,10 +25,14 @@ module Tint
 				condition(&block)
 			end
 
-			def slim(template, options)
+			def slim(template, options={})
 				return super(template, options) if template == :error
 
-				super :"layouts/files", locals: { breadcrumbs: breadcrumbs } do
+				if options[:layout].nil?
+					super :"layouts/files", locals: { breadcrumbs: breadcrumbs } do
+						super :"files/#{template}", options
+					end
+				else
 					super :"files/#{template}", options
 				end
 			end
