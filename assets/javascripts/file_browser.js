@@ -63,8 +63,10 @@ window.addEventListener("load", function() {
 			}
 
 			function merge(one, two) {
-				merged = JSON.parse(JSON.stringify(one));
-				for(key in two) { merged[key] = two[key]; }
+				merged = Object.create(one);
+				for(key in two) {
+					if(two.hasOwnProperty(key)) { merged[key] = two[key]; }
+				}
 				return merged;
 			}
 
