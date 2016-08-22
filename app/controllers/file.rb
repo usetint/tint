@@ -156,20 +156,21 @@ module Tint
 					redirect to(resource.parent.route)
 				end
 
-				post "/Makefile", params: :build_system do
-					build_systems = [:jekyll]
-					build_system = build_systems.find { |bs| bs.to_s == params[:build_system] }
+				["Makefile", ".tint.yml"].each do |template|
+					post "/#{template}", params: :build_system do
+						build_system = valid_build_system(params[:build_system])
 
-					raise ArgumentError, "Must specify a valid build system" unless build_system
+						raise ArgumentError, "Must specify a valid build system" unless build_system
 
-					site.commit_with("Created default #{build_system} Makefile") do |dir|
-						FileUtils.cp(
-							Pathname.new(__FILE__).join("../../../templates/#{build_system}/Makefile"),
-							dir.join("Makefile")
-						)
+						site.commit_with("Created default #{build_system} #{template}") do |dir|
+							FileUtils.cp(
+								Pathname.new(__FILE__).join("../../../templates/#{build_system}/#{template}"),
+								dir.join(template)
+							)
+						end
+
+						redirect to(site.route)
 					end
-
-					redirect to(site.route)
 				end
 
 				post "/?*", params: :file do
@@ -201,6 +202,11 @@ module Tint
 			end
 
 		protected
+
+			def valid_build_system(build_system)
+				build_systems = [:jekyll]
+				build_systems.find { |bs| bs.to_s == build_system.to_s }
+			end
 
 			def resource
 				site.resource(params[:splat].join("/"))

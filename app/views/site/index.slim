@@ -12,6 +12,16 @@ form method="post" action=site.route("sync")
 				option value="jekyll" Jekyll
 		button type="submit" Add a default Makefile
 
+- unless site.config_file.exist?
+	p.error You do not have a .tint.yml file. This is not terrible, but maybe you should add one.
+
+	form method="post" action=site.route("files/.tint.yml")
+		label
+			| Select your build system
+			select name="build_system"
+				option value="jekyll" Jekyll
+		button type="submit" Add a default .tint.yml
+
 - unless ENV["SITE_PATH"]
 	form method="post" action=site.route
 		input type="hidden" name="_method" value="DELETE"
