@@ -156,13 +156,15 @@ module Tint
 					redirect to(resource.parent.route)
 				end
 
-				post "/Makefile" do
+				post "/Makefile", params: :build_system do
 					build_systems = [:jekyll]
-					build_system = build_systems.find { |bs| params[:build_system] }
+					build_system = build_systems.find { |bs| bs.to_s == params[:build_system] }
+
+					raise ArgumentError, "Must specify a valid build system" unless build_system
 
 					site.commit_with("Created default #{build_system} Makefile") do |dir|
 						FileUtils.cp(
-							Pathname.new(__FILE__).dirname.dirname.dirname.join("templates/#{build_system}/Makefile"),
+							Pathname.new(__FILE__).join("../../../templates/#{build_system}/Makefile"),
 							dir.join("Makefile")
 						)
 					end
