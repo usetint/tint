@@ -172,6 +172,10 @@ module Tint
 			end
 		end
 
+		def makefile?
+			cache_path.join("Makefile").exist?
+		end
+
 	protected
 
 		def maybe_commit(git, message, user)
