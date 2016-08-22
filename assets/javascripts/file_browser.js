@@ -3,9 +3,17 @@
 window.addEventListener("load", function() {
 	function getFileDetails() {
 		return new Promise(function(resolve, reject) {
-			var modal = document.getElementById("file-browser");
+			var modal = document.createElement("div");
+			modal.setAttribute("id", "file-browser");
+
+			var browser = document.createElement("div");
+			browser.className = "contents";
+
+			modal.appendChild(browser);
+			document.body.appendChild(modal)
+
 			modal.style.display = "flex";
-			var browser = modal.querySelector(".contents");
+
 			var headers = new Headers();
 			headers.append('Accept', 'application/json');
 			var params = {

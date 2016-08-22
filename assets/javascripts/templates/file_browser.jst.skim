@@ -5,4 +5,3 @@ form action=@route method="post" enctype="multipart/form-data"
 ol
 	- for child in @children
 		li: a href=child.route data-type=child.type data-path=child.path data-mime=child.mime = child.name
-
