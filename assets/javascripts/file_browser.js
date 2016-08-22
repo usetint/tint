@@ -1,9 +1,11 @@
 //= require templates/file_browser
 
 window.addEventListener("load", function() {
-	function getPath() {
+	function getFileDetails() {
 		return new Promise(function(resolve, reject) {
-			var browser = document.getElementById("file-browser");
+			var modal = document.getElementById("file-browser");
+			modal.style.display = "flex";
+			var browser = modal.querySelector(".contents");
 			var headers = new Headers();
 			headers.append('Accept', 'application/json');
 			var params = {
@@ -49,8 +51,12 @@ window.addEventListener("load", function() {
 						if(link.dataset.type === "directory") {
 							directoryListing(link.href);
 						} else {
-							resolve(link.dataset.path);
-							browser.innerHTML = "";
+							resolve({
+								path: link.dataset.path,
+								image: link.dataset.image,
+								mime: link.dataset.mime
+							});
+							modal.style.display = "none";
 						}
 					});
 				});
@@ -81,8 +87,13 @@ window.addEventListener("load", function() {
 
 		button.addEventListener("click", function(event) {
 			event.preventDefault();
-			getPath().then(function(path) {
-				fileInput.previousElementSibling.value = path;
+			getFileDetails().then(function(details) {
+				fileInput.previousElementSibling.value = details.path;
+				if(details.image) {
+					var src = "data:" + details.mime +";base64," + details.image;
+					// TODO: make sure we assign this properly (handle case where there is no image)
+					fileInput.previousElementSibling.previousElementSibling.src = src;
+				}
 			});
 		});
 	});

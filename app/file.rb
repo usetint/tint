@@ -75,7 +75,11 @@ module Tint
 		end
 
 		def to_h(_=nil)
-			super.merge(mime: mime)
+			h = super.merge(mime: mime)
+			if image? && size / 2**20 < 10
+				h = h.merge(encoded_image: Base64.encode64(path.open.read))
+			end
+			h
 		end
 
 	protected

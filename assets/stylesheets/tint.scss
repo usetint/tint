@@ -91,3 +91,22 @@ ul form {
 		padding: 0.25rem 0.5rem;
 	}
 }
+
+#file-browser {
+	align-items: center;
+	background: rgba(#fff, 0.9);
+	bottom: 0;
+	display: none;
+	justify-content: center;
+	left: 0;
+	position: fixed;
+	right: 0;
+	top: 0;
+
+	.contents {
+		background: #fff;
+		border: 1px solid #ccc;
+		border-radius: 2px;
+		padding: 2rem;
+	}
+}
