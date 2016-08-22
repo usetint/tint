@@ -225,7 +225,8 @@ module Tint
 			def breadcrumbs
 				fragments = Array(params["splat"]).join("/").split("/")
 				breadcrumbs = fragments.each_with_index.map { |_, i| site.resource(fragments[0..i].join("/")) }
-				breadcrumbs.unshift(OpenStruct.new(name: "files", route: site.route("files")))
+				files = OpenStruct.new(name: "files", route: site.route("files"))
+				[site, files] + breadcrumbs
 			end
 		end
 	end
