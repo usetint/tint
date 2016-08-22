@@ -39,5 +39,15 @@ describe Tint::Directory do
 				sub.children.map(&:name)
 			)
 		end
+
+		it "should not list files set as hidden in .tint.yml" do
+			FileUtils.touch dir.join(".hidden.yml")
+			site.stub(:config, { "hidden_paths" => [".*"] }) do
+				assert_equal(
+					["..", "four", "one", "three", "two"],
+					sub.children.map(&:name)
+				)
+			end
+		end
 	end
 end
