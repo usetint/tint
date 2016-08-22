@@ -6,7 +6,7 @@ nav
 		- breadcrumbs.each do |fragment|
 			li
 				- if fragment == breadcrumbs.last
-					= fragment.name
+					= fragment.fn
 				- else
-					a href=fragment.route = fragment.name
+					a href=fragment.route = fragment.fn
 == yield

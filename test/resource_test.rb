@@ -54,9 +54,15 @@ describe Tint::Resource do
 	end
 
 	describe "#name" do
+		it "should return the path basename" do
+			assert_equal(path.split("/").last, subject.fn)
+		end
+	end
+
+	describe "#fn" do
 		describe "when no name is passed" do
 			it "should use the name from the path" do
-				assert_equal(path.split("/").last, subject.name)
+				assert_equal(path.split("/").last, subject.fn)
 			end
 		end
 
@@ -65,7 +71,15 @@ describe Tint::Resource do
 			let(:tname) { ".." }
 
 			it "should use the name that was given" do
-				assert_equal(tname, subject.name)
+				assert_equal(tname, subject.fn)
+			end
+		end
+
+		describe "when path is same as site path" do
+			let(:subject) { Tint::Resource.new(site, site.cache_path) }
+
+			it "should return the string 'files'" do
+				assert_equal("files", subject.fn)
 			end
 		end
 	end

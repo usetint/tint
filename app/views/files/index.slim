@@ -9,7 +9,7 @@ form action=object.route method="post"
 ul
 	- object.children.each do |file|
 		li
-			a href=file.route = file.name
+			a href=file.route = file.fn
 
 			- unless file.directory?
 				form action=file.route method="post"
@@ -18,7 +18,7 @@ ul
 
 				a href="#{file.route}?download" Download
 
-			- unless file.name == ".."
+			- unless file == object.parent
 				form action=file.route method="post"
 					input type="hidden" name="_method" value="PUT"
 					input type="text" name="name" value=file.name

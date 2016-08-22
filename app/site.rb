@@ -29,7 +29,6 @@ module Tint
 		def fn
 			@options[:fn]
 		end
-		alias_method :name, :fn
 
 		def user_id
 			@options[:user_id] && @options[:user_id].to_i
