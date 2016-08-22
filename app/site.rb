@@ -60,6 +60,10 @@ module Tint
 			@config ||= unsafe_config rescue {}
 		end
 
+		def show_config_warning?
+			@options[:show_config_warning]
+		end
+
 		def config_file
 			cache_path.join(".tint.yml")
 		end

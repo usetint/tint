@@ -17,10 +17,6 @@ module Tint
 				condition { request.query_string == val }
 			end
 
-			def self.params(key)
-				condition { !!params[key] }
-			end
-
 			def self.if(block)
 				condition(&block)
 			end

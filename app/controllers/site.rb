@@ -63,6 +63,16 @@ module Tint
 					slim :"site/index", locals: { site: site }
 				end
 
+				put "/", params: :show_config_warning do
+					authorize site, :update?
+
+					Tint.db[:sites].where(site_id: params[:site]).update(
+						show_config_warning: false
+					)
+
+					redirect to(site.route)
+				end
+
 				put "/" do
 					authorize site, :update?
 

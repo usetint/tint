@@ -48,6 +48,10 @@ module Tint
 				verify_authorized
 			end
 
+			def self.params(key)
+				condition { !!params[key] }
+			end
+
 		protected
 
 			def site
