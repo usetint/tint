@@ -68,8 +68,7 @@ window.addEventListener("load", function() {
 				return merged;
 			}
 
-			// TODO: remove hardcoded route
-			directoryListing("/3/files");
+			directoryListing(files_path);
 		});
 	}
 
