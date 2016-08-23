@@ -25,18 +25,10 @@ module Tint
 				}
 			end
 
-			def add_deploy_key(remote)
-				user, repo = extract_from_remote(remote)
-				self.class.post(
-					"/1.0/repositories/#{user}/#{repo}/deploy-keys",
-					body: {
-						accountname: user,
-						repo_slug: repo,
-						label: "Tint",
-						key: ENV.fetch("SSH_PUBLIC")
-					},
-					headers: headers
-				)
+			def add_deploy_key(_remote)
+				# Bitbucket does not have the ability to add keys to a user's account.
+				# All we can do is add a key on the repository, but it is read only,
+				# which is not of much use to us.
 			end
 
 			def subscribe(remote, callback)
