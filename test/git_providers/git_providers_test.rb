@@ -9,20 +9,14 @@ describe Tint::GitProviders do
     let(:repo) { "yayarepo" }
     let(:remote) { "#{prefix}git@github.com:#{username}/#{repo}.git" }
 
-    describe "when remote does not have ssh:// in front of it" do
-      let(:prefix) { "" }
+		["", "ssh://"].each do |prefix|
+			describe "when prefix is '#{prefix}'" do
+				let(:prefix) { prefix }
 
-      it "should return the username and repo" do
-        assert_equal([username, repo], subject.extract_from_remote(remote))
-      end
-    end
-
-    describe "when remote does not have ssh:// in front of it" do
-      let(:prefix) { "ssh://" }
-
-      it "should return the username and repo" do
-        assert_equal([username, repo], subject.extract_from_remote(remote))
-      end
-    end
+				it "should return the username and repo" do
+					assert_equal([username, repo], subject.extract_from_remote(remote))
+				end
+			end
+		end
   end
 end
