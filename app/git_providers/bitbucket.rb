@@ -35,9 +35,7 @@ module Tint
 						label: "Tint",
 						key: ENV.fetch("SSH_PUBLIC")
 					},
-					headers: {
-						"Authorization" => "Bearer #{omniauth["credentials"]["token"]}"
-					}
+					headers: headers
 				)
 			end
 
@@ -50,10 +48,7 @@ module Tint
 						active: true,
 						events: ["repo:push"]
 					}.to_json,
-					headers: {
-						"Authorization" => "Bearer #{omniauth["credentials"]["token"]}",
-						"Content-Type" => "application/json"
-					}
+					headers: headers.merge("Content-Type" => "application/json")
 				)
 			end
 
@@ -61,14 +56,16 @@ module Tint
 
 			attr_reader :omniauth
 
+			def headers
+				{ "Authorization" => "Bearer #{omniauth["credentials"]["token"]}" }
+			end
+
 			def remote(repo)
 				repo["links"]["clone"].find { |link| link["name"] == "ssh" }["href"]
 			end
 
 			def get_repositories(repos=[], path="/2.0/repositories/#{omniauth["uid"]}?pagelen=100")
-				response = self.class.get(path, headers: {
-					"Authorization" => "Bearer #{omniauth["credentials"]["token"]}"
-				})
+				response = self.class.get(path, headers: headers)
 
 				repos = repos + Array(response["values"])
 				if response["next"]
