@@ -9,6 +9,10 @@
 	form method="post" action="/auth/github"
 		button type="submit" Login with Github
 
+- if OmniAuth::Builder.providers.include?(:bitbucket)
+	form method="post" action="/auth/bitbucket"
+		button type="submit" Login with Bitbucket
+
 - if OmniAuth::Builder.providers.include?(:indieauth)
 	form method="post" action="/auth/indieauth"
 		button type="submit" Login with your domain

@@ -4,6 +4,15 @@ GIT
   specs:
     git (1.3.0)
 
+GIT
+  remote: git://github.com/sishen/omniauth-bitbucket.git
+  revision: bda8447b0ea32bcde4002046b3efffeda03d50f0
+  specs:
+    omniauth-bitbucket (0.0.2)
+      multi_json (~> 1.7)
+      omniauth (~> 1.1)
+      omniauth-oauth2 (>= 1.1.1, < 2.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -80,7 +89,7 @@ GEM
       faraday (~> 0.9.0)
       microformats2 (>= 2.0.1)
       omniauth (~> 1.0)
-    omniauth-oauth2 (1.4.0)
+    omniauth-oauth2 (1.3.1)
       oauth2 (~> 1.0)
       omniauth (~> 1.2)
     pkg-config (1.1.7)
@@ -156,10 +165,13 @@ DEPENDENCIES
   git!
   github_api
   gitlab
+  httparty
   omniauth
+  omniauth-bitbucket!
   omniauth-github
   omniauth-gitlab
   omniauth-indieauth
+  omniauth-oauth2 (~> 1.3.1)
   pry
   pry-byebug
   rake
