@@ -1,6 +1,6 @@
 GIT
-  remote: git://github.com/singpolyma/ruby-git.git
-  revision: cbc14442c0cf237a9e4e28e2c5bfbfb1741d9005
+  remote: git://github.com/ericroberts/ruby-git.git
+  revision: 887a2583bd47d59bf81bdc76d405ba325d8f4265
   specs:
     git (1.3.0)
 

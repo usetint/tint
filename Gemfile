@@ -4,7 +4,7 @@ gem "sinatra"
 gem "sinatra-contrib"
 
 gem "activesupport", "< 5.0.0" # For pundit
-gem "git", github: "singpolyma/ruby-git"
+gem "git", github: "ericroberts/ruby-git"
 gem "github_api"
 gem "gitlab"
 gem "httparty"

@@ -89,6 +89,16 @@ module Tint
 					}
 				end
 
+				put "/?*", params: :sha do
+					depth = site.git.log.find_index { |commit| commit.sha == params[:sha] } + 1
+
+					site.commit_with("Reverted to #{params[:sha][0..6]}", nil, 1, depth) do |dir|
+						Git.open(dir).revert("#{params[:sha]}..HEAD", no_commit: true)
+					end
+
+					redirect to(site.route)
+				end
+
 				put "/*", params: :name do
 					authorize resource, :update?
 
