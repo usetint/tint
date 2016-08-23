@@ -152,11 +152,9 @@ module Tint
 			end
 		end
 
-		def commit_with(message, user=nil, depth=1, &block)
-			raise "Push failed." if depth > 5
-
+		def commit_with(message, user=nil, tries: 1, depth: 1, &block)
 			Dir.mktmpdir("tint-push") do |dir|
-				Git.clone(@options[:remote], "clone", path: dir, depth: 1)
+				Git.clone(@options[:remote], "clone", path: dir, depth: depth)
 				path = Pathname.new(dir).join("clone")
 				git = Git.open(path.to_s)
 
@@ -172,8 +170,9 @@ module Tint
 							git.push
 							sync
 						end
-					rescue Git::GitExecuteError
-						commit_with(message, user, depth+1, &block)
+					rescue Git::GitExecuteError => e
+						raise e if tries > 4
+						commit_with(message, user, tries+1, depth, &block)
 					end
 				end
 			end
