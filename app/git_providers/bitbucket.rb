@@ -6,7 +6,7 @@ module Tint
 		class Bitbucket
 			include HTTParty
 
-			base_uri "https://api.bitbucket.org/2.0"
+			base_uri "https://api.bitbucket.org"
 
 			def initialize(payload)
 				@omniauth = JSON.parse(payload)
@@ -26,12 +26,25 @@ module Tint
 			end
 
 			def add_deploy_key(remote)
+				user, repo = extract_from_remote(remote)
+				self.class.post(
+					"/1.0/repositories/#{user}/#{repo}/deploy-keys",
+					body: {
+						accountname: user,
+						repo_slug: repo,
+						label: "Tint",
+						key: ENV.fetch("SSH_PUBLIC")
+					},
+					headers: {
+						"Authorization" => "Bearer #{omniauth["credentials"]["token"]}"
+					}
+				)
 			end
 
 			def subscribe(remote, callback)
 				user, repo = extract_from_remote(remote)
 				self.class.post(
-					"/repositories/#{user}/#{repo}/hooks",
+					"/2.0/repositories/#{user}/#{repo}/hooks",
 					body: {
 						url: callback,
 						active: true,
@@ -52,12 +65,12 @@ module Tint
 				repo["links"]["clone"].find { |link| link["name"] == "ssh" }["href"]
 			end
 
-			def get_repositories(repos=[], path="/repositories/#{omniauth["uid"]}?pagelen=100")
+			def get_repositories(repos=[], path="/2.0/repositories/#{omniauth["uid"]}?pagelen=100")
 				response = self.class.get(path, headers: {
 					"Authorization" => "Bearer #{omniauth["credentials"]["token"]}"
 				})
 
-				repos = repos + response["values"]
+				repos = repos + Array(response["values"])
 				if response["next"]
 					get_repositories(repos, response["next"])
 				else
