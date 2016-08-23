@@ -44,6 +44,7 @@ module Tint
 				self.class.post(
 					"/2.0/repositories/#{user}/#{repo}/hooks",
 					body: {
+						description: "Tint",
 						url: callback,
 						active: true,
 						events: ["repo:push"]
