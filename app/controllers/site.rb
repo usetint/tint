@@ -2,9 +2,9 @@ require "pathname"
 require "shellwords"
 
 require_relative "../git_providers/git_providers"
+require_relative "../git_providers/bitbucket"
 require_relative "../git_providers/github"
 require_relative "../git_providers/gitlab"
-require_relative "../git_providers/bitbucket"
 require_relative "../site"
 require_relative "base"
 
