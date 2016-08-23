@@ -165,6 +165,7 @@ DEPENDENCIES
   git!
   github_api
   gitlab
+  httparty
   omniauth
   omniauth-bitbucket!
   omniauth-github
