@@ -128,7 +128,7 @@ module Tint
 					authorize resource, :update?
 
 					if params[:file].is_a?(Hash) && params[:file][:tempfile]
-						site.commit_with("Modified #{resource.relative_path}") do |dir|
+						site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
 							FormHelpers.upload(dir.join(resource.parent.relative_path), params[:file], resource.name)
 						end
 					end
@@ -139,7 +139,7 @@ module Tint
 				put "/*" do
 					authorize resource, :update?
 
-					site.commit_with("Modified #{resource.relative_path}") do |dir|
+					site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
 						updated_data = FormHelpers.process(params[:data], dir)
 						dir.join(resource.relative_path).open("w") do |f|
 							if updated_data
@@ -182,7 +182,8 @@ module Tint
 				post "/?*", params: :file do
 					authorize resource, :update?
 
-					site.commit_with("Uploaded #{resource.relative_path.join(params[:file][:filename])}") do |dir|
+					filename = resource.relative_path.join(params[:file][:filename])
+					site.commit_with("Uploaded #{filename}", pundit_user) do |dir|
 						FormHelpers.upload(dir.join(resource.relative_path), params[:file])
 					end
 
@@ -199,7 +200,7 @@ module Tint
 				delete "/*" do
 					authorize resource, :destroy?
 
-					site.commit_with("Removed #{resource.relative_path}") do |dir|
+					site.commit_with("Removed #{resource.relative_path}", pundit_user) do |dir|
 						dir.join(resource.relative_path).delete
 					end
 
