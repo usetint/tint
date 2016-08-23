@@ -152,7 +152,7 @@ module Tint
 			end
 		end
 
-		def commit_with(message, user=nil, tries=1, depth=1, &block)
+		def commit_with(message, user=nil, tries: 1, depth: 1, &block)
 			Dir.mktmpdir("tint-push") do |dir|
 				Git.clone(@options[:remote], "clone", path: dir, depth: depth)
 				path = Pathname.new(dir).join("clone")
