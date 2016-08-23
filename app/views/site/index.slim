@@ -16,7 +16,7 @@ form method="post" action=site.route("sync")
 	- if site.show_config_warning? && !site.config_file.exist?
 		p.error You do not have a .tint.yml file. This is not terrible, but maybe you should add one.
 
-		div style="background: #ccc; padding: 1rem"
+		.card
 			form method="post" action=site.route("files/.tint.yml")
 				label
 					| Select your build system

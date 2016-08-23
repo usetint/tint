@@ -4,6 +4,25 @@ $input-width: 20rem;
 	box-sizing: border-box;
 }
 
+%card {
+	background: #f0f0f0;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	display: block;
+	margin-bottom: 2rem;
+	max-width: 100%;
+	overflow: auto;
+	padding: 1rem;
+
+	:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.card {
+	@extend %card;
+}
+
 body {
 	font-family: sans-serif;
 	padding: 2rem;
@@ -26,6 +45,10 @@ body {
 			}
 		}
 	}
+}
+
+code {
+	@extend %card;
 }
 
 form {
