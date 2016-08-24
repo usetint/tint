@@ -29,3 +29,4 @@ exclude_paths:
 - "app/public/tinymce/**/*"
 - "app/public/upndown.bundle.js"
 - "app/public/marked.js"
+- "assets/javascripts/vendor/**/*"

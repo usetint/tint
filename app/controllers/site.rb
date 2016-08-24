@@ -18,7 +18,7 @@ module Tint
 				else
 					authorize Tint::Site, :index?
 
-					git_providers = Tint.db[:identities].where(user_id: pundit_user[:user_id]).map do |identity|
+					git_providers = Tint.db[:identities].where(user_id: pundit_user.user_id).map do |identity|
 						GitProviders.build(identity[:provider], identity[:omniauth])
 					end.compact
 
@@ -34,13 +34,13 @@ module Tint
 
 				site_id = Tint.db.transaction do
 					site_id = Tint.db[:sites].insert(
-						user_id: pundit_user[:user_id],
+						user_id: pundit_user.user_id,
 						fn: params[:fn],
 						remote: params[:remote]
 					)
 
 					if params[:provider]
-						identity = Tint.db[:identities][user_id: pundit_user[:user_id], provider: params[:provider]]
+						identity = Tint.db[:identities][user_id: pundit_user.user_id, provider: params[:provider]]
 						if identity && (provider = GitProviders.build(identity[:provider], identity[:omniauth]))
 							provider.add_deploy_key(params[:remote])
 							provider.subscribe(params[:remote], "#{ENV.fetch("APP_URL")}/#{site_id}/sync")

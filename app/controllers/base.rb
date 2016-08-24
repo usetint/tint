@@ -7,8 +7,10 @@ require "sinatra/streaming"
 
 require "slim"
 
-require_relative "../site"
 require_relative "../db"
+require_relative "../helpers"
+require_relative "../site"
+require_relative "../user"
 
 module Tint
 	module Controllers
@@ -23,6 +25,7 @@ module Tint
 			register Sinatra::Namespace
 			register Sinatra::RespondWith
 			helpers Sinatra::Streaming
+			helpers Tint::Helpers::Rendering
 
 			error Pundit::NotAuthorizedError do
 				redirect to("/auth/login")
@@ -34,9 +37,9 @@ module Tint
 
 			current_user do
 				if ENV['SITE_PATH']
-					{ user_id: 1 }
+					User.new(user_id: 1)
 				else
-					Tint.db[:users][user_id: session['user'].to_i] if session['user']
+					User.new(Tint.db[:users][user_id: session["user"].to_i]) if session["user"]
 				end
 			end
 
