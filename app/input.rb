@@ -23,6 +23,8 @@ module Tint
 				DateTime
 			elsif norm_key.end_with?("_date") || norm_key == "date" || value.is_a?(::Date)
 				Date
+			elsif norm_key == "time" || norm_key.end_with?("_time")
+				Time
 			elsif norm_key == "description" || norm_key.end_with?("_text") || (value.is_a?(String) && value.length > 50)
 				Textarea
 			else
@@ -69,6 +71,9 @@ module Tint
 			def value
 				::Date.parse(super.to_s) if super.to_s != ""
 			end
+		end
+
+		class Time < Base
 		end
 
 		class Select < Base
