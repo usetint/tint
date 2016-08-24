@@ -120,6 +120,22 @@ describe Tint::Input do
 			end
 		end
 
+		describe "when the key is description" do
+			let(:key) { "description" }
+
+			it "should return Textarea" do
+				assert_equal(Tint::Input::Textarea, subject)
+			end
+		end
+
+		describe "when key ends in _text" do
+			let(:key) { "something_text" }
+
+			it "should return Textarea" do
+				assert_equal(Tint::Input::Textarea, subject)
+			end
+		end
+
 		describe "arrays" do
 			describe "when array is scalarish" do
 				let(:tvalue) { ["one.ext", "two.ext"] }
