@@ -71,6 +71,10 @@ module Tint
 			super.merge(mime: mime)
 		end
 
+		def log
+			site.git.log.path(relative_path)
+		end
+
 	protected
 
 		def extension

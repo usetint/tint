@@ -1,1 +1,10 @@
 h1 = resource.name
+
+ul
+	- resource.log.each do |entry|
+		li style="margin-bottom: 1rem;"
+			div= "(#{entry.sha[0..6]}) #{entry.message}"
+			form method="post" action=resource.route
+				input type="hidden" name="_method" value="PUT"
+				input type="hidden" name="sha" value=entry.sha
+				button type="submit" Go back to this version

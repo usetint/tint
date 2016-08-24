@@ -89,14 +89,30 @@ module Tint
 					}
 				end
 
-				put "/?*", params: :sha do
-					depth = site.git.log.find_index { |commit| commit.sha == params[:sha] } + 1
+				put "/?", params: :sha do
+					depth = site.git.log.find_index { |commit| commit.sha == params[:sha] }
+					return slim :error, locals: { message: "Cannot find that commit" } unless depth >= 0
 
-					site.commit_with("Reverted to #{params[:sha][0..6]}", pundit_user, depth: depth) do |dir|
+					site.commit_with("Reverted to #{params[:sha][0..6]}", pundit_user, depth: depth + 1) do |dir|
 						Git.open(dir).revert("#{params[:sha]}..HEAD", no_commit: true)
 					end
 
 					redirect to(site.route)
+				end
+
+				put "/*", params: :sha do
+					depth = site.git.log.find_index { |commit| commit.sha == params[:sha] }
+					return slim :error, locals: { message: "Cannot find that commit" } unless depth >= 0
+
+					site.commit_with(
+						"Reverted #{resource.relative_path} to #{params[:sha][0..6]}",
+						pundit_user,
+						depth: depth + 1
+					) do |dir|
+						Git.open(dir).checkout_file(params[:sha], resource.relative_path)
+					end
+
+					redirect to(resource.route)
 				end
 
 				put "/*", params: :name do

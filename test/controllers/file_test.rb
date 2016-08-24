@@ -39,8 +39,22 @@ describe Tint::Controllers::File do
 	["files", "files/index.html"].each do |route|
 		describe "get /#{route}" do
 			it "should render without error" do
-				response = get site.route(route), {}, session.merge("HTTP_ACCEPT" => "text/html")
-				assert(response.ok?)
+				class FakeGit
+					def log
+						self
+					end
+
+					def path(*_)
+						[]
+					end
+				end
+
+				Tint::Site.stub(:new, site) do
+					site.stub(:git, FakeGit.new) do
+						response = get site.route(route), {}, session.merge("HTTP_ACCEPT" => "text/html")
+						assert(response.ok?)
+					end
+				end
 			end
 		end
 	end
