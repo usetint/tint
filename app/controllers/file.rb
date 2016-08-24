@@ -4,15 +4,12 @@ require "slim"
 
 require_relative "base"
 require_relative "../input"
-require_relative "../helpers"
 require_relative "../directory"
 require_relative "../form_helpers"
 
 module Tint
 	module Controllers
 		class File < Base
-			helpers Tint::Helpers::Rendering
-
 			def self.query(val)
 				condition { request.query_string == val }
 			end

@@ -74,11 +74,4 @@ form method="post" action=site.route
 				= open('templates/post-receive').read.gsub(/http:\/\/localhost:9292\/1\//, ENV.fetch('APP_URL') + "#{site.route}")
 
 - if site.cloned?
-	ul
-		- site.git.log.each do |log|
-			li style="margin-bottom: 1rem;"
-				div= "(#{log.sha[0..6]}) #{log.message}"
-				form method="post" action=site.route("files")
-					input type="hidden" name="_method" value="PUT"
-					input type="hidden" name="sha" value=log.sha
-					button type="submit" Revert to this commit
+	== render_log log: site.git.log, route: site.route("files"), button: "Revert to this commit"

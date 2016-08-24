@@ -56,6 +56,15 @@ module Tint
 				end
 			end
 
+			def render_log(log:, route:, button:)
+				render_slim :log, log: log, route: route, button: button
+			end
+
+			def localtime(time, fmt="%F %H:%M")
+				return unless time
+				render_slim("time", time: time, fmt: fmt)
+			end
+
 		protected
 
 			def render_slim(template, locals)

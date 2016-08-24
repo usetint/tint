@@ -9,6 +9,7 @@ require "slim"
 
 require_relative "../site"
 require_relative "../db"
+require_relative "../helpers"
 
 module Tint
 	module Controllers
@@ -23,6 +24,7 @@ module Tint
 			register Sinatra::Namespace
 			register Sinatra::RespondWith
 			helpers Sinatra::Streaming
+			helpers Tint::Helpers::Rendering
 
 			error Pundit::NotAuthorizedError do
 				redirect to("/auth/login")
