@@ -187,8 +187,8 @@ module Tint
 		def maybe_commit(git, message, user)
 			git.status.each do |f|
 				if f.type
-					if user && user[:email]
-						git.commit("#{message} via tint", author: "#{user[:fn]} <#{user[:email]}>")
+					if user && user.email
+						git.commit("#{message} via tint", author: "#{user.fn} <#{user.email}>")
 					else
 						git.commit("#{message} via tint")
 					end

@@ -4,7 +4,7 @@ module Tint
 	class SitePolicy < Tint::ApplicationPolicy
 		def index?
 			return !!user if record == Tint::Site
-			user && user[:user_id] == record.user_id
+			user && user.user_id == record.user_id
 		end
 
 		def create?
@@ -12,7 +12,7 @@ module Tint
 		end
 
 		def update?
-			user && user[:user_id] == record.user_id
+			user && user.user_id == record.user_id
 		end
 
 		def destroy?
@@ -25,7 +25,7 @@ module Tint
 			end
 
 			def resolve
-				scope.where(user_id: user[:user_id]).map do |site_rec|
+				scope.where(user_id: user.user_id).map do |site_rec|
 					Tint::Site.new(site_rec)
 				end
 			end
