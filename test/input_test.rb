@@ -112,8 +112,40 @@ describe Tint::Input do
 			end
 		end
 
+		describe "when the key is time" do
+			let(:key) { "time" }
+
+			it "should return Time" do
+				assert_equal(Tint::Input::Time, subject)
+			end
+		end
+
+		describe "when the key ends with _time" do
+			let(:key) { "closing_time" }
+
+			it "should return Time" do
+				assert_equal(Tint::Input::Time, subject)
+			end
+		end
+
 		describe "when the value is a string longer than 50 characters" do
 			let(:tvalue) { "A" * 51 }
+
+			it "should return Textarea" do
+				assert_equal(Tint::Input::Textarea, subject)
+			end
+		end
+
+		describe "when the key is description" do
+			let(:key) { "description" }
+
+			it "should return Textarea" do
+				assert_equal(Tint::Input::Textarea, subject)
+			end
+		end
+
+		describe "when key ends in _text" do
+			let(:key) { "something_text" }
 
 			it "should return Textarea" do
 				assert_equal(Tint::Input::Textarea, subject)
@@ -189,6 +221,16 @@ describe Tint::Input do
 				let(:val) { [{}, "one"] }
 
 				it { assert_equal(false, subject) }
+			end
+		end
+	end
+
+	describe Tint::Input::Time do
+		let(:subject) { Tint::Input::Time.new(:time, :time, nil, nil) }
+
+		describe "#render" do
+			it "should return a string" do
+				assert_equal(String, subject.render.class)
 			end
 		end
 	end

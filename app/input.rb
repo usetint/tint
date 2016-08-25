@@ -10,19 +10,22 @@ module Tint
 		def self.type(key, value, site)
 			return unless scalarish?(value)
 
+			norm_key = key.to_s.downcase
 			if select_options(site, key)
 				MultipleSelect
 			elsif select_options(site, ActiveSupport::Inflector.pluralize(key.to_s))
 				Select
 			elsif [true, false].include? value
 				Checkbox
-			elsif key.to_s.end_with?("_path") || key.to_s.end_with?("_paths")
+			elsif norm_key.end_with?("_path") || norm_key.end_with?("_paths")
 				File
-			elsif key.to_s.downcase.end_with?("_datetime") || key.to_s.downcase == "datetime" || value.is_a?(::Time)
+			elsif norm_key.end_with?("_datetime") || norm_key == "datetime" || value.is_a?(::Time)
 				DateTime
-			elsif key.to_s.downcase.end_with?("_date") || key.to_s.downcase == "date" || value.is_a?(::Date)
+			elsif norm_key.end_with?("_date") || norm_key == "date" || value.is_a?(::Date)
 				Date
-			elsif value.is_a?(String) && value.length > 50
+			elsif norm_key == "time" || norm_key.end_with?("_time")
+				Time
+			elsif norm_key == "description" || norm_key.end_with?("_text") || (value.is_a?(String) && value.length > 50)
 				Textarea
 			else
 				Text
@@ -68,6 +71,9 @@ module Tint
 			def value
 				::Date.parse(super.to_s) if super.to_s != ""
 			end
+		end
+
+		class Time < Base
 		end
 
 		class Select < Base
