@@ -1,3 +1,0 @@
-[submodule "app/css/foundation-sites"]
-	path = app/css/foundation-sites
-	url = git@github.com:zurb/foundation-sites.git
