@@ -225,6 +225,40 @@ describe Tint::Input do
 		end
 	end
 
+	describe Tint::Input::DateTime do
+		let(:subject) { Tint::Input::DateTime.new(nil, nil, val, nil) }
+
+		describe "#value" do
+			describe "when datetime is an empty string" do
+				let(:val) { "" }
+
+				it "should return nil" do
+					assert_equal(nil, subject.value)
+				end
+			end
+
+			describe "when datetime is a valid time" do
+				let(:t) { ::Time.new(2007,11,1,15,25,0) }
+
+				describe "when it is represented as a string" do
+					let(:val) { t.to_s }
+
+					it "should return a time object" do
+						assert_equal(t, subject.value)
+					end
+				end
+
+				describe "when it is represented as a time" do
+					let(:val) { t }
+
+					it "should return a time object" do
+						assert_equal(t, subject.value)
+					end
+				end
+			end
+		end
+	end
+
 	describe Tint::Input::Time do
 		let(:subject) { Tint::Input::Time.new(:time, :time, nil, nil) }
 
