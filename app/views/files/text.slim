@@ -1,6 +1,6 @@
 == slim "header", layout: false
 
-form action=path method="post"
+form#content action=path method="post"
 	input type="hidden" name="_method" value="PUT"
 	- if frontmatter
 		== render_yml(frontmatter)
