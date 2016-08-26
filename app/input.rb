@@ -63,7 +63,7 @@ module Tint
 
 		class DateTime < Base
 			def value
-				Time.parse(super.to_s) if super.to_s != ""
+				::Time.parse(super.to_s) if super.to_s != ""
 			end
 		end
 
