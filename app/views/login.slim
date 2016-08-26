@@ -1,3 +1,6 @@
+- if pundit_user
+	p Associate another account with your current login:
+
 - if OmniAuth::Builder.providers.include?(:gitlab)
 	form method="post" action="/auth/gitlab"
 		input type="url" name="site" placeholder="GitLab domain"

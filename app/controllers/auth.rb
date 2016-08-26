@@ -63,14 +63,21 @@ module Tint
 					identity = Tint.db[:identities][provider: params[:provider], uid: uid]
 
 					if identity
+						if pundit_user
+							status 400
+							return slim :error, locals: { message: "That identity is claimed by another account." }
+						end
+
 						Tint.db[:identities].where(provider: params[:provider], uid: uid).
 							update(omniauth: request.env["omniauth.auth"].to_json)
 						session["user"] = identity[:user_id]
 					else
-						session['user'] = Tint.db[:users].insert(
-							fn: request.env["omniauth.auth"].info.name,
-							email: request.env["omniauth.auth"].info.email
-						)
+						unless pundit_user
+							session['user'] = Tint.db[:users].insert(
+								fn: request.env["omniauth.auth"].info.name,
+								email: request.env["omniauth.auth"].info.email
+							)
+						end
 
 						Tint.db[:identities].insert(
 							provider: params["provider"],
