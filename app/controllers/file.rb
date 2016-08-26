@@ -164,7 +164,7 @@ module Tint
 								end
 							end
 
-							if params.has_key?(:content)
+							if params.has_key?("content")
 								f.puts(params[:content].encode(universal_newline: true))
 							elsif !resource.yml?
 								resource.stream_content(&f.method(:puts))

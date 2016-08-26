@@ -12,7 +12,8 @@ window.addEventListener('load', function() {
 		content_style: 'p { white-space: pre-wrap; }'
 	});
 
-	document.querySelector("form").addEventListener("submit", function(e) {
+	document.querySelector("form#content").addEventListener("submit", function(e) {
+		var form = this;
 		e.preventDefault();
 
 		new upndown().convert(content.value, function(error, markdown) {
@@ -20,7 +21,7 @@ window.addEventListener('load', function() {
 				alert(error);
 			} else {
 				content.value = markdown;
-				HTMLFormElement.prototype.submit.call(document.querySelector("form"));
+				HTMLFormElement.prototype.submit.call(form);
 			}
 		}, { keepHtml: true, keepWhitespace: true });
 	});
