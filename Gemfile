@@ -28,7 +28,7 @@ group :development do
 	gem "dotenv"
 	gem "pry"
 	gem "pry-byebug"
-	gem "scss-lint"
+	gem "scss_lint"
 	gem "sqlite3"
 end
 
