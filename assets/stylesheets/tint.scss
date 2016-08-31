@@ -35,12 +35,12 @@ body {
 		li {
 			display: inline-block;
 
-			&:after {
+			&::after {
 				content: "›";
 				margin-left: 0.5rem;
 			}
 
-			&:last-child:after {
+			&:last-child::after {
 				content: none;
 			}
 		}
