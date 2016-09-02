@@ -1,3 +1,5 @@
+@import "variables";
+@import "mixins";
 @import "base";
 
 a {
@@ -6,7 +8,7 @@ a {
 
 body {
 	display: flex;
-	font-family: Lato, sans-serif;
+	font-family: $font-stack;
 	font-size: 16px;
 	margin: 0;
 	min-height: 100vh;
@@ -17,6 +19,8 @@ body {
 
 		background: url("/assets/nav.svg") 50% 0 no-repeat #211e31;
 		background-size: 100% auto;
+		display: flex;
+		flex-direction: column;
 		min-width: 16rem;
 		padding: $padding;
 
@@ -92,9 +96,86 @@ body {
 				}
 			}
 		}
+
+		> :nth-last-child(2) {
+			flex: 1;
+		}
 	}
 
 	> section {
-		padding: 1rem 2rem;
+		$verticalp: 1rem;
+		$horizontalp: 2rem;
+
+		flex: 1;
+		padding: $verticalp $horizontalp;
+
+		> header {
+			background: #f8f8f8;
+			border-bottom: 1px solid #d9d9d9;
+			margin: -#{$verticalp} -#{$horizontalp} $horizontalp;
+			padding: $verticalp $horizontalp;
+
+			> h1 {
+				color: #707070;
+				font-size: 1.25rem;
+				font-weight: 700;
+				margin: 0 0 0.5rem;
+			}
+		}
+	}
+}
+
+.breadcrumbs {
+	color: #6d6d6d;
+	font-size: 0.75rem;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	li {
+		display: inline-block;
+
+		&::after {
+			content: "/";
+			margin: 0 0.25rem;
+		}
+
+		&:last-child::after {
+			content: none;
+		}
+	}
+}
+
+.files {
+	list-style-type: none;
+	margin: 0 0 2rem;
+	padding: 0;
+
+	li {
+		align-items: center;
+		border-bottom: 1px solid #ebebeb;
+		display: flex;
+
+		&:hover {
+			background: #f9f9f9;
+		}
+
+		> * {
+			margin: 0 0.5rem;
+		}
+
+		> :first-child {
+			display: block;
+			flex: 1;
+			overflow: hidden;
+			padding: 0.3rem 0;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		> .download {
+			@extend %button;
+			@extend %small-button;
+		}
 	}
 }

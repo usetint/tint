@@ -7,18 +7,17 @@ html
 		link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"
 		script type="text/javascript" src="/assets/localtime.js"
 	body
-		nav
-			h1: a href="/" Tint
-			- if site
-				section
-					h1 Current Project
-					h2 = site.fn
-					a href="#" = site.remote
-				section
-					h1 Content
-					ul
-						li: a href=site.route("files") class=("active" if controller == :file) File Manager
-			- if pundit_user
+		- if pundit_user
+			nav
+				h1: a href="/" Tint
+				- if site
+					section
+						h1 Current Project
+						h2 = site.fn
+					section
+						h1 Content
+						ul
+							li: a href=site.route("files") class=("active" if controller == :file) File Manager
 				form method="post" action="/auth/login"
 					input type="hidden" name="_method" value="DELETE"
 					button type="submit" Logout
