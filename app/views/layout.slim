@@ -2,12 +2,25 @@ doctype html
 html
 	head
 		title Tint
+		link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i"
 		link rel="stylesheet" href="/assets/tint.css"
+		link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"
 		script type="text/javascript" src="/assets/localtime.js"
 	body
-		h1: a href="/" Tint
-		== yield
-		- if pundit_user
-			form method="post" action="/auth/login"
-				input type="hidden" name="_method" value="DELETE"
-				button type="submit" Logout
+		nav
+			h1: a href="/" Tint
+			- if site
+				section
+					h1 Current Project
+					h2 = site.fn
+					a href="#" = site.remote
+				section
+					h1 Content
+					ul
+						li: a href=site.route("files") class=("active" if controller == :file) File Manager
+			- if pundit_user
+				form method="post" action="/auth/login"
+					input type="hidden" name="_method" value="DELETE"
+					button type="submit" Logout
+		section
+			== yield
