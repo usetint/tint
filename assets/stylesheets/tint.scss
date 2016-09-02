@@ -3,7 +3,7 @@
 @import "base";
 
 a {
-	color: #00a7c2;
+	color: $link-color;
 }
 
 body {
@@ -95,10 +95,6 @@ body {
 					}
 				}
 			}
-		}
-
-		> :nth-last-child(2) {
-			flex: 1;
 		}
 	}
 
