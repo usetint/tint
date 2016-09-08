@@ -29,13 +29,15 @@ body {
 			a {
 				$size: 2rem;
 
-				background: url("/assets/logomark.svg") center no-repeat;
-				background-size: contain;
-				color: transparent;
 				display: block;
-				font: 0/0 a;
 				height: $size;
+				overflow: hidden;
 				width: $size;
+
+				&::before {
+					content: url("/assets/logomark.svg");
+					display: block;
+				}
 			}
 		}
 
