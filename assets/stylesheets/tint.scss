@@ -49,12 +49,12 @@ body {
 				border-bottom: 1px solid #07060d;
 				color: rgba(#fff, 0.35);
 				font-size: 0.75rem;
-				margin: 0 -#{$padding} $h1-bottom-margin;
+				margin: 0 #{$padding * -1} $h1-bottom-margin;
 				padding: 0.5rem $padding;
 				text-transform: uppercase;
 
 				+ ul {
-					margin-top: -#{$h1-bottom-margin};
+					margin-top: #{$h1-bottom-margin * -1};
 				}
 			}
 
@@ -109,7 +109,7 @@ body {
 		> header {
 			background: #f8f8f8;
 			border-bottom: 1px solid #d9d9d9;
-			margin: -#{$verticalp} -#{$horizontalp} $horizontalp;
+			margin: #{$verticalp * -1} #{$horizontalp * -1} $horizontalp;
 			padding: $verticalp $horizontalp;
 
 			> h1 {
