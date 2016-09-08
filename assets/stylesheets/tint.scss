@@ -16,7 +16,7 @@ body {
 	> nav {
 		$padding: 1rem;
 
-		background: url("/assets/nav.svg") 50% 0 no-repeat #211e31;
+		background: url("/images/nav.svg") 50% 0 no-repeat #211e31;
 		background-size: 100% auto;
 		display: flex;
 		flex-direction: column;
@@ -35,7 +35,7 @@ body {
 				width: $size;
 
 				&::before {
-					content: url("/assets/logomark.svg");
+					content: url("/images/logomark.svg");
 					display: block;
 				}
 			}
