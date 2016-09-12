@@ -24,25 +24,23 @@ body {
 		min-width: 16rem;
 		padding: $padding;
 
-		> h1 {
+		> a {
+			$size: 2rem;
+
+			display: block;
+			height: $size;
 			margin: 0 0 2rem;
+			overflow: hidden;
+			width: $size;
 
-			a {
-				$size: 2rem;
-
+			&::before {
+				content: url("/images/logomark.svg");
 				display: block;
-				height: $size;
-				overflow: hidden;
-				width: $size;
-
-				&::before {
-					content: url("/images/logomark.svg");
-					display: block;
-				}
 			}
 		}
 
-		> section {
+		> section,
+		> header {
 			margin-bottom: 2rem;
 			$h1-bottom-margin: 1rem;
 
