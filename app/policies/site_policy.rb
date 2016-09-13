@@ -4,7 +4,7 @@ module Tint
 	class SitePolicy < Tint::ApplicationPolicy
 		def index?
 			return !!user if record == Tint::Site
-			user && user.user_id == record.user_id
+			user && record.users.any? { |u| u[:user_id] == user.user_id }
 		end
 
 		def create?
@@ -12,7 +12,7 @@ module Tint
 		end
 
 		def update?
-			user && user.user_id == record.user_id
+			user && record.users.any? { |u| u[:user_id] == user.user_id }
 		end
 
 		def destroy?
@@ -25,7 +25,10 @@ module Tint
 			end
 
 			def resolve
-				scope.where(user_id: user.user_id).map do |site_rec|
+				scope.join(:site_users, site_id: :site_id).
+				      where(user_id: user.user_id).map do |site_rec|
+					# This site does not have users set, but
+					# that isn't an issue in any current use and saves time for now
 					Tint::Site.new(site_rec)
 				end
 			end

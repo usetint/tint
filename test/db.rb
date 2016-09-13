@@ -7,8 +7,15 @@ module Tint
 		end
 
 		Table = Struct.new(:rows) do
+			extend Forwardable
+			def_delegators :rows, :first, :map
+
 			def all
 				rows
+			end
+
+			def join(_table, _columns)
+				self
 			end
 
 			def [](conditions)

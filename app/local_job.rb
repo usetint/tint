@@ -16,7 +16,7 @@ module Tint
 		def self.local_site(site_id=nil)
 			Tint::Site.new(
 				site_id: (site_id || 1).to_i,
-				user_id: 1,
+				users: [{ user_id: 1, role: "owner" }],
 				remote: "file://#{Pathname.new(ENV.fetch('SITE_PATH')).realpath}",
 				cache_path: Pathname.new(ENV.fetch('SITE_PATH')).realpath,
 				deploy_path: Pathname.new(ENV.fetch('PREFIX')).realpath,

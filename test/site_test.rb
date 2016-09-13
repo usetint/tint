@@ -9,7 +9,7 @@ describe Tint::Site do
 			cache_path: Pathname.new(__FILE__).dirname.join(cache_path),
 			deploy_path: Pathname.new(__FILE__).dirname.join(deploy_path),
 			fn: "my test site",
-			user_id: "3"
+			users: [{ user_id: 3, role: "owner" }]
 		}
 	end
 	let(:cache_path) { "data" }
@@ -72,9 +72,9 @@ describe Tint::Site do
 		end
 	end
 
-	describe "#user_id" do
-		it "should return the integer value of options[:user_id]" do
-			assert_equal(options[:user_id].to_i, subject.user_id)
+	describe "#users" do
+		it "should return the value of options[:users]" do
+			assert_equal(options[:users], subject.users)
 		end
 	end
 
