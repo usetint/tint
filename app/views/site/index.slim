@@ -44,7 +44,10 @@ form method="post" action=site.route("sync")
 
 - if site.cloned?
 	nav
-		ul: li: a href=site.route("files") Edit Files
+		ul
+			li: a href=site.route("files") Edit Files
+			- if policy(site).manage_users?
+				li: a href=site.route("users") Manage Users
 - elsif site.status == :clone_failed
 	p.error We were unable to clone your site. Please make sure the repository exists.
 - else

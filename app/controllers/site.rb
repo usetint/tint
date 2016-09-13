@@ -122,6 +122,23 @@ module Tint
 				end
 			end
 
+			namespace "/:site/users" do
+				get "/" do
+					authorize site, :manage_users?
+					users = Tint.db[:users].where(user_id: site.users.map { |u| u[:user_id] }).map do |user|
+						role = site.users.find { |u| u[:user_id] == user[:user_id] }
+						user.merge(role: role[:role])
+					end
+
+					slim :"site/users", locals: {
+						site: site,
+						users: users,
+						owner_invite: invite_for("owner"),
+						client_invite: invite_for("client")
+					}
+				end
+			end
+
 		protected
 
 			def invite_for(role)
