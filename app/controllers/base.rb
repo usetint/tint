@@ -28,6 +28,7 @@ module Tint
 			helpers Tint::Helpers::Rendering
 
 			error Pundit::NotAuthorizedError do
+				session["back_to"] = request.url
 				redirect to("/auth/login")
 			end
 
