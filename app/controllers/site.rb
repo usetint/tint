@@ -62,6 +62,28 @@ module Tint
 			end
 
 			namespace "/:site" do
+				get "/", params: :invite do
+					raise Pundit::NotAuthorizedError unless pundit_user
+					skip_authorization
+
+					invite = Tint.db[:site_invites].
+						where(site_id: params[:site], invite_code: params[:invite]).
+						where("expires_at > ?", Time.now.utc).first
+
+					if invite
+						Tint.db[:site_users].insert(
+							site_id: params[:site].to_i,
+							user_id: pundit_user.user_id,
+							role: invite[:role]
+						)
+
+						redirect(site.route)
+					else
+						status 404
+						slim :error, locals: { message: "Not a valid invite code." }
+					end
+				end
+
 				get "/" do
 					authorize site, :index?
 
@@ -101,6 +123,24 @@ module Tint
 			end
 
 		protected
+
+			def invite_for(role)
+				invite = Tint.db[:site_invites].
+							where(site_id: params["site"].to_i, role: role).
+							where("expires_at > ?", Time.now.utc + 432000 - 3600).first
+				unless invite
+					invite = {
+						invite_code: SecureRandom.urlsafe_base64,
+						expires_at: Time.now.utc + 432000,
+						site_id: params["site"].to_i,
+						role: role
+					}
+
+					Tint.db[:site_invites].insert(invite)
+				end
+
+				invite
+			end
 
 			def translate(value)
 				case value
