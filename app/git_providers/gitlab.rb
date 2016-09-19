@@ -25,13 +25,13 @@ module Tint
 				end
 			end
 
-			def add_deploy_key(_remote)
+			def add_deploy_key(_remote, public_key)
 				# We just add to the user for now, because there are no read/write
 				# deploy keys in Gitlab
 				# https://gitlab.com/gitlab-org/gitlab-ce/issues/19658
 				@gitlab.create_ssh_key(
 					"tint",
-					ENV.fetch("SSH_PUBLIC")
+					public_key
 				)
 			rescue ::Gitlab::Error::BadRequest => e
 				raise e unless e.message =~ /'fingerprint' has already been taken/

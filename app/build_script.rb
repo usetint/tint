@@ -2,7 +2,7 @@ require "digest"
 require "shellwords"
 
 module Tint
-	def self.build_script(job_id, site_id, remote, token)
+	def self.build_script(job_id, site_id, remote, token, ssh_private_key=nil)
 		job_id = Shellwords.escape(job_id.to_s)
 		site_id = Shellwords.escape(site_id.to_s)
 		remote = Shellwords.escape(remote.to_s)
@@ -12,10 +12,21 @@ module Tint
 		clone = "/tmp/#{job_id}-clone"
 		tar = "#{job_id}.tar"
 
+		if ssh_private_key
+			ssh_private_key = <<-KEY
+			mkdir -p ~/.ssh
+			chmod 0700 ~/.ssh
+			printf "%s" #{Shellwords.escape(ssh_private_key)} > ~/.ssh/id_ed25519
+			chmod 0600 ~/.ssh/id_ed25519
+			KEY
+		end
+
 		<<-SCRIPT
 		#!/bin/sh
 
 		set -e
+
+		#{ssh_private_key}
 
 		rm -rf #{clone} #{prefix}
 		mkdir -p #{prefix}

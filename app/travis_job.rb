@@ -50,7 +50,11 @@ module Tint
 			@status = :created
 			self.class.queue_dir.join("10-created.d").join("#{job_id}.json").open('w') do |f|
 				f.puts(JSON.dump(
-					job: { id: job_id, token: Tint.token(job_id) },
+					job: {
+						id: job_id,
+						token: Tint.token(job_id),
+						ssh_private_key: site.ssh_private_key_path.read
+					},
 					site: site.to_h
 				))
 			end
