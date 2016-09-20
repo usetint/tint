@@ -1,11 +1,13 @@
 require "pathname"
 require "shellwords"
+require "uri"
 
-require_relative "../git_providers/git_providers"
 require_relative "../git_providers/bitbucket"
+require_relative "../git_providers/git_providers"
 require_relative "../git_providers/github"
 require_relative "../git_providers/gitlab"
 require_relative "../site"
+require_relative "../wordlist"
 require_relative "base"
 
 module Tint
@@ -33,11 +35,18 @@ module Tint
 				authorize Tint::Site, :create?
 
 				site_id = Tint.db.transaction do
-					site_id = Tint.db[:sites].insert(
-						user_id: pundit_user.user_id,
-						fn: params[:fn],
-						remote: params[:remote]
-					)
+					begin
+						domain = URI(ENV["APP_URL"]).hostname.split(/\./).last(2) if ENV["APP_URL"]
+						subdomain = WORDLIST.sample(3).join('-')
+						site_id = Tint.db[:sites].insert(
+							user_id: pundit_user.user_id,
+							fn: params[:fn],
+							remote: params[:remote],
+							domain: ENV["APP_URL"] && ([subdomain] + domain).join(".")
+						)
+					rescue Sequel::UniqueConstraintViolation
+						retry
+					end
 
 					if params[:provider]
 						identity = Tint.db[:identities][user_id: pundit_user.user_id, provider: params[:provider]]
