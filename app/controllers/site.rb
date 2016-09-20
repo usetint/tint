@@ -36,13 +36,12 @@ module Tint
 
 				site_id = Tint.db.transaction do
 					begin
-						domain = URI(ENV["APP_URL"]).hostname.split(/\./).last(2) if ENV["APP_URL"]
 						subdomain = WORDLIST.sample(3).join('-')
 						site_id = Tint.db[:sites].insert(
 							user_id: pundit_user.user_id,
 							fn: params[:fn],
 							remote: params[:remote],
-							domain: ENV["APP_URL"] && ([subdomain] + domain).join(".")
+							domain: DOMAIN && "#{subdomain}.#{DOMAIN}"
 						)
 					rescue Sequel::UniqueConstraintViolation
 						retry
@@ -76,7 +75,9 @@ module Tint
 				put "/" do
 					authorize site, :update?
 
-					updated_attributes = [:fn, :remote, :show_config_warning].select { |key|
+					params["domain"] = "#{params[:subdomain]}.#{DOMAIN}" if params[:subdomain]
+
+					updated_attributes = [:fn, :remote, :domain, :show_config_warning].select { |key|
 						params.has_key?(key.to_s)
 					}.each_with_object({}) { |key, update|
 						update[key] = translate(params[key])

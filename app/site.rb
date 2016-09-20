@@ -30,6 +30,16 @@ module Tint
 			@options[:fn]
 		end
 
+		def domain
+			@options[:domain]
+		end
+
+		def subdomain
+			if domain && domain =~ /\.#{Regexp.escape(DOMAIN)}$/
+				domain.sub(/\.#{Regexp.escape(DOMAIN)}$/, '')
+			end
+		end
+
 		def user_id
 			@options[:user_id] && @options[:user_id].to_i
 		end
