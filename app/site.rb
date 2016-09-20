@@ -39,7 +39,7 @@ module Tint
 		end
 
 		def deploy_path
-			@deploy_path ||= ensure_path(:deploy_path)
+			@deploy_path ||= ensure_path(:deploy_path, @options[:domain])
 		end
 
 		def valid_config?
@@ -200,9 +200,9 @@ module Tint
 			false
 		end
 
-		def ensure_path(key, env=key.to_s.upcase)
+		def ensure_path(key, suffix=nil, env=key.to_s.upcase)
 			PathHelpers.ensure(
-				@options[key] || Pathname.new(ENV.fetch(env)).join(@options[:site_id].to_s)
+				@options[key] || Pathname.new(ENV.fetch(env)).join(suffix || @options[:site_id].to_s)
 			)
 		end
 	end
