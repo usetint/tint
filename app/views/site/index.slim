@@ -61,6 +61,10 @@ form method="post" action=site.route
 		| Remote
 		input type="text" name="remote" value=site.remote
 
+	label
+		| Subdomain
+		input type="text" name="subdomain" value=site.subdomain
+
 	button type="submit" Update
 
 - unless ENV["SITE_PATH"]

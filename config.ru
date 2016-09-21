@@ -6,6 +6,8 @@ if !ENV["RACK_ENV"] || ENV["RACK_ENV"] == "development"
 	Dotenv.load
 end
 
+require "uri"
+
 require_relative "app/db"
 require_relative "app/controllers/asset"
 require_relative "app/controllers/auth"
@@ -18,6 +20,7 @@ ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
 
 module Tint
 	BuildJob = ENV['TRAVIS_WORKER_BASE_DIR'] ? TravisJob : LocalJob
+	DOMAIN = ENV["APP_URL"] && URI(ENV["APP_URL"]).hostname.split(/\./).last(2).join(".")
 end
 
 run Rack::Cascade.new([
