@@ -63,8 +63,7 @@ module Tint
 
 			namespace "/:site" do
 				get "/", params: :invite do
-					raise Pundit::NotAuthorizedError unless pundit_user
-					skip_authorization
+					authorize site, :accept_invitation?
 
 					invite = Tint.db[:site_invites].
 						where(site_id: params[:site], invite_code: params[:invite]).

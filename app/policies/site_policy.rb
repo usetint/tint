@@ -21,6 +21,10 @@ module Tint
 			end
 		end
 
+		def accept_invitation?
+			!!user
+		end
+
 		def destroy?
 			update?
 		end
