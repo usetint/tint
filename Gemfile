@@ -23,6 +23,10 @@ gem "slim"
 gem "sprockets"
 gem "tilt", "1.4"
 
+group :production do
+	gem "pg"
+end
+
 group :development do
 	gem "awesome_print"
 	gem "dotenv"

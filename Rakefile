@@ -53,4 +53,19 @@ end}
 	end
 end
 
+namespace :assets do
+	desc 'compile assets'
+	task :precompile => [:environment] do
+		require_relative "app/controllers/asset.rb"
+		sprockets = Tint::Controllers::Asset.settings.sprockets
+
+		Pathname.new("public").rmtree rescue nil
+		FileUtils.cp_r("app/public", "public")
+
+		["tint.css", "file_browser.js", "localtime.js"].each do |asset|
+			sprockets[asset].write_to("public/assets/#{asset}")
+		end
+	end
+end
+
 task default: [:test]
