@@ -1,12 +1,14 @@
 javascript:
 	var files_path = "#{site.route("files")}";
 
-nav
-	ul
-		- breadcrumbs.each do |fragment|
-			li
-				- if fragment == breadcrumbs.last
-					= fragment.fn
-				- else
-					a href=fragment.route = fragment.fn
+header
+	h1 File Manager
+	nav
+		ul.breadcrumbs
+			- breadcrumbs.each do |fragment|
+				li
+					- if fragment == breadcrumbs.last
+						= fragment.fn
+					- else
+						a href=fragment.route = fragment.fn
 == yield

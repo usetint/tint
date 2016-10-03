@@ -55,13 +55,17 @@ module Tint
 				condition { !!params[key] }
 			end
 
+			def controller
+				self.class.name.split("::").last.downcase.to_sym
+			end
+
 		protected
 
 			def site
 				if ENV['SITE_PATH']
 					LocalJob.local_site(params['site'])
-				else
-					Tint::Site.new(Tint.db[:sites][site_id: params['site'].to_i])
+				elsif (site_details = Tint.db[:sites][site_id: params[:site].to_i])
+					Tint::Site.new(site_details)
 				end
 			end
 

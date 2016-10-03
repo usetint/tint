@@ -6,7 +6,7 @@ form action=object.route method="post"
 	input type="text" name="folder" required="required"
 	button type="submit" New folder
 
-ul
+ul.files
 	- object.children.each do |file|
 		li
 			a href=file.route = file.fn
@@ -16,7 +16,7 @@ ul
 					input type="hidden" name="_method" value="DELETE"
 					button type="submit" Delete
 
-				a href="#{file.route}?download" Download
+				a.download href="#{file.route}?download" Download
 
 			- unless file == object.parent
 				form action=file.route method="post"

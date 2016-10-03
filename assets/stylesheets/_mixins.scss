@@ -1,0 +1,24 @@
+%button {
+	$bg: $button-color;
+	$color: #fff;
+
+	background: $bg;
+	border: none;
+	border-radius: 2px;
+	color: $color;
+	cursor: pointer;
+	display: inline-block;
+	font-family: $font-stack;
+	font-size: 1rem;
+	padding: 0.5rem 1rem;
+	text-decoration: none;
+
+	&:hover {
+		background: darken($bg, 10);
+	}
+}
+
+%small-button {
+	font-size: 0.8rem;
+	padding: 0.25rem 0.5rem;
+}
