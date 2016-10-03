@@ -1,5 +1,6 @@
 require "erb"
 require "git"
+require "shellwords"
 require "tmpdir"
 
 require_relative "resource"
@@ -52,6 +53,23 @@ module Tint
 			@deploy_path ||= ensure_path(:deploy_path, @options[:domain])
 		end
 
+		def ssh_private_key_path
+			priv = ssh_keys_path.join(@options[:site_id].to_s)
+
+			unless priv.exist?
+				system("ssh-keygen -q -t ed25519 -N '' -f #{Shellwords.escape(priv.to_s)}")
+			end
+
+			priv.chmod(0600)
+			priv
+		end
+
+		def ssh_public_key_path
+			pub = ssh_private_key_path.sub_ext(".pub")
+			pub.chmod(0600)
+			pub
+		end
+
 		def valid_config?
 			begin
 				unsafe_config
@@ -91,6 +109,7 @@ module Tint
 		end
 
 		def git
+			ENV["SITE_PRIVATE_KEY_PATH"] = ssh_private_key_path.to_s
 			@git ||= Git.open(cache_path)
 		end
 
@@ -121,6 +140,7 @@ module Tint
 		end
 
 		def clone(remote=@options[:remote])
+			ENV["SITE_PRIVATE_KEY_PATH"] = ssh_private_key_path.to_s
 			begin
 				# First, do a shallow clone so that we are up and running
 				Git.clone(remote, cache_path.basename, path: cache_path.dirname, depth: 1)
@@ -163,6 +183,8 @@ module Tint
 		end
 
 		def commit_with(message, user=nil, tries: 1, depth: 1, &block)
+			ENV["SITE_PRIVATE_KEY_PATH"] = ssh_private_key_path.to_s
+
 			Dir.mktmpdir("tint-push") do |dir|
 				Git.clone(@options[:remote], "clone", path: dir, depth: depth)
 				path = Pathname.new(dir).join("clone")
@@ -208,6 +230,10 @@ module Tint
 			end
 
 			false
+		end
+
+		def ssh_keys_path
+			PathHelpers.ensure(Pathname.new(ENV.fetch("SSH_KEYS_PATH")))
 		end
 
 		def ensure_path(key, suffix=nil, env=key.to_s.upcase)

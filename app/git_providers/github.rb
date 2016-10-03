@@ -23,12 +23,12 @@ module Tint
 				end
 			end
 
-			def add_deploy_key(remote)
+			def add_deploy_key(remote, public_key)
 				user, repo = GitProviders.extract_from_remote(remote)
 				@github.repos.keys.create(
 					user: user,
 					repo: repo,
-					key: ENV.fetch("SSH_PUBLIC"),
+					key: public_key,
 					title: "tint",
 					read_only: false
 				)

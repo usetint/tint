@@ -50,7 +50,7 @@ module Tint
 					if params[:provider]
 						identity = Tint.db[:identities][user_id: pundit_user.user_id, provider: params[:provider]]
 						if identity && (provider = GitProviders.build(identity[:provider], identity[:omniauth]))
-							provider.add_deploy_key(params[:remote])
+							provider.add_deploy_key(params[:remote], Tint::Site.new(site_id: site_id).ssh_public_key_path.read)
 							provider.subscribe(params[:remote], "#{ENV.fetch("APP_URL")}/#{site_id}/sync")
 						end
 					end

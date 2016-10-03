@@ -71,7 +71,7 @@ form method="post" action=site.route
 	section
 		h1 Setup
 		p Add access for this SSH public key to your remote:
-		code = ENV.fetch('SSH_PUBLIC')
+		code = site.ssh_public_key_path.read
 		p And add this script as a post-receive hook:
 		pre
 			code

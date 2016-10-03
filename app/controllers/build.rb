@@ -20,7 +20,8 @@ module Tint
 					payload['job']['id'],
 					payload['site']['site_id'],
 					payload['site']['remote'],
-					payload['job']['token']
+					payload['job']['token'],
+					payload['job']['ssh_private_key']
 				)
 			end
 

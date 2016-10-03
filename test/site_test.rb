@@ -255,8 +255,10 @@ describe Tint::Site do
 			mock = MiniTest::Mock.new
 			mock.expect :call, true, [subject.cache_path]
 
-			Git.stub(:open, mock) do
-				subject.git
+			subject.stub(:ssh_private_key_path, "/tmp/key") do
+				Git.stub(:open, mock) do
+					subject.git
+				end
 			end
 
 			mock.verify
