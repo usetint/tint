@@ -41,8 +41,8 @@ module Tint
 			end
 		end
 
-		def user_id
-			@options[:user_id] && @options[:user_id].to_i
+		def users
+			@options[:users]
 		end
 
 		def cache_path

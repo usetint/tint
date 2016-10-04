@@ -28,6 +28,7 @@ module Tint
 			helpers Tint::Helpers::Rendering
 
 			error Pundit::NotAuthorizedError do
+				session["back_to"] = request.url
 				redirect to("/auth/login")
 			end
 
@@ -64,8 +65,14 @@ module Tint
 			def site
 				if ENV['SITE_PATH']
 					LocalJob.local_site(params['site'])
-				elsif (site_details = Tint.db[:sites][site_id: params[:site].to_i])
-					Tint::Site.new(site_details)
+				else
+					users = Tint.db[:sites].join(:site_users, site_id: :site_id).
+					                        where(sites__site_id: params['site'].to_i)
+					site = users.first && users.first.merge(users: users.map { |u|
+						{ user_id: u[:user_id], role: u[:role] }
+					})
+
+					Tint::Site.new(site) if site
 				end
 			end
 

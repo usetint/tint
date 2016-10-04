@@ -1,0 +1,24 @@
+h1 = "#{site.fn} Users"
+
+table
+	tr
+		th User
+		th Email
+		th Role
+	- users.each do |user|
+		tr
+			td = user[:fn]
+			td = user[:email]
+			td = user[:role]
+
+section
+	h1 Invite Owners
+
+	' Send this link to owners who should be able to manage:
+	= "#{ENV.fetch('APP_URL')}#{site.route}?invite=#{owner_invite[:invite_code]}"
+
+section
+	h1 Invite Clients
+
+	' Send this link to clients who should be able to edit:
+	= "#{ENV.fetch('APP_URL')}#{site.route}?invite=#{client_invite[:invite_code]}"

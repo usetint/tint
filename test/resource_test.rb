@@ -7,9 +7,9 @@ describe Tint::Resource do
 	let(:path) { "directory/file" }
 	let(:subject) { Tint::Resource.new(site, path) }
 
-	describe "#user_id" do
-		it "should call user_id on site" do
-			assert_method_called_on_member(subject, :site, :user_id)
+	describe "#users" do
+		it "should call users on site" do
+			assert_method_called_on_member(subject, :site, :users)
 		end
 	end
 

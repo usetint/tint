@@ -62,6 +62,27 @@ module Tint
 			end
 
 			namespace "/:site" do
+				get "/", params: :invite do
+					authorize site, :accept_invitation?
+
+					invite = Tint.db[:site_invites].
+						where(site_id: params[:site], invite_code: params[:invite]).
+						where("expires_at > ?", Time.now.utc).first
+
+					if invite
+						Tint.db[:site_users].insert(
+							site_id: params[:site].to_i,
+							user_id: pundit_user.user_id,
+							role: invite[:role]
+						)
+
+						redirect(site.route)
+					else
+						status 404
+						slim :error, locals: { message: "Not a valid invite code." }
+					end
+				end
+
 				get "/" do
 					authorize site, :index?
 
@@ -100,7 +121,42 @@ module Tint
 				end
 			end
 
+			namespace "/:site/users" do
+				get "/" do
+					authorize site, :manage_users?
+					users = Tint.db[:users].where(user_id: site.users.map { |u| u[:user_id] }).map do |user|
+						role = site.users.find { |u| u[:user_id] == user[:user_id] }
+						user.merge(role: role[:role])
+					end
+
+					slim :"site/users", locals: {
+						site: site,
+						users: users,
+						owner_invite: invite_for("owner"),
+						client_invite: invite_for("client")
+					}
+				end
+			end
+
 		protected
+
+			def invite_for(role)
+				invite = Tint.db[:site_invites].
+							where(site_id: params["site"].to_i, role: role).
+							where("expires_at > ?", Time.now.utc + 432000 - 3600).first
+				unless invite
+					invite = {
+						invite_code: SecureRandom.urlsafe_base64,
+						expires_at: Time.now.utc + 432000,
+						site_id: params["site"].to_i,
+						role: role
+					}
+
+					Tint.db[:site_invites].insert(invite)
+				end
+
+				invite
+			end
 
 			def translate(value)
 				case value

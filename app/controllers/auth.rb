@@ -87,7 +87,11 @@ module Tint
 						)
 					end
 
-					redirect to("/")
+					if session["back_to"]
+						redirect session.delete("back_to")
+					else
+						redirect to("/")
+					end
 				end
 			end
 		end

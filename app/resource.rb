@@ -6,7 +6,7 @@ module Tint
 
 		attr_reader :relative_path
 
-		def_delegators :site, :user_id
+		def_delegators :site, :users
 
 		def initialize(site, relative_path, fn=nil)
 			@site = site

@@ -11,8 +11,11 @@ describe Tint::Controllers::File do
 
 	let(:site_options) do
 		{
+			sites__site_id: 1,
 			site_id: 1,
 			user_id: 1,
+			role: "owner",
+			users: [{ user_id: 1, role: "owner" }],
 			cache_path: Pathname.new(__FILE__).dirname.join("data/site"),
 			fn: "Test Site"
 		}
