@@ -17,7 +17,7 @@ require_relative "app/controllers/site"
 
 ENV["GIT_COMMITTER_NAME"] = "Tint"
 ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
-ENV["GIT_SSH"] = Pathname.new(__FILE__).dirname.join("git_ssh").to_s
+ENV["GIT_SSH"] = Pathname.new(__FILE__).realpath.dirname.join("git_ssh").to_s
 
 module Tint
 	BuildJob = ENV['TRAVIS_WORKER_BASE_DIR'] ? TravisJob : LocalJob
