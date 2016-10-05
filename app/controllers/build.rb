@@ -17,7 +17,7 @@ module Tint
 
 				content_type :text
 				Tint.build_script(
-					payload['job']['id'],
+					payload['job']['uuid'],
 					payload['site']['site_id'],
 					payload['site']['remote'],
 					payload['job']['token'],
