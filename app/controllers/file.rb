@@ -181,7 +181,7 @@ module Tint
 
 						raise ArgumentError, "Must specify a valid build system" unless build_system
 
-						site.commit_with("Created default #{build_system} #{template}") do |dir|
+						site.commit_with("Created default #{build_system} #{template}", pundit_user) do |dir|
 							FileUtils.cp(
 								Pathname.new(__FILE__).join("../../../templates/#{build_system}/#{template}"),
 								dir.join(template)
