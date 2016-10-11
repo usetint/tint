@@ -38,10 +38,14 @@ module Tint
 					begin
 						subdomain = WORDLIST.sample(3).join('-')
 						site_id = Tint.db[:sites].insert(
-							user_id: pundit_user.user_id,
 							fn: params[:fn],
 							remote: params[:remote],
 							domain: DOMAIN && "#{subdomain}.#{DOMAIN}"
+						)
+						Tint.db[:site_users].insert(
+							site_id: site_id,
+							user_id: pundit_user.user_id,
+							role: "owner"
 						)
 					rescue Sequel::UniqueConstraintViolation
 						retry
