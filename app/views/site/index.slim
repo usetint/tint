@@ -3,6 +3,11 @@ h1 = site.fn
 form method="post" action=site.route("sync")
 	button type="submit" Sync & Build
 
+- unless ENV["SITE_PATH"]
+	form method="post" action=site.route
+		input type="hidden" name="_method" value="DELETE"
+		button type="submit" Delete this site
+
 - if site.cloned?
 	- unless site.makefile?
 		p.error YOU DO NOT HAVE A MAKEFILE. THIS IS VERY BAD.
@@ -29,11 +34,6 @@ form method="post" action=site.route("sync")
 				input type="hidden" name="show_config_warning" value="false"
 				button type="submit" Stop telling me about this
 
-- unless ENV["SITE_PATH"]
-	form method="post" action=site.route
-		input type="hidden" name="_method" value="DELETE"
-		button type="submit" Delete this site
-
 - if !site.valid_config?
 	p.error We were unable to parse your .tint.yml file.
 
@@ -41,16 +41,9 @@ form method="post" action=site.route("sync")
 	p.error Your most recent build failed.
 - elsif [:build_created, :build_received, :build_started].include?(site.status)
 	p You have a build running...
-
-- if site.cloned?
-	nav
-		ul
-			li: a href=site.route("files") Edit Files
-			- if policy(site).manage_users?
-				li: a href=site.route("users/") Manage Users
 - elsif site.status == :clone_failed
 	p.error We were unable to clone your site. Please make sure the repository exists.
-- else
+- elsif !site.cloned?
 	p Please wait, we are syncing your remote...
 
 form method="post" action=site.route
@@ -70,7 +63,7 @@ form method="post" action=site.route
 
 	button type="submit" Update
 
-- unless ENV["SITE_PATH"]
+- unless ENV["SITE_PATH"] || site.cloned?
 	section
 		h1 Setup
 		p Add access for this SSH public key to your remote:
@@ -81,4 +74,7 @@ form method="post" action=site.route
 				= open('templates/post-receive').read.gsub(/http:\/\/localhost:9292\/1\//, ENV.fetch('APP_URL') + "#{site.route}")
 
 - if site.cloned?
-	== render_log log: site.git.log, route: site.route("files"), button: "Revert to this commit"
+	section
+		h1 Site History
+
+		== render_log log: site.git.log, route: site.route("files"), button: "revert"

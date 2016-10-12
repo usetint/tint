@@ -12,11 +12,14 @@ html
 				- if site
 					header
 						h1 Current Project
-						h2 = site.fn
+						h2: a href=site.route class=("active" if controller == :site) = site.fn
 					section
 						h1 Content
 						ul
-							li: a href=site.route("files") class=("active" if controller == :file) File Manager
+							- if site.cloned?
+								li: a href=site.route("files") class=("active" if controller == :file) File Manager
+							- if policy(site).manage_users?
+								li: a href=site.route("users/") Manage Users
 				form method="post" action="/auth/login"
 					input type="hidden" name="_method" value="DELETE"
 					button type="submit" Logout

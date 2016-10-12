@@ -1,11 +1,11 @@
-ul
+ol.log
 	- log.each do |entry|
 		li style="margin-bottom: 1rem;"
-			div
-				=> entry.sha[0..6]
-				==> localtime(entry.date)
-				= entry.message
 			form method="post" action=route
 				input type="hidden" name="_method" value="PUT"
 				input type="hidden" name="sha" value=entry.sha
 				button type="submit" = button
+
+			=> entry.sha[0..6]
+			==> localtime(entry.date)
+			= entry.message
