@@ -1,0 +1,21 @@
+body > section {
+	background: #ccc;
+	margin: auto;
+	max-width: 24rem;
+	text-align: center;
+
+	> h1 {
+		img {
+			display: block;
+			margin: auto;
+		}
+	}
+
+	input {
+		margin: auto;
+	}
+
+	button {
+		width: 100%;
+	}
+}
