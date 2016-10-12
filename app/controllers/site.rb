@@ -119,6 +119,8 @@ module Tint
 					authorize site, :destroy?
 
 					site.clear_cache!
+					site.ssh_public_key_path.unlink
+					site.ssh_private_key_path.unlink
 					Tint.db[:sites].where(site_id: params[:site]).delete
 
 					redirect to("/")
