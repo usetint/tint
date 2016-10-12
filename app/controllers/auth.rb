@@ -25,6 +25,11 @@ module Tint
 
 					provider :gitlab, redirect_url: "#{ENV['APP_URL']}/auth/gitlab/callback", setup: ->(env) {
 						if env.dig("rack.request.form_hash", "site")
+							if !env.dig("rack.request.form_hash", "client_id") && env.dig("rack.request.form_hash", "site") == ENV["GITLAB_SITE"]
+								env["rack.request.form_hash"]["client_id"] = ENV["GITLAB_CLIENT_ID"]
+								env["rack.request.form_hash"]["client_secret"] = ENV["GITLAB_CLIENT_SECRET"]
+							end
+
 							env['omniauth.strategy'].options[:client_id] = env.dig("rack.request.form_hash", "client_id")
 							env['omniauth.strategy'].options[:client_secret] = env.dig("rack.request.form_hash", "client_secret")
 							env['omniauth.strategy'].options[:site] = env.dig("rack.request.form_hash", "site")

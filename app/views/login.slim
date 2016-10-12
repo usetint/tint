@@ -1,21 +1,33 @@
 - if pundit_user
-	p Associate another account with your current login:
-
-- if OmniAuth::Builder.providers.include?(:gitlab)
-	form method="post" action="/auth/gitlab"
-		input type="url" name="site" placeholder="GitLab domain"
-		input type="text" name="client_id" placeholder="OAuth client id"
-		input type="text" name="client_secret" placeholder="OAuth client secret"
-		button type="submit" Login with Gitlab
+	h1 Associate another account with your login
+- else
+	h1: img src="/images/logomark.svg" alt="Tint" Login/Register with
 
 - if OmniAuth::Builder.providers.include?(:github)
 	form method="post" action="/auth/github"
-		button type="submit" Login with Github
+		button type="submit" Github
 
-- if OmniAuth::Builder.providers.include?(:bitbucket)
-	form method="post" action="/auth/bitbucket"
-		button type="submit" Login with Bitbucket
+- if OmniAuth::Builder.providers.include?(:gitlab)
+	- if ENV["GITLAB_SITE"]
+		form method="post" action="/auth/gitlab"
+			input type="hidden" name="site" value=ENV["GITLAB_SITE"]
+			button type="submit" = URI(ENV["GITLAB_SITE"]).hostname.capitalize
+
+	form#other-gitlab method="post" action="/auth/gitlab"
+		input type="url" name="site" placeholder="GitLab site root"
+		input type="text" name="client_id" placeholder="OAuth client id"
+		input type="text" name="client_secret" placeholder="OAuth client secret"
+		button type="submit"
+			- if ENV["GITLAB_SITE"]
+				' Other
+			| Gitlab
+
+	script type="text/javascript" src="/gitlab_auth.js"
 
 - if OmniAuth::Builder.providers.include?(:indieauth)
 	form method="post" action="/auth/indieauth"
-		button type="submit" Login with your domain
+		button type="submit" IndieAuth
+
+- if OmniAuth::Builder.providers.include?(:bitbucket)
+	form method="post" action="/auth/bitbucket"
+		button type="submit" Bitbucket
