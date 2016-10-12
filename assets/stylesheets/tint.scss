@@ -21,7 +21,8 @@ body {
 		background-size: 100% auto;
 		display: flex;
 		flex-direction: column;
-		min-width: 16rem;
+		max-width: 25%;
+		min-width: 20%;
 		padding: $padding;
 
 		> a {
@@ -75,24 +76,26 @@ body {
 			}
 
 			> ul {
+				font-size: 0.875rem;
 				list-style-type: none;
 				margin-left: 0;
 				padding-left: 0;
+			}
 
-				a {
-					border-left: 4px solid transparent;
-					color: rgba(#fff, 0.6);
-					display: block;
-					font-size: 0.875rem;
-					margin-left: -$padding;
-					margin-right: -$padding;
-					padding: 0.75rem $padding;
-					text-decoration: none;
+			> ul a,
+			> h2 a {
+				border-left: 4px solid transparent;
+				color: rgba(#fff, 0.6);
+				display: block;
+				margin-left: -$padding;
+				margin-right: -$padding;
+				padding: 0.75rem $padding;
+				text-decoration: none;
 
-					&.active {
-						border-color: #ff8006;
-						color: #fff;
-					}
+				&:hover,
+				&.active {
+					border-color: #ff8006;
+					color: #fff;
 				}
 			}
 		}
@@ -171,6 +174,21 @@ body {
 
 		> .download {
 			@extend %button;
+			@extend %small-button;
+		}
+	}
+}
+
+.log {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	form {
+		display: inline;
+		padding-right: 1em;
+
+		button {
 			@extend %small-button;
 		}
 	}

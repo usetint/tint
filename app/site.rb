@@ -23,7 +23,7 @@ module Tint
 		end
 
 		def route(sub='')
-			path = sub.split("/").map { |s| ERB::Util.url_encode(s) }.join("/")
+			path = sub.split("/", -1).map { |s| ERB::Util.url_encode(s) }.join("/")
 			"/#{@options[:site_id]}/#{path}"
 		end
 
