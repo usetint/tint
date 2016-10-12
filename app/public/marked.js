@@ -801,10 +801,7 @@ Renderer.prototype.html = function(html) {
 Renderer.prototype.heading = function(text, level, raw) {
   return '<h'
     + level
-    + ' id="'
-    + this.options.headerPrefix
-    + raw.toLowerCase().replace(/[^\w]+/g, '-')
-    + '">'
+    + '>'
     + text
     + '</h'
     + level
