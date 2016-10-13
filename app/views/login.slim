@@ -1,7 +1,7 @@
 - if pundit_user
 	h1 Associate another account with your login
 - else
-	h1: img src="/images/logomark.svg" alt="Tint" Login/Register with
+	h1: img src="/images/logo.svg" alt="Tint" Login/Register with
 
 - if OmniAuth::Builder.providers.include?(:github)
 	form method="post" action="/auth/github"
