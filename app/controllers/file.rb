@@ -44,7 +44,7 @@ module Tint
 					authorize resource, :edit?
 
 					if resource.text?
-						slim :source, locals: { path: resource.route }
+						html = slim :source, locals: { path: resource.route }
 						stream_into_element("<textarea name=\"source\">", html, resource)
 					else
 						slim :error, locals: { message: "Only text files may be edited by source" }
