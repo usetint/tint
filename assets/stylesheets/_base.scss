@@ -76,19 +76,7 @@ button {
 }
 
 ul form {
-	display: inline-block;
-	margin-bottom: 0;
-
-	input[type="text"] {
-		display: inline-block;
-		font-size: 0.8rem;
-		padding: 0.25rem 0.5rem;
-		width: auto;
-	}
-
-	button {
-		@extend %small-button;
-	}
+	@extend %small-form;
 }
 
 #file-browser {

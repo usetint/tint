@@ -1,10 +1,11 @@
-form action=object.route method="post" enctype="multipart/form-data"
-	input type="file" name="file" required="required"
-	button type="submit" Upload
+.actions
+	form action=object.route method="post"
+		input type="text" name="folder" required="required"
+		button type="submit" New folder
 
-form action=object.route method="post"
-	input type="text" name="folder" required="required"
-	button type="submit" New folder
+	form action=object.route method="post" enctype="multipart/form-data"
+		input type="file" name="file" required="required"
+		button type="submit" Upload
 
 ul.files
 	- object.children.each do |file|
@@ -23,3 +24,5 @@ ul.files
 					input type="hidden" name="_method" value="PUT"
 					input type="text" name="name" value=file.name
 					button type="submit" Rename
+
+script type="text/javascript" src="/toggle_renames.js"
