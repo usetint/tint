@@ -1,9 +1,7 @@
-== slim "header", layout: false
-
 form action=path method="post" enctype="multipart/form-data"
 	input type="hidden" name="_method" value="PUT"
 	== render_yml(data)
 
 	button type="submit" Save
 
-a href="?source" Edit Raw Source
+== render_log log: resource.log, route: resource.route, button: "revert"

@@ -4,8 +4,10 @@ window.addEventListener('load', function() {
 	tinymce.init({
 		selector: 'textarea[name=content]',
 		menubar: false,
+		statusbar: false,
 		toolbar: 'undo redo | formatselect | bold italic numlist bullist | blockquote link image',
 		entity_encoding: 'raw',
+		plugins: "autoresize",
 
 		// Show and preserve whitspace
 		whitespace_elements: 'p',

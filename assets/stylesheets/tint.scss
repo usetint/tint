@@ -21,9 +21,8 @@ body {
 		background-size: 100% auto;
 		display: flex;
 		flex-direction: column;
-		max-width: 25%;
-		min-width: 20%;
 		padding: $padding;
+		width: 25%;
 
 		> a {
 			$size: 2rem;
