@@ -9,11 +9,11 @@ form#content enctype="multipart/form-data" action=path method="post"
 			input type="text" name="data[title]" placeholder="Untitled Page" value=(frontmatter || {})["title"]
 
 	textarea name="content"
-	small Shift+Enter to insert a raw newline (in code blocks, etc)
 
 	- meta = (frontmatter || {}).reject {|k,v| k == "title"}
 	- if meta.size > 0
-		== render_yml(meta)
+		fieldset.yml
+			== render_yml(meta)
 
 	footer
 		button type="submit" Save and Update
