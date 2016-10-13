@@ -32,6 +32,8 @@
 	}
 
 	.mce-tinymce {
+		border-left: none;
+		border-right: none;
 		margin: calc(-1rem - 1px) -2rem 0;
 		width: calc(100% + 4rem);
 	}
