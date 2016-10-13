@@ -64,6 +64,11 @@ textarea {
 
 button {
 	@extend %button;
+
+	&::-moz-focus-inner {
+		border: none;
+		padding: 0;
+	}
 }
 
 .error {
