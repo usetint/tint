@@ -1,16 +1,24 @@
-== slim "header", layout: false
-
 form#content enctype="multipart/form-data" action=path method="post"
 	input type="hidden" name="_method" value="PUT"
-	- if frontmatter
-		== render_yml(frontmatter)
 
-	small Shift+Enter to insert a raw newline (in code blocks, etc)
+	header
+		a href="?source" Source
+
+		label
+			| Page Title
+			input type="text" name="data[title]" placeholder="Untitled Page" value=(frontmatter || {})["title"]
+
 	textarea name="content"
-	button type="submit" Save
+	small Shift+Enter to insert a raw newline (in code blocks, etc)
 
-- if frontmatter
-	a href="?source" Edit Raw Source
+	- meta = (frontmatter || {}).reject {|k,v| k == "title"}
+	- if meta.size > 0
+		== render_yml(meta)
+
+	footer
+		button type="submit" Save and Update
+
+== render_log log: resource.log, route: resource.route, button: "revert"
 
 - if wysiwyg
 	script type="text/javascript" src="/marked.js"

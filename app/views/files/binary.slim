@@ -5,3 +5,5 @@ form action=file.route method="post" enctype="multipart/form-data"
 	label
 		== input.render
 	button type="submit" Update file
+
+== render_log log: resource.log, route: resource.route, button: "revert"

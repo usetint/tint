@@ -1,0 +1,53 @@
+#content {
+	> header {
+		background: #f8f8f8;
+		border-bottom: 1px solid #d9d9d9;
+		margin: -2rem -2rem 1rem;
+		padding: 1rem 2rem;
+
+		> a {
+			float: right;
+		}
+
+		label {
+			font-size: 0.8rem;
+			font-weight: bold;
+			margin: 0;
+			text-transform: uppercase;
+		}
+
+		input[name="data[title]"] {
+			border-left: none;
+			border-right: none;
+			border-top: none;
+			padding: 0.5rem 0;
+		}
+	}
+
+	> textarea {
+		background: #fff;
+		height: calc(70vh - 10rem);
+		margin: calc(-1rem - 1px) -2rem 0;
+		width: calc(100% + 4rem);
+	}
+
+	.mce-tinymce {
+		margin: calc(-1rem - 1px) -2rem 0;
+		width: calc(100% + 4rem);
+	}
+
+	> footer {
+		background: #f8f8f8;
+		border-top: 1px solid #d9d9d9;
+		bottom: 0;
+		padding: 1rem 2rem;
+		position: fixed;
+		right: 0;
+		text-align: right;
+		width: 75%;
+	}
+}
+
+.log {
+	margin-bottom: 5rem;
+}
