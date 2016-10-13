@@ -13,6 +13,7 @@ require_relative "app/controllers/asset"
 require_relative "app/controllers/auth"
 require_relative "app/controllers/build"
 require_relative "app/controllers/file"
+require_relative "app/controllers/license"
 require_relative "app/controllers/site"
 
 ENV["GIT_COMMITTER_NAME"] = "Tint"
@@ -29,5 +30,6 @@ run Rack::Cascade.new([
 	Tint::Controllers::Auth,
 	Tint::Controllers::Build,
 	Tint::Controllers::File,
+	Tint::Controllers::License,
 	Tint::Controllers::Site
 ])
