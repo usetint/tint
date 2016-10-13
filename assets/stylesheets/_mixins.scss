@@ -22,3 +22,28 @@
 	font-size: 0.8rem;
 	padding: 0.25rem 0.5rem;
 }
+
+%small-form {
+	display: inline-block;
+	margin-bottom: 0;
+
+	> * {
+		margin: 0 0.25rem;
+	}
+
+	input[type="text"],
+	input[type="file"] {
+		display: inline-block;
+		font-size: 0.8rem;
+		padding: 0.25rem 0.5rem;
+		width: auto;
+	}
+
+	input[type="file"] {
+		padding: 0;
+	}
+
+	button {
+		@extend %small-button;
+	}
+}
