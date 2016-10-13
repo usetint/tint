@@ -25,18 +25,10 @@ body {
 		width: 25%;
 
 		> a {
-			$size: 2rem;
-
 			display: block;
-			height: $size;
 			margin: 0 0 2rem;
-			overflow: hidden;
-			width: $size;
 
-			&::before {
-				content: url("/images/logomark.svg");
-				display: block;
-			}
+			img { height: 2rem; }
 		}
 
 		> section,
