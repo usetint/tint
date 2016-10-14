@@ -25,6 +25,7 @@ gem "tilt", "1.4"
 
 group :production do
 	gem "pg"
+	gem "sentry-raven"
 end
 
 group :development do
