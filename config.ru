@@ -16,6 +16,12 @@ require_relative "app/controllers/file"
 require_relative "app/controllers/license"
 require_relative "app/controllers/site"
 
+begin
+	require "raven"
+	use Raven::Rack
+rescue LoadError
+end
+
 ENV["GIT_COMMITTER_NAME"] = "Tint"
 ENV["GIT_COMMITTER_EMAIL"] = "commit@usetint.com"
 ENV["GIT_SSH"] = Pathname.new(__FILE__).realpath.dirname.join("git_ssh").to_s

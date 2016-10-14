@@ -114,6 +114,8 @@ GEM
     scss_lint (0.50.2)
       rake (>= 0.9, < 12)
       sass (~> 3.4.20)
+    sentry-raven (2.0.2)
+      faraday (>= 0.7.6, < 0.10.x)
     sequel (4.36.0)
     simplecov (0.12.0)
       docile (~> 1.1.0)
@@ -179,6 +181,7 @@ DEPENDENCIES
   ruby-filemagic
   sass
   scss_lint
+  sentry-raven
   sequel
   sinatra
   sinatra-contrib
