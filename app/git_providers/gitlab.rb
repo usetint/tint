@@ -14,7 +14,7 @@ module Tint
 
 			def repositories(exclude: [])
 				@gitlab.projects(archived: false).auto_paginate.select { |repo|
-					!exclude.include?(repo.ssh_url)
+					!exclude.include?(repo.ssh_url_to_repo)
 				}.map do |repo|
 					{
 						fn: repo.name_with_namespace,
