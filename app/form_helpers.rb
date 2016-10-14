@@ -1,5 +1,7 @@
 module Tint
 	module FormHelpers
+		class Invalid < Exception; end
+
 		def self.process(data, dir)
 			case data
 			when Array
@@ -68,6 +70,8 @@ module Tint
 			def datetime
 				datetime = "#{self["___datetime_date"]} #{self["___datetime_time"]}"
 				Time.parse(datetime) if datetime.strip.to_s != ""
+			rescue ArgumentError
+				raise Invalid.new("#{k}: invalid date #{v.inspect}")
 			end
 
 			def array
@@ -76,7 +80,12 @@ module Tint
 
 			def convert_dates
 				merge(self) do |k,v|
-					v = Date.parse(v) if is_date?(k, v)
+					begin
+						v = Date.parse(v) if is_date?(k, v)
+					rescue ArgumentError
+						raise Invalid.new("#{k}: invalid date #{v.inspect}")
+					end
+
 					FormHelpers.process(v, dir)
 				end.to_h
 			end
