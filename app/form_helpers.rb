@@ -74,7 +74,7 @@ module Tint
 				datetime = "#{self["___datetime_date"]} #{self["___datetime_time"]}"
 				Time.parse(datetime) if datetime.strip.to_s != ""
 			rescue ArgumentError
-				raise Invalid.new("#{k}: invalid date #{v.inspect}")
+				raise Invalid.new("invalid date #{datetime.inspect}")
 			end
 
 			def array

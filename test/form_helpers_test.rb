@@ -62,6 +62,17 @@ describe Tint::FormHelpers do
 						assert_equal(nil, subject.process(data, dir))
 					end
 				end
+
+				describe "when datetime is invalid" do
+					let(:date) { "boop" }
+					let(:vtime) { "boop" }
+
+					it "should throw catchable exception" do
+						assert_raises(Tint::FormHelpers::Invalid) do
+							subject.process(data, dir)
+						end
+					end
+				end
 			end
 
 			describe "when we are sending in a pretend array" do
@@ -86,6 +97,16 @@ describe Tint::FormHelpers do
 
 						it "should return a Hash" do
 							assert_equal(Hash, subject.process(data, dir).class)
+						end
+					end
+				end
+
+				describe "when date is invalid" do
+					let(:data) { { "date" => "boop" } }
+
+					it "should throw catchable exception" do
+						assert_raises(Tint::FormHelpers::Invalid) do
+							subject.process(data, dir)
 						end
 					end
 				end
