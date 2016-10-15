@@ -110,6 +110,7 @@ GEM
       rack (>= 1.0)
     rake (11.2.2)
     ruby-filemagic (0.7.1)
+    ruby_dig (0.0.2)
     sass (3.4.22)
     scss_lint (0.50.2)
       rake (>= 0.9, < 12)
@@ -179,6 +180,7 @@ DEPENDENCIES
   pry-byebug
   rake
   ruby-filemagic
+  ruby_dig
   sass
   scss_lint
   sentry-raven

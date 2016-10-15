@@ -1,5 +1,5 @@
 require "active_support/inflector/methods"
-require_relative "future"
+require "ruby_dig"
 
 module Tint
 	module Input

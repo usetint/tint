@@ -85,3 +85,13 @@ module Tint
 		end
 	end
 end
+
+# Monkepatch to allow digging into session
+
+require "rack/session/abstract/id"
+
+class Rack::Session::Abstract::SessionHash
+	def dig(*args)
+		to_hash.dig(*args)
+	end
+end
