@@ -87,7 +87,7 @@ module Tint
 				end
 
 				put "/?", params: :sha do
-					depth = site.git.log.find_index { |commit| commit.sha == params[:sha] }
+					depth = site.log.find_index { |commit| commit.sha == params[:sha] }
 					return slim :error, locals: { message: "Cannot find that commit" } unless depth >= 0
 
 					site.commit_with("Reverted to #{params[:sha][0..6]}", pundit_user, depth: depth + 1) do |dir|
@@ -98,7 +98,7 @@ module Tint
 				end
 
 				put "/*", params: :sha do
-					depth = site.git.log.find_index { |commit| commit.sha == params[:sha] }
+					depth = site.log.find_index { |commit| commit.sha == params[:sha] }
 					return slim :error, locals: { message: "Cannot find that commit" } unless depth >= 0
 
 					site.commit_with(

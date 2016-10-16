@@ -117,6 +117,12 @@ module Tint
 			cache_path.join('.git').directory?
 		end
 
+		def log
+			git.log.tap(&:size)
+		rescue Git::GitExecuteError
+			[] # No log
+		end
+
 		def status
 			status = @options[:status] || if Tint.db
 				job = Tint.db[:jobs].where(site_id: @options[:site_id]).order(:created_at).last
@@ -217,19 +223,29 @@ module Tint
 	protected
 
 		def maybe_commit(git, message, user)
-			git.status.each do |f|
-				if f.type
-					if user && user.email
-						git.commit("#{message} via tint", author: "#{user.fn} <#{user.email}>")
-					else
-						git.commit("#{message} via tint")
-					end
+			begin
+				status = git.status
+			rescue Git::GitExecuteError
+				commit(git, message, user)
+				return true
+			end
 
+			status.each do |f|
+				if f.type
+					commit(git, message, user)
 					return true
 				end
 			end
 
 			false
+		end
+
+		def commit(git, message, user)
+			if user && user.email
+				git.commit("#{message} via tint", author: "#{user.fn} <#{user.email}>")
+			else
+				git.commit("#{message} via tint")
+			end
 		end
 
 		def ssh_keys_path
