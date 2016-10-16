@@ -21,6 +21,7 @@ gem "sequel"
 gem "sinatra-pundit"
 gem "skim"
 gem "slim"
+gem "slugify"
 gem "sprockets"
 gem "tilt", "1.4"
 

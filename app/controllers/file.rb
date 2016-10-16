@@ -154,8 +154,14 @@ module Tint
 
 					begin
 						site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
-								updated_data = FormHelpers.process(params[:data], dir)
-							dir.join(resource.relative_path).open("w") do |f|
+							updated_data = FormHelpers.process(params[:data], dir)
+
+							new_relative_path = resource.relative_path_with_frontmatter(updated_data)
+							if new_relative_path != resource.relative_path
+								dir.join(resource.relative_path).rename(dir.join(new_relative_path))
+							end
+
+							dir.join(new_relative_path).open("w") do |f|
 								if updated_data
 									if resource.yml?
 										f.puts updated_data.to_yaml.sub(/\A---\r?\n?/, "")
@@ -163,12 +169,12 @@ module Tint
 										f.puts updated_data.to_yaml
 										f.puts "---"
 									end
-								end
 
-								if params.has_key?("content")
-									f.puts(params[:content].encode(universal_newline: true))
-								elsif !resource.yml?
-									resource.stream_content(&f.method(:puts))
+									if params.has_key?("content")
+										f.puts(params[:content].encode(universal_newline: true))
+									elsif !resource.yml?
+										resource.stream_content(&f.method(:puts))
+									end
 								end
 							end
 						end

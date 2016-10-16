@@ -143,6 +143,10 @@ describe Tint::File do
 					}, subject.frontmatter)
 				end
 			end
+
+			describe "#relative_path_with_frontmatter" do
+				it { assert_equal(subject.relative_path_with_frontmatter, subject.relative_path) }
+			end
 		end
 
 		describe "and overlapping in file" do
@@ -159,6 +163,10 @@ describe Tint::File do
 						"date" => Date.new(1980, 10, 10)
 					}, subject.frontmatter)
 				end
+			end
+
+			describe "#relative_path_with_frontmatter" do
+				it { assert_equal(subject.relative_path_with_frontmatter, Pathname.new("filename_frontmatter/1980-10-10-other-title.md")) }
 			end
 		end
 end

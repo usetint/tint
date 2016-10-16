@@ -1,4 +1,5 @@
 require "filemagic"
+require "slugify"
 require "yaml"
 
 require_relative "resource"
@@ -85,6 +86,13 @@ module Tint
 			from_filename.merge(from_front)
 		end
 
+		def relative_path_with_frontmatter(front=frontmatter, ext=extension)
+			return relative_path unless filename_frontmatter_candidates.first
+			parent.relative_path.join(filename_frontmatter_candidates.first.map { |piece|
+				format_piece(piece, front[piece["key"]]).to_s
+			}.join + ext.to_s)
+		end
+
 		def to_h(_=nil)
 			super.merge(mime: mime)
 		end
@@ -124,6 +132,30 @@ module Tint
 					matches = Pathname.glob([parent.path.join(glob), site.cache_path.join(glob)])
 					matches.include?(path) ? pieces : nil
 				end.compact
+		end
+
+		def piece_default(piece)
+			piece["default"] || case piece["format"]
+				when "slugify"
+					"slug"
+				else
+					piece["match"]
+			end
+		end
+
+		def format_piece(piece, value)
+			if piece.has_key?("strptime")
+				value = (value || Time.now).strftime(piece["strptime"])
+			else
+				value ||= piece_default(piece)
+			end
+
+			case piece["format"]
+				when "slugify"
+					value.slugify
+				else
+					value.to_s
+			end
 		end
 
 		def piece_match(piece, path)
