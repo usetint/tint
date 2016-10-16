@@ -210,7 +210,7 @@ module Tint
 						end
 					rescue Git::GitExecuteError => e
 						raise e if tries > 4
-						commit_with(message, user, tries+1, depth, &block)
+						commit_with(message, user, tries: tries+1, depth: depth, &block)
 					end
 				end
 			end
