@@ -66,19 +66,7 @@ module Tint
 
 		def frontmatter
 			from_filename = filename_frontmatter_candidates.reduce({}) do |data, pieces|
-				catch(:done) do
-					new_data, final_path = pieces.reduce([data, path.basename.to_s]) do |(acc, path), piece|
-						if (result = piece_match(piece, path))
-							[piece["key"] ? acc.merge(piece["key"] => result[:data]) : acc, result[:path]]
-						else
-							throw(:done, data) # Did not match
-						end
-					end
-
-					throw(:done, data) unless final_path == "" || final_path[0] == "." # Must consume whole filename
-
-					new_data
-				end
+				data.merge(try_filename_frontmatter_candidate(pieces))
 			end
 
 			# From frontmatter takes precedence
@@ -132,6 +120,20 @@ module Tint
 					matches = Pathname.glob([parent.path.join(glob), site.cache_path.join(glob)])
 					matches.include?(path) ? pieces : nil
 				end.compact
+		end
+
+		def try_filename_frontmatter_candidate(pieces)
+			data, final_path = pieces.reduce([{}, path.basename.to_s]) do |(acc, path), piece|
+				if (result = piece_match(piece, path))
+					[piece["key"] ? acc.merge(piece["key"] => result[:data]) : acc, result[:path]]
+				else
+					return {} # Did not match
+				end
+			end
+
+			return {} unless final_path == "" || final_path[0] == "." # Must consume whole filename
+
+			data
 		end
 
 		def piece_default(piece)
