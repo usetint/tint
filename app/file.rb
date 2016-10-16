@@ -64,7 +64,25 @@ module Tint
 		end
 
 		def frontmatter
-			YAML.safe_load(open(path), [Date, Time])
+			from_filename = filename_frontmatter_candidates.reduce({}) do |data, pieces|
+				catch(:done) do
+					new_data, final_path = pieces.reduce([data, path.basename.to_s]) do |(acc, path), piece|
+						if (result = piece_match(piece, path))
+							[piece["key"] ? acc.merge(piece["key"] => result[:data]) : acc, result[:path]]
+						else
+							throw(:done, data) # Did not match
+						end
+					end
+
+					throw(:done, data) unless final_path == "" || final_path[0] == "." # Must consume whole filename
+
+					new_data
+				end
+			end
+
+			# From frontmatter takes precedence
+			from_front = YAML.safe_load(open(path), [Date, Time]) || {} rescue {}
+			from_filename.merge(from_front)
 		end
 
 		def to_h(_=nil)
@@ -97,6 +115,31 @@ module Tint
 				end
 
 				[!has_frontmatter, has_frontmatter]
+			end
+		end
+
+		def filename_frontmatter_candidates
+			@filename_frontmatter_candidates ||=
+				(site.config["filename_frontmatter"] || {}).map do |(glob, pieces)|
+					matches = Pathname.glob([parent.path.join(glob), site.cache_path.join(glob)])
+					matches.include?(path) ? pieces : nil
+				end.compact
+		end
+
+		def piece_match(piece, path)
+			if piece.has_key?("match") && (match = /^#{piece["match"]}/.match(path))
+				{ data: match.to_s, path: match.post_match }
+			elsif piece.has_key?("strptime")
+				begin
+					time = if Input.type(piece["key"], nil, site) == Input::Date
+						Date.strptime(path, piece["strptime"])
+					else
+						Time.strptime(path, piece["strptime"])
+					end
+					{ data: time, path: path.sub(time.strftime(piece["strptime"]), "") }
+				rescue ArgumentError
+					# Parse failed, so return nil
+				end
 			end
 		end
 	end
