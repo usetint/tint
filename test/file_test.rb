@@ -169,4 +169,27 @@ describe Tint::File do
 				it { assert_equal(subject.relative_path_with_frontmatter, Pathname.new("filename_frontmatter/1980-10-10-other-title.md")) }
 			end
 		end
+
+		describe "binary file" do
+			let(:path) { "filename_frontmatter/2015-01-01-binary.bin" }
+
+			describe "#frontmatter?" do
+				it { assert(subject.frontmatter?) }
+			end
+
+			describe "#frontmatter" do
+				it "should return from filename" do
+					assert_equal({
+						"title" => "binary",
+						"date" => Date.new(2015, 01, 01)
+					}, subject.frontmatter)
+				end
+			end
+
+			describe "#relative_path_with_frontmatter" do
+				it { assert_equal(subject.relative_path_with_frontmatter, subject.relative_path) }
+			end
+		end
+
+	end
 end

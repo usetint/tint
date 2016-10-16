@@ -61,7 +61,7 @@ module Tint
 		end
 
 		def frontmatter?
-			detect_content_or_frontmatter[1]
+			detect_content_or_frontmatter[1] || filename_frontmatter_candidates.length > 0
 		end
 
 		def frontmatter

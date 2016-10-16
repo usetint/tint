@@ -80,7 +80,10 @@ module Tint
 
 				get "/?*" do
 					authorize resource, :edit?
+
+					frontmatter = resource.frontmatter? && resource.frontmatter
 					slim :binary, locals: {
+						frontmatter: frontmatter,
 						file: resource,
 						input: Input::File.new(:file, "file", resource.relative_path, site)
 					}
@@ -140,9 +143,23 @@ module Tint
 				put "/*", params: :file do
 					authorize resource, :update?
 
-					if params[:file].is_a?(Hash) && params[:file][:tempfile]
+					if (params[:file].is_a?(Hash) && params[:file][:tempfile]) || params.has_key?("data")
 						site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
-							FormHelpers.upload(dir.join(resource.parent.relative_path), params[:file], resource.name)
+							name = if params.has_key?("data")
+								updated_data = FormHelpers.process(params[:data], dir)
+								new_relative_path = resource.relative_path_with_frontmatter(updated_data)
+								if new_relative_path != resource.relative_path
+									dir.join(resource.relative_path).rename(dir.join(new_relative_path))
+								end
+
+								new_relative_path.basename.to_s
+							else
+								resource.name
+							end
+
+							if (params[:file].is_a?(Hash) && params[:file][:tempfile])
+								FormHelpers.upload(dir.join(resource.parent.relative_path), params[:file], name)
+							end
 						end
 					end
 
