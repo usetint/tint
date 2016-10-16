@@ -1,3 +1,12 @@
 hidden_paths:
   - .*
   - Makefile
+
+filename_frontmatter:
+  "_posts/*":
+    - key: date
+      strptime: '%Y-%m-%d'
+    - match: '-'
+    - key: title
+      match: '[^\.]+'
+      format: slugify
