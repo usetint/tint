@@ -1,2 +1,2 @@
-input type="date" name="#{name}[___datetime_date]" value=(value && value.strftime("%F"))
-input type="time" name="#{name}[___datetime_time]" value=(value && value.strftime("%H:%M:%S"))
+input type="date" name="#{name}[___datetime_date]" pattern=Tint::FormHelpers::VALID_DATE value=(value && value.strftime("%F"))
+input type="time" name="#{name}[___datetime_time]" pattern=Tint::FormHelpers::VALID_TIME value=(value && value.strftime("%H:%M:%S"))

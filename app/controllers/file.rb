@@ -152,27 +152,31 @@ module Tint
 				put "/*" do
 					authorize resource, :update?
 
-					site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
-						updated_data = FormHelpers.process(params[:data], dir)
-						dir.join(resource.relative_path).open("w") do |f|
-							if updated_data
-								if resource.yml?
-									f.puts updated_data.to_yaml.sub(/\A---\r?\n?/, "")
-								else
-									f.puts updated_data.to_yaml
-									f.puts "---"
+					begin
+						site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
+								updated_data = FormHelpers.process(params[:data], dir)
+							dir.join(resource.relative_path).open("w") do |f|
+								if updated_data
+									if resource.yml?
+										f.puts updated_data.to_yaml.sub(/\A---\r?\n?/, "")
+									else
+										f.puts updated_data.to_yaml
+										f.puts "---"
+									end
+								end
+
+								if params.has_key?("content")
+									f.puts(params[:content].encode(universal_newline: true))
+								elsif !resource.yml?
+									resource.stream_content(&f.method(:puts))
 								end
 							end
-
-							if params.has_key?("content")
-								f.puts(params[:content].encode(universal_newline: true))
-							elsif !resource.yml?
-								resource.stream_content(&f.method(:puts))
-							end
 						end
-					end
 
-					redirect to(resource.parent.route)
+						redirect to(resource.parent.route)
+					rescue FormHelpers::Invalid
+						halt 500, $!.to_s
+					end
 				end
 
 				["Makefile", ".tint.yml"].each do |template|

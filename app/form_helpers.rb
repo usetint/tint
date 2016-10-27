@@ -1,5 +1,10 @@
 module Tint
 	module FormHelpers
+		VALID_DATE = "(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))"
+		VALID_TIME = "(0?[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])(?::([0-9]|[0-5][0-9]))?"
+
+		class Invalid < Exception; end
+
 		def self.process(data, dir)
 			case data
 			when Array
@@ -68,6 +73,8 @@ module Tint
 			def datetime
 				datetime = "#{self["___datetime_date"]} #{self["___datetime_time"]}"
 				Time.parse(datetime) if datetime.strip.to_s != ""
+			rescue ArgumentError
+				raise Invalid.new("invalid date #{datetime.inspect}")
 			end
 
 			def array
@@ -76,7 +83,12 @@ module Tint
 
 			def convert_dates
 				merge(self) do |k,v|
-					v = Date.parse(v) if is_date?(k, v)
+					begin
+						v = Date.parse(v) if is_date?(k, v)
+					rescue ArgumentError
+						raise Invalid.new("#{k}: invalid date #{v.inspect}")
+					end
+
 					FormHelpers.process(v, dir)
 				end.to_h
 			end
