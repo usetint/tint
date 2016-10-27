@@ -3,8 +3,8 @@ require "omniauth-bitbucket"
 require "omniauth-github"
 require "omniauth-gitlab"
 require "omniauth-indieauth"
+require "ruby_dig"
 
-require_relative "../future"
 require_relative "../tint_omniauth" # Monkeypatch
 require_relative "base"
 
