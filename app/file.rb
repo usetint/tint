@@ -72,7 +72,7 @@ module Tint
 		end
 
 		def log
-			site.git.log.path(relative_path)
+			site.log.path(relative_path)
 		end
 
 	protected

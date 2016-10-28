@@ -50,6 +50,10 @@ describe Tint::Controllers::File do
 					def path(*_)
 						[]
 					end
+
+					def size
+						1
+					end
 				end
 
 				Tint::Site.stub(:new, site) do
