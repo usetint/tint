@@ -109,4 +109,87 @@ describe Tint::File do
 			end
 		end
 	end
+
+	describe "file with frontmatter in filename" do
+		before do
+			site.cache_path.join(".tint.yml").open("w") do |f|
+				f.puts(YAML::dump("filename_frontmatter" => {
+					"filename_frontmatter/*" => [
+						{"key" => "date", "strptime" => "%Y-%m-%d"},
+						{"match" => "-"},
+						{"key" => "title", "match" => "[^\\.]+", "format" => "slugify" }
+					]
+				}))
+			end
+		end
+
+		after do
+			site.cache_path.join(".tint.yml").unlink
+		end
+
+		describe "and in file" do
+			let(:path) { "filename_frontmatter/2016-01-01-with-frontmatter.md" }
+
+			describe "#frontmatter?" do
+				it { assert(subject.frontmatter?) }
+			end
+
+			describe "#frontmatter" do
+				it "should return the parsed frontmatter and from filename" do
+					assert_equal({
+						"other" => "stuff",
+						"title" => "with-frontmatter",
+						"date" => Date.new(2016, 01, 01)
+					}, subject.frontmatter)
+				end
+			end
+
+			describe "#relative_path_with_frontmatter" do
+				it { assert_equal(subject.relative_path_with_frontmatter, subject.relative_path) }
+			end
+		end
+
+		describe "and overlapping in file" do
+			let(:path) { "filename_frontmatter/2010-01-01-with-overlapping-frontmatter.md" }
+
+			describe "#frontmatter?" do
+				it { assert(subject.frontmatter?) }
+			end
+
+			describe "#frontmatter" do
+				it "should return the parsed frontmatter overriding from filename" do
+					assert_equal({
+						"title" => "Other Title",
+						"date" => Date.new(1980, 10, 10)
+					}, subject.frontmatter)
+				end
+			end
+
+			describe "#relative_path_with_frontmatter" do
+				it { assert_equal(subject.relative_path_with_frontmatter, Pathname.new("filename_frontmatter/1980-10-10-other-title.md")) }
+			end
+		end
+
+		describe "binary file" do
+			let(:path) { "filename_frontmatter/2015-01-01-binary.bin" }
+
+			describe "#frontmatter?" do
+				it { assert(subject.frontmatter?) }
+			end
+
+			describe "#frontmatter" do
+				it "should return from filename" do
+					assert_equal({
+						"title" => "binary",
+						"date" => Date.new(2015, 01, 01)
+					}, subject.frontmatter)
+				end
+			end
+
+			describe "#relative_path_with_frontmatter" do
+				it { assert_equal(subject.relative_path_with_frontmatter, subject.relative_path) }
+			end
+		end
+
+	end
 end

@@ -4,6 +4,11 @@ form action=file.route method="post" enctype="multipart/form-data"
 	input type="hidden" name="_method" value="PUT"
 	label
 		== input.render
+
+	- if frontmatter && frontmatter.size > 0
+		fieldset.yml
+			== render_yml(frontmatter)
+
 	button type="submit" Update file
 
 == render_log log: resource.log, route: resource.route, button: "revert"

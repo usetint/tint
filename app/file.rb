@@ -1,4 +1,5 @@
 require "filemagic"
+require "slugify"
 require "yaml"
 
 require_relative "resource"
@@ -60,11 +61,24 @@ module Tint
 		end
 
 		def frontmatter?
-			detect_content_or_frontmatter[1]
+			detect_content_or_frontmatter[1] || filename_frontmatter_candidates.length > 0
 		end
 
 		def frontmatter
-			YAML.safe_load(open(path), [Date, Time])
+			from_filename = filename_frontmatter_candidates.reduce({}) do |data, pieces|
+				data.merge(try_filename_frontmatter_candidate(pieces))
+			end
+
+			# From frontmatter takes precedence
+			from_front = YAML.safe_load(open(path), [Date, Time]) || {} rescue {}
+			from_filename.merge(from_front)
+		end
+
+		def relative_path_with_frontmatter(front=frontmatter, ext=extension)
+			return relative_path unless filename_frontmatter_candidates.first
+			parent.relative_path.join(filename_frontmatter_candidates.first.map { |piece|
+				format_piece(piece, front[piece["key"]]).to_s
+			}.join + ext.to_s)
 		end
 
 		def to_h(_=nil)
@@ -97,6 +111,69 @@ module Tint
 				end
 
 				[!has_frontmatter, has_frontmatter]
+			end
+		end
+
+		def filename_frontmatter_candidates
+			@filename_frontmatter_candidates ||=
+				(site.config["filename_frontmatter"] || {}).map do |(glob, pieces)|
+					matches = Pathname.glob([parent.path.join(glob), site.cache_path.join(glob)])
+					matches.include?(path) ? pieces : nil
+				end.compact
+		end
+
+		def try_filename_frontmatter_candidate(pieces)
+			data, final_path = pieces.reduce([{}, path.basename.to_s]) do |(acc, path), piece|
+				if (result = piece_match(piece, path))
+					[piece["key"] ? acc.merge(piece["key"] => result[:data]) : acc, result[:path]]
+				else
+					return {} # Did not match
+				end
+			end
+
+			return {} unless final_path == "" || final_path[0] == "." # Must consume whole filename
+
+			data
+		end
+
+		def piece_default(piece)
+			piece["default"] || case piece["format"]
+				when "slugify"
+					"slug"
+				else
+					piece["match"]
+			end
+		end
+
+		def format_piece(piece, value)
+			if piece.has_key?("strptime")
+				value = (value || Time.now).strftime(piece["strptime"])
+			else
+				value ||= piece_default(piece)
+			end
+
+			case piece["format"]
+				when "slugify"
+					value.slugify
+				else
+					value.to_s
+			end
+		end
+
+		def piece_match(piece, path)
+			if piece.has_key?("match") && (match = /^#{piece["match"]}/.match(path))
+				{ data: match.to_s, path: match.post_match }
+			elsif piece.has_key?("strptime")
+				begin
+					time = if Input.type(piece["key"], nil, site) == Input::Date
+						Date.strptime(path, piece["strptime"])
+					else
+						Time.strptime(path, piece["strptime"])
+					end
+					{ data: time, path: path.sub(time.strftime(piece["strptime"]), "") }
+				rescue ArgumentError
+					# Parse failed, so return nil
+				end
 			end
 		end
 	end
