@@ -32,6 +32,10 @@ module Tint
 					if input_type == Input::MultipleSelect
 						render_input(key, value, name, type)
 					else
+						if value.length < 1 && input_type != Input::Text
+							value = [nil]
+						end
+
 						render_slim(
 							"inputs/fieldset/array",
 							legend: key,
