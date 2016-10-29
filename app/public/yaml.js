@@ -7,38 +7,81 @@ window.addEventListener("load", function() {
 		return Array.prototype.find.call(collection, condition);
 	}
 
-	function buildName(string, ol, nameRegexp) {
-		return string.replace(nameRegexp, ol.dataset.key + "[" + ol.children.length + "]");
+	function nameRegexp(ol) {
+		return new RegExp(ol.dataset.key.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + "\\[\\d+\\]");
 	}
 
-	function hydrateLi(nameRegexp, li, i) {
-		var ol = li.parentElement;
-		var button = find(li.children, function(el) { return el.className === "clone"; });
+	function buildName(string, ol, number) {
+		return string.replace(nameRegexp(ol), ol.dataset.key + "[" + number + "]");
+	}
 
-		if(!button) {
-			button = document.createElement("button");
-			li.appendChild(button);
+	function enableDisableMoveButtons(ol, li, number) {
+		find(li.children, function(el) { return el.className === "move-up"; }).disabled = number < 1;
+		find(li.children, function(el) { return el.className === "move-down"; }).disabled = number >= ol.children.length - 1;
+	}
 
-			button.type = "button";
-			button.className = "clone";
-			button.textContent = "Clone";
+	function hydrateLi(li) {
+		function findOrCreateButton(className, label) {
+			var button = find(li.children, function(el) { return el.className === className; });
+
+			if(!button) {
+				button = document.createElement("button");
+				li.appendChild(button);
+
+				button.type = "button";
+				button.className = className;
+				button.textContent = label;
+			}
+
+			return button;
 		}
 
-		button.addEventListener("click", function() {
+		findOrCreateButton("clone", "Clone").addEventListener("click", function() {
 			var item = li.cloneNode(true);
-			renameAppendHydrate(ol, item, nameRegexp);
+			renameAppendHydrate(li.parentElement, item, nameRegexp(li.parentElement));
 		});
+
+		findOrCreateButton("move-up", "^").addEventListener("click", function() {
+			li.parentNode.insertBefore(li, li.previousElementSibling);
+			renumber(li.parentNode, li);
+			renumber(li.parentNode, li.nextElementSibling);
+		});
+
+		findOrCreateButton("move-down", "V").addEventListener("click", function() {
+			li.parentNode.insertBefore(li.nextElementSibling, li);
+			renumber(li.parentNode, li);
+			renumber(li.parentNode, li.previousElementSibling);
+		});
+
+		enableDisableMoveButtons(li.parentNode, li, Array.prototype.indexOf.call(li.parentNode.children, li));
 	}
 
-	function renameAppendHydrate(ol, item, nameRegexp, resetValue) {
-		forEach(item.querySelectorAll('input, textarea'), function(el) {
-			el.name = buildName(el.name, ol, nameRegexp);
-			if(resetValue) {
-				el.value = '';
-			}
+	function renumber(ol, li) {
+		var number = Array.prototype.indexOf.call(ol.children, li);
+
+		if(number === -1) {
+			number = ol.children.length;
+		}
+
+		forEach(li.querySelectorAll('input, textarea, select'), function(el) {
+			el.name = buildName(el.name, ol, number);
 		});
 
+		forEach(li.querySelectorAll('ol[data-key]'), function(el) {
+			el.dataset.key = buildName(el.dataset.key, ol, number);
+		});
+
+		enableDisableMoveButtons(ol, li, number);
+	}
+
+	function renameAppendHydrate(ol, item, resetValue) {
+		renumber(ol, item);
+
 		if(resetValue) {
+			forEach(item.querySelectorAll('input, textarea, select'), function(el) {
+				el.value = '';
+			});
+
 			forEach(item.querySelectorAll("input[type='file']"), function(input) {
 				var image = input.previousElementSibling.previousElementSibling.nodeName === "IMG" &&
 										input.previousElementSibling.previousElementSibling;
@@ -50,12 +93,11 @@ window.addEventListener("load", function() {
 		}
 
 		forEach(item.querySelectorAll('ol[data-key]'), function(el) {
-			el.dataset.key = buildName(el.dataset.key, ol, nameRegexp);
 			hydrate(el);
 		});
 
 		ol.appendChild(item);
-		hydrateLi(nameRegexp, item, ol.children.length - 1);
+		hydrateLi(item);
 
 		if(item.getBoundingClientRect().bottom > window.innerHeight) {
 			item.scrollIntoView(false);
@@ -63,7 +105,6 @@ window.addEventListener("load", function() {
 	}
 
 	function hydrate(ol) {
-		var nameRegexp = new RegExp(ol.dataset.key.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + "\\[\\d+\\]");
 		var button = ol.parentElement.lastElementChild;
 		button.addEventListener("click", function() {
 			var item = ol.lastElementChild.cloneNode(true);
@@ -71,11 +112,11 @@ window.addEventListener("load", function() {
 				el.parentNode.removeChild(el);
 			});
 
-			renameAppendHydrate(ol, item, nameRegexp, true)
+			renameAppendHydrate(ol, item, true)
 		});
 
 		forEach(ol.children, function(li, i) {
-			hydrateLi(nameRegexp, li, i);
+			hydrateLi(li);
 		});
 	}
 

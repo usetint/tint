@@ -56,6 +56,10 @@
 		input {
 			background: #fff;
 		}
+
+		button[disabled] {
+			display: none;
+		}
 	}
 
 	> footer {
