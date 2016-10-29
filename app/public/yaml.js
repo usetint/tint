@@ -79,7 +79,8 @@ window.addEventListener("load", function() {
 		});
 	}
 
-	forEach(document.querySelectorAll("form ol[data-key]"), function(ol) {
+	forEach(document.querySelectorAll("form ol[data-key] > li:last-child"), function(li) {
+		var ol = li.parentElement;
 		var button = document.createElement("button");
 		button.type = "button";
 		button.textContent = "New Item";
