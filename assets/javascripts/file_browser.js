@@ -82,7 +82,7 @@ window.addEventListener("load", function() {
 		});
 	}
 
-	Array.prototype.forEach.call(document.querySelectorAll("input[type='file']"), function(fileInput) {
+	Array.prototype.forEach.call(document.querySelectorAll(".yml input[type='file']"), function(fileInput) {
 		var pathInput = fileInput.previousElementSibling;
 
 		var button = document.createElement("button");
@@ -98,22 +98,32 @@ window.addEventListener("load", function() {
 			event.preventDefault();
 			getFileDetails().then(function(details) {
 				fileInput.previousElementSibling.value = details.path;
-				if(details.mime.split("/")[0] === "image") {
-					replaceFileImage(fileInput, details.route);
-				}
+				replaceFilePreview(
+					fileInput,
+					details.mime.split("/")[0] === "image" ? "IMG" : "DIV",
+					details.route,
+					details.path
+				);
 			});
 		});
 	});
 
-	function replaceFileImage(input, src) {
-		var image = input.previousElementSibling.previousElementSibling.nodeName === "IMG" &&
-		            input.previousElementSibling.previousElementSibling;
+	function replaceFilePreview(input, nodeName, src, alt) {
+		var valueEl = input.previousElementSibling.previousElementSibling;
 
-		if(!image) {
-			image = document.createElement("img");
-			input.parentElement.insertBefore(image, input.previousElementSibling);
+		if(valueEl.nodeName !== nodeName) {
+			valueEl.parentElement.removeChild(valueEl);
+
+			valueEl = document.createElement(nodeName);
+			valueEl.className = "value";
+			input.parentElement.insertBefore(valueEl, input.previousElementSibling);
 		}
 
-		image.src = src + "?download";
+		if(nodeName === "IMG") {
+			valueEl.src = src + "?download";
+			valueEl.alt = alt;
+		} else {
+			valueEl.textContent = alt;
+		}
 	}
 });
