@@ -11,6 +11,9 @@ module Tint
 		def initialize(site, relative_path, fn=nil)
 			@site = site
 			@relative_path = Pathname.new(relative_path).cleanpath
+			unless @relative_path.relative?
+				@relative_path = @relative_path.relative_path_from(Pathname.new("/"))
+			end
 			@fn = fn
 		end
 

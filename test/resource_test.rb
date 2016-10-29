@@ -41,6 +41,14 @@ describe Tint::Resource do
 				assert_raises { subject.path }
 			end
 		end
+
+		describe "when absolute" do
+			let(:path) { "/directory/file" }
+
+			it "should return the path relative to the site" do
+				assert_equal(site.cache_path.join(path[1..-1]).realdirpath, subject.path)
+			end
+		end
 	end
 
 	describe "#==" do
@@ -76,7 +84,7 @@ describe Tint::Resource do
 		end
 
 		describe "when path is same as site path" do
-			let(:subject) { Tint::Resource.new(site, site.cache_path) }
+			let(:subject) { Tint::Resource.new(site, ".") }
 
 			it "should return the string 'files'" do
 				assert_equal("files", subject.fn)
