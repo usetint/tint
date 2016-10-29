@@ -17,7 +17,7 @@ module Tint
 				render_slim("inputs/yaml", template: template, value: value)
 			end
 
-			def render_value(key, value, name, type=nil)
+			def render_value(key, value, name, type=nil, legend=nil)
 				case value
 				when Hash
 					render_slim(
@@ -41,13 +41,13 @@ module Tint
 						)
 					end
 				else
-					render_input(key, value, name, type)
+					render_input(key, value, name, type, legend)
 				end
 			end
 
-			def render_input(key, value, name, type=nil)
+			def render_input(key, value, name, type=nil, legend=nil)
 				type ||= Input.type(key, value, site)
-				input = type.new(key, name, value, site).render
+				input = type.new(key || legend, name, value, site).render
 
 				if key
 					render_slim("inputs/labelled", label: key, input: input)
