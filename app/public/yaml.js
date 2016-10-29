@@ -54,6 +54,19 @@ window.addEventListener("load", function() {
 		});
 
 		enableDisableMoveButtons(li.parentNode, li, Array.prototype.indexOf.call(li.parentNode.children, li));
+
+		forEach(li.querySelectorAll("input[type=file]"), function(fileInput) {
+			// We should only hydrate "direct" children that are not in a
+			// descendant ol[data-key]
+			var traverseParents = fileInput.parentElement;
+			while(traverseParents.nodeName !== "OL" && !traverseParents.dataset.key) {
+				traverseParents = traverseParents.parentElement;
+			}
+
+			if(traverseParents === li.parentElement) {
+				fileBrowser(fileInput);
+			}
+		});
 	}
 
 	function renumber(ol, li) {

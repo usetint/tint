@@ -1,6 +1,6 @@
 //= require templates/file_browser
 
-window.addEventListener("load", function() {
+function fileBrowser(fileInput) {
 	function getFileDetails() {
 		return new Promise(function(resolve, reject) {
 			var modal = document.createElement("div");
@@ -101,41 +101,11 @@ window.addEventListener("load", function() {
 		});
 	}
 
-	Array.prototype.forEach.call(document.querySelectorAll(".yml input[type='file']"), function(fileInput) {
-		var pathInput = fileInput.previousElementSibling;
-
-		var button = document.createElement("button");
-		button.type = "button";
-		button.textContent = "Choose File";
-
-		fileInput.parentElement.insertBefore(button, fileInput.nextSibling);
-
-		fileInput.style.display = "none";
-		pathInput.style.display = "none";
-
-		button.addEventListener("click", function(event) {
-			event.preventDefault();
-			getFileDetails().then(function(details) {
-				fileInput.previousElementSibling.value = details.path;
-				replaceFilePreview(
-					fileInput,
-					details.mime.split("/")[0] === "image" ? "IMG" : "DIV",
-					details.route,
-					details.path
-				);
-			}, function(error) {
-				if(error !== "cancel") {
-					alert("" + error);
-				}
-			});
-		});
-	});
-
 	function replaceFilePreview(input, nodeName, src, alt) {
 		var valueEl = input.previousElementSibling.previousElementSibling;
 
-		if(valueEl.nodeName !== nodeName) {
-			valueEl.parentElement.removeChild(valueEl);
+		if(!valueEl || valueEl.nodeName !== nodeName) {
+			if(valueEl) valueEl.parentElement.removeChild(valueEl);
 
 			valueEl = document.createElement(nodeName);
 			valueEl.className = "value";
@@ -149,4 +119,35 @@ window.addEventListener("load", function() {
 			valueEl.textContent = alt;
 		}
 	}
-});
+
+	var pathInput = fileInput.previousElementSibling;
+	var button = fileInput.nextElementSibling;
+
+	if(!button || button.nodeName !== "BUTTON") {
+		button = document.createElement("button");
+		button.type = "button";
+		button.textContent = "Choose File";
+
+		fileInput.parentElement.insertBefore(button, fileInput.nextSibling);
+	}
+
+	fileInput.style.display = "none";
+	pathInput.style.display = "none";
+
+	button.addEventListener("click", function(event) {
+		event.preventDefault();
+		getFileDetails().then(function(details) {
+			fileInput.previousElementSibling.value = details.path;
+			replaceFilePreview(
+				fileInput,
+				details.mime.split("/")[0] === "image" ? "IMG" : "DIV",
+				details.route,
+				details.path
+			);
+		}, function(error) {
+			if(error !== "cancel") {
+				alert("" + error);
+			}
+		});
+	});
+}
