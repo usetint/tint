@@ -6,9 +6,27 @@ window.addEventListener("load", function() {
 			var modal = document.createElement("div");
 			modal.setAttribute("id", "file-browser");
 
+			function cancelOnEsc(e) {
+				document.removeEventListener("keyup", cancelOnEsc);
+
+				if(e.key === "Escape") {
+					reject("cancel");
+					modal.parentElement.removeChild(modal);
+				}
+			}
+
+			modal.addEventListener("click", function(e) {
+				if(e.target === modal) {
+					document.removeEventListener("keyup", cancelOnEsc);
+					reject("cancel");
+					modal.parentElement.removeChild(modal);
+				}
+			});
+
+			document.addEventListener("keyup", cancelOnEsc);
+
 			var browser = document.createElement("div");
 			browser.className = "contents";
-
 			modal.appendChild(browser);
 			document.body.appendChild(modal)
 
@@ -64,7 +82,8 @@ window.addEventListener("load", function() {
 								route: link.href,
 								mime: link.dataset.mime
 							});
-							modal.style.display = "none";
+							document.removeEventListener("keyup", cancelOnEsc);
+							modal.parentElement.removeChild(modal);
 						}
 					});
 				});
@@ -104,6 +123,10 @@ window.addEventListener("load", function() {
 					details.route,
 					details.path
 				);
+			}, function(error) {
+				if(error !== "cancel") {
+					alert("" + error);
+				}
 			});
 		});
 	});

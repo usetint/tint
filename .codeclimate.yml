@@ -3,6 +3,9 @@ engines:
     enabled: true
   eslint:
     enabled: true
+    checks:
+      no-alert:
+        enabled: false
   csslint:
     enabled: true
   scss-lint:
