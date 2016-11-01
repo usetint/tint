@@ -17,7 +17,7 @@ describe Tint::Directory do
 	end
 
 	describe "#children" do
-		let(:sub) { Tint::Directory.new(site, dir) }
+		let(:sub) { Tint::Directory.new(site, dir.relative_path_from(site.cache_path)) }
 		let(:dir) do
 			dir = subject.path.join("dirtest")
 			dir.mkpath
