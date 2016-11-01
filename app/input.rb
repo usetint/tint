@@ -17,13 +17,13 @@ module Tint
 				Select
 			elsif [true, false].include? value
 				Checkbox
-			elsif norm_key.end_with?("_path") || norm_key.end_with?("_paths")
+			elsif ["_path", "_paths"].any? { |x| norm_key.end_with?(x) }
 				File
-			elsif norm_key.end_with?("_datetime") || norm_key == "datetime" || value.is_a?(::Time)
+			elsif ["_datetime", "_datetimes"].any? { |x| norm_key.end_with?(x) || norm_key == x[1..-1] } || value.is_a?(::Time)
 				DateTime
-			elsif norm_key.end_with?("_date") || norm_key == "date" || value.is_a?(::Date)
+			elsif ["_date", "_dates"].any? { |x| norm_key.end_with?(x) || norm_key == x[1..-1] } || value.is_a?(::Date)
 				Date
-			elsif norm_key == "time" || norm_key.end_with?("_time")
+			elsif ["_time", "_times"].any? { |x| norm_key.end_with?(x) || norm_key == x[1..-1] }
 				Time
 			elsif norm_key == "description" || norm_key.end_with?("_text") || (value.is_a?(String) && value.length > 50)
 				Textarea
