@@ -41,13 +41,13 @@ window.addEventListener("load", function() {
 			renameAppendHydrate(li.parentElement, item, nameRegexp(li.parentElement));
 		});
 
-		findOrCreateButton("move-up", "^").addEventListener("click", function() {
+		findOrCreateButton("move-up", "▲").addEventListener("click", function() {
 			li.parentNode.insertBefore(li, li.previousElementSibling);
 			renumber(li.parentNode, li);
 			renumber(li.parentNode, li.nextElementSibling);
 		});
 
-		findOrCreateButton("move-down", "V").addEventListener("click", function() {
+		findOrCreateButton("move-down", "▼").addEventListener("click", function() {
 			li.parentNode.insertBefore(li.nextElementSibling, li);
 			renumber(li.parentNode, li);
 			renumber(li.parentNode, li.previousElementSibling);
