@@ -71,7 +71,14 @@ module Tint
 
 			# From frontmatter takes precedence
 			from_front = YAML.safe_load(open(path), [Date, Time]) || {} rescue {}
-			from_filename.merge(from_front)
+			if from_filename.empty?
+				from_front
+			elsif from_filename.class != from_front.class
+				raise IncompatibleFrontmatter,
+					"Files with frontmatter in their filename cannot have a #{from_front.class.name} as their root element."
+			else
+				from_filename.merge(from_front)
+			end
 		end
 
 		def relative_path_with_frontmatter(front=frontmatter, ext=extension)
@@ -175,6 +182,9 @@ module Tint
 					# Parse failed, so return nil
 				end
 			end
+		end
+
+		class IncompatibleFrontmatter < TypeError
 		end
 	end
 end

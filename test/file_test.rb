@@ -110,18 +110,48 @@ describe Tint::File do
 		end
 	end
 
-	describe "file with frontmatter in filename" do
-		before do
-			site.cache_path.join(".tint.yml").open("w") do |f|
-				f.puts(YAML::dump("filename_frontmatter" => {
-					"filename_frontmatter/*" => [
-						{"key" => "date", "strptime" => "%Y-%m-%d"},
-						{"match" => "-"},
-						{"key" => "title", "match" => "[^\\.]+", "format" => "slugify" }
-					]
-				}))
+	def set_frontmatter_rules(site)
+		site.cache_path.join(".tint.yml").open("w") do |f|
+			f.puts(YAML::dump("filename_frontmatter" => {
+				"filename_frontmatter/*" => [
+					{"key" => "date", "strptime" => "%Y-%m-%d"},
+					{"match" => "-"},
+					{"key" => "title", "match" => "[^\\.]+", "format" => "slugify" }
+				]
+			}))
+		end
+	end
+
+	describe "yml file with array as root element" do
+		describe "a file without frontmatter parsed from filename" do
+			let(:path) { "array_root.yml" }
+
+			it "should not raise an error" do
+				subject.frontmatter
+			end
+
+			it "should return the contents of the file" do
+				assert_equal ["one", "two", "three", "four"], subject.frontmatter
 			end
 		end
+
+		describe "a file with frontmatter parsed from filename" do
+			before { set_frontmatter_rules(site) }
+
+			let(:path) { "filename_frontmatter/2016-01-01-array-root.yml" }
+
+			it "should raise an exception" do
+				err = assert_raises Tint::File::IncompatibleFrontmatter do
+					subject.frontmatter
+				end
+
+				assert_equal "Files with frontmatter in their filename cannot have a Array as their root element.", err.message
+			end
+		end
+	end
+
+	describe "file with frontmatter in filename" do
+		before { set_frontmatter_rules(site) }
 
 		after do
 			site.cache_path.join(".tint.yml").unlink
