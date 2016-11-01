@@ -59,34 +59,40 @@ module Tint
 				get "/?*", if: -> { resource.yml? || !resource.content? } do
 					authorize resource, :edit?
 
-					slim :yml, locals: {
-						data: resource.frontmatter,
-						path: resource.route
-					}
+					render_or_error do
+						slim :yml, locals: {
+							data: resource.frontmatter,
+							path: resource.route
+						}
+					end
 				end
 
 				get "/?*", if: -> { resource.text? } do
 					authorize resource, :edit?
 
-					frontmatter = resource.frontmatter? && resource.frontmatter
-					html = slim :text, locals: {
-						frontmatter: frontmatter,
-						wysiwyg: resource.markdown?,
-						path: resource.route
-					}
+					render_or_error do
+						frontmatter = resource.frontmatter? && resource.frontmatter
+						html = slim :text, locals: {
+							frontmatter: frontmatter,
+							wysiwyg: resource.markdown?,
+							path: resource.route
+						}
 
-					stream_into_element("<textarea name=\"content\">", html, resource, :stream_content)
+						stream_into_element("<textarea name=\"content\">", html, resource, :stream_content)
+					end
 				end
 
 				get "/?*" do
 					authorize resource, :edit?
 
-					frontmatter = resource.frontmatter? && resource.frontmatter
-					slim :binary, locals: {
-						frontmatter: frontmatter,
-						file: resource,
-						input: Input::File.new(:file, "file", resource.relative_path, site)
-					}
+					render_or_error do
+						frontmatter = resource.frontmatter? && resource.frontmatter
+						slim :binary, locals: {
+							frontmatter: frontmatter,
+							file: resource,
+							input: Input::File.new(:file, "file", resource.relative_path, site)
+						}
+					end
 				end
 
 				put "/?", params: :sha do
@@ -274,6 +280,12 @@ module Tint
 				breadcrumbs = fragments.each_with_index.map { |_, i| site.resource(fragments[0..i].join("/")) }
 				files = OpenStruct.new(fn: "files", route: site.route("files"))
 				[site, files] + breadcrumbs
+			end
+
+			def render_or_error
+				yield
+			rescue Tint::File::IncompatibleFrontmatter => e
+				render_error 500, e.message
 			end
 		end
 	end
