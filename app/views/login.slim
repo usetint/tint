@@ -31,3 +31,13 @@
 - if OmniAuth::Builder.providers.include?(:bitbucket)
 	form method="post" action="/auth/bitbucket"
 		button type="submit" Bitbucket
+
+- if ENV['TERMS_URL'] || ENV['PRIVACY_URL']
+	p
+		' By using this service you agree to the
+		- if ENV['TERMS_URL']
+			a href=ENV['TERMS_URL'] Terms of Service
+			- if ENV['PRIVACY_URL']
+				'  and
+		- if ENV['PRIVACY_URL']
+			a href=ENV['PRIVACY_URL'] Privacy Policy
