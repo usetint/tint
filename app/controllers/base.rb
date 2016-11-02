@@ -88,6 +88,11 @@ module Tint
 					end
 				end
 			end
+
+			def render_error(status_code, message)
+				status status_code
+				return slim :error, locals: { message: message }
+			end
 		end
 	end
 end

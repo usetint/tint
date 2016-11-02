@@ -30,6 +30,10 @@ module Tint
 				end
 			end
 
+			error Tint::File::IncompatibleFrontmatter do
+				render_error 500, env["sinatra.error"].message
+			end
+
 			namespace "/:site/files" do
 				get "/?*", query: "download" do
 					if resource.exist? && resource.file?
