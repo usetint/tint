@@ -57,6 +57,10 @@ module Tint
 
 				get "/?*", if: -> { resource.directory? || !resource.exist? } do
 					authorize resource, :index?
+
+					session["moves"] ||= {}
+					session["moves"][site.route] ||= []
+
 					respond_with :index, resource
 				end
 
@@ -119,18 +123,39 @@ module Tint
 					redirect to(resource.route)
 				end
 
+				put "/*", if: -> { params.has_key?("move") } do
+					authorize resource, :update?
+
+					session["moves"] ||= {}
+					session["moves"][site.route] ||= []
+
+					if params["move"] == "0"
+						session["moves"][site.route].reject! { |file| file.relative_path == resource.relative_path }
+					else
+						session["moves"][site.route] << resource
+					end
+
+					redirect(back || to(resource.parent.route))
+				end
+
 				put "/*", params: :name do
 					authorize resource, :update?
 
 					new = resource.parent.resource(params[:name])
-					if new.exist?
+					if new.exist? && resource != new
 						slim :error, locals: { message: "A file with that name already exists" }
 					else
-						site.commit_with("Renamed #{resource.relative_path} to #{new.name}", pundit_user) do |dir|
-							dir.join(resource.relative_path).rename(dir.join(new.relative_path))
+						if resource != new
+							site.commit_with("Renamed #{resource.relative_path} to #{new.name}", pundit_user) do |dir|
+								dir.join(resource.relative_path).rename(dir.join(new.relative_path))
+							end
 						end
 
-						redirect to(resource.parent.route)
+						session["moves"] ||= {}
+						session["moves"][site.route] ||= []
+						session["moves"][site.route].reject! { |file| file.relative_path == resource.relative_path }
+
+						redirect to(new.parent.route)
 					end
 				end
 

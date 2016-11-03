@@ -86,9 +86,16 @@
 
 	form {
 		@extend %small-form;
+	}
 
+	> form {
 		&:first-of-type {
 			float: right;
 		}
+	}
+
+	> ul {
+		list-style-type: none;
+		padding: 0;
 	}
 }
