@@ -10,6 +10,20 @@ require_relative "path_helpers"
 
 module Tint
 	class Site
+		module Config
+			class Basenames < String
+				yaml_tag "!basenames"
+
+				def encode_with(coder)
+					coder.represent_scalar("basenames", self)
+				end
+
+				def init_with(coder)
+					self << coder.scalar
+				end
+			end
+		end
+
 		def initialize(options)
 			@options = options
 		end
@@ -80,7 +94,7 @@ module Tint
 		end
 
 		def unsafe_config
-			config_file.exist? ? YAML.safe_load(config_file.open, [Date, Time]) : {}
+			config_file.exist? ? YAML.safe_load(config_file.open, [Date, Time, Config::Basenames]) : {}
 		end
 
 		def config

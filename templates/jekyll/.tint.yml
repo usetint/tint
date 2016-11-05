@@ -1,3 +1,6 @@
+options:
+  layouts: !basenames "_layouts/"
+
 hidden_paths:
   - .*
   - Makefile
