@@ -2,7 +2,8 @@ form#content enctype="multipart/form-data" action=path method="post"
 	input type="hidden" name="_method" value="PUT"
 
 	header
-		a href="?source" Source
+		- unless path.split("/").last.start_with?(".template")
+			a href="?source" Source
 
 		label
 			| Page Title

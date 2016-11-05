@@ -124,8 +124,7 @@ module Tint
 		def filename_frontmatter_candidates
 			@filename_frontmatter_candidates ||=
 				(site.config["filename_frontmatter"] || {}).map do |(glob, pieces)|
-					matches = Pathname.glob([parent.path.join(glob), site.cache_path.join(glob)])
-					matches.include?(path) ? pieces : nil
+					relative_path.fnmatch?(glob) || basename.fnmatch?(glob) ? pieces : nil
 				end.compact
 		end
 

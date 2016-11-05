@@ -221,5 +221,21 @@ describe Tint::File do
 			end
 		end
 
+		describe "nonexistant file" do
+			let(:path) { "filename_frontmatter/2015-01-01-this-file-is-not-here.md" }
+
+			describe "#frontmatter" do
+				it "should return from filename" do
+					assert_equal({
+						"title" => "this-file-is-not-here",
+						"date" => Date.new(2015, 01, 01)
+					}, subject.frontmatter)
+				end
+			end
+
+			describe "#relative_path_with_frontmatter" do
+				it { assert_equal(subject.relative_path_with_frontmatter, subject.relative_path) }
+			end
+		end
 	end
 end

@@ -7,6 +7,11 @@
 		input type="file" name="file" required="required"
 		button type="submit" Upload
 
+	- if object.templates.length > 0
+		ul.templates
+			- object.templates.each do |ext|
+				li: a href=object.resource(".template.#{ext}").route = "+ New #{object.collection_name.capitalize} (#{ext})"
+
 	- unless moves.empty?
 		ul
 			- moves.each do |file|
