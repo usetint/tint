@@ -7,7 +7,13 @@ window.addEventListener('load', function() {
 		statusbar: false,
 		toolbar: 'undo redo | formatselect | bold italic numlist bullist | blockquote link image',
 		entity_encoding: 'raw',
-		plugins: "autoresize",
+		plugins: "autoresize, link",
+		document_base_url: "http://" + site_domain + "/",
+		relative_urls: false,
+		remove_script_host: true,
+		target_list: false,
+		link_title: false,
+		// Can have a link_list that gets links from JSON, URL, or function and displays
 
 		// Show and preserve whitspace
 		whitespace_elements: 'p',
