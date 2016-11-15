@@ -6,7 +6,7 @@ module Tint
 			site.resource(relative_path.join(path))
 		end
 
-		def children
+		def children(include_parent=true)
 			@children ||= begin
 				children = exist? ? path.children(false).map(&method(:resource)) : []
 
@@ -17,7 +17,7 @@ module Tint
 					children = children.reject { |child| hidden.include?(child.path) }
 				end
 
-				if relative_path.to_s != "."
+				if include_parent && relative_path.to_s != "."
 					parent = self.class.new(site, relative_path.dirname, "..")
 					children.unshift(parent)
 				end

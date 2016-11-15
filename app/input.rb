@@ -92,10 +92,17 @@ module Tint
 			end
 
 			def format_options(options)
-				if options.is_a? Array
+				case options
+				when Array
 					options.map { |value| [value, value] }
-				elsif options.is_a? Hash
+				when Hash
 					options.map { |value, display| [value, display] }
+				when Site::Config::Basenames
+					format_options(site.resource(options).children(false).map { |file|
+						file.basename(file.extname).to_s
+					})
+				when String # Filenames
+					format_options(site.resource(options).children(false).map(&:fn))
 				else
 					fail ArgumentError, "options must be a Hash or an Array"
 				end
