@@ -57,10 +57,6 @@ module Tint
 
 				get "/?*", if: -> { resource.directory? || !resource.exist? } do
 					authorize resource, :index?
-
-					session["moves"] ||= {}
-					session["moves"][site.route] ||= []
-
 					respond_with :index, resource
 				end
 
@@ -126,13 +122,10 @@ module Tint
 				put "/*", if: -> { params.has_key?("move") } do
 					authorize resource, :update?
 
-					session["moves"] ||= {}
-					session["moves"][site.route] ||= []
-
 					if params["move"] == "0"
-						session["moves"][site.route].reject! { |file| file.relative_path == resource.relative_path }
+						moves.reject! { |file| file.relative_path == resource.relative_path }
 					else
-						session["moves"][site.route] << resource
+						moves << resource
 					end
 
 					redirect(back || to(resource.parent.route))
@@ -151,9 +144,7 @@ module Tint
 							end
 						end
 
-						session["moves"] ||= {}
-						session["moves"][site.route] ||= []
-						session["moves"][site.route].reject! { |file| file.relative_path == resource.relative_path }
+						moves.reject! { |file| file.relative_path == resource.relative_path }
 
 						redirect to(new.parent.route)
 					end
@@ -282,6 +273,11 @@ module Tint
 			def valid_build_system(build_system)
 				build_systems = [:jekyll]
 				build_systems.find { |bs| bs.to_s == build_system.to_s }
+			end
+
+			def moves
+				session["moves"] ||= {}
+				session["moves"][site.route] ||= []
 			end
 
 			def resource

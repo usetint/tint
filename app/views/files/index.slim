@@ -7,9 +7,9 @@
 		input type="file" name="file" required="required"
 		button type="submit" Upload
 
-	- unless session["moves"][site.route].empty?
+	- unless moves.empty?
 		ul
-			- session["moves"][site.route].each do |file|
+			- moves.each do |file|
 				li
 					= file.relative_path.to_s
 
@@ -24,7 +24,7 @@
 						button type="submit" Do not Move
 
 ul.files
-	- object.children.reject { |file| session["moves"][site.route].include?(file) }.each do |file|
+	- object.children.reject { |file| moves.include?(file) }.each do |file|
 		li
 			a href=file.route = file.fn
 
