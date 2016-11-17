@@ -7,8 +7,24 @@
 		input type="file" name="file" required="required"
 		button type="submit" Upload
 
+	- unless moves.empty?
+		ul
+			- moves.each do |file|
+				li
+					= file.relative_path.to_s
+
+					form action=file.route method="post"
+						input type="hidden" name="_method" value="PUT"
+						input type="hidden" name="name" value=object.path.relative_path_from(file.parent.path).join(file.name).to_s
+						button type="submit" Move to Here
+
+					form action=file.route method="post"
+						input type="hidden" name="_method" value="PUT"
+						input type="hidden" name="move" value="0"
+						button type="submit" Do not Move
+
 ul.files
-	- object.children.each do |file|
+	- object.children.reject { |file| moves.include?(file) }.each do |file|
 		li
 			a href=file.route = file.fn
 
@@ -20,6 +36,11 @@ ul.files
 				a.download href="#{file.route}?download" Download
 
 			- unless file == object.parent
+				form action=file.route method="post"
+					input type="hidden" name="_method" value="PUT"
+					input type="hidden" name="move"
+					button type="submit" Move
+
 				form action=file.route method="post"
 					input type="hidden" name="_method" value="PUT"
 					input type="text" name="name" value=file.name

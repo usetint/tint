@@ -119,18 +119,34 @@ module Tint
 					redirect to(resource.route)
 				end
 
+				put "/*", if: -> { params.has_key?("move") } do
+					authorize resource, :update?
+
+					if params["move"] == "0"
+						moves.reject! { |file| file.relative_path == resource.relative_path }
+					else
+						moves << resource
+					end
+
+					redirect(back || to(resource.parent.route))
+				end
+
 				put "/*", params: :name do
 					authorize resource, :update?
 
 					new = resource.parent.resource(params[:name])
-					if new.exist?
+					if new.exist? && resource != new
 						slim :error, locals: { message: "A file with that name already exists" }
 					else
-						site.commit_with("Renamed #{resource.relative_path} to #{new.name}", pundit_user) do |dir|
-							dir.join(resource.relative_path).rename(dir.join(new.relative_path))
+						if resource != new
+							site.commit_with("Renamed #{resource.relative_path} to #{new.name}", pundit_user) do |dir|
+								dir.join(resource.relative_path).rename(dir.join(new.relative_path))
+							end
 						end
 
-						redirect to(resource.parent.route)
+						moves.reject! { |file| file.relative_path == resource.relative_path }
+
+						redirect to(new.parent.route)
 					end
 				end
 
@@ -257,6 +273,11 @@ module Tint
 			def valid_build_system(build_system)
 				build_systems = [:jekyll]
 				build_systems.find { |bs| bs.to_s == build_system.to_s }
+			end
+
+			def moves
+				session["moves"] ||= {}
+				session["moves"][site.route] ||= []
 			end
 
 			def resource
