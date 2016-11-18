@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: git://github.com/usetint/ruby-git.git
-  revision: 887a2583bd47d59bf81bdc76d405ba325d8f4265
+  revision: c3f36790155a88c5438b8e4cc1aef0057180282e
   specs:
     git (1.3.0)
 

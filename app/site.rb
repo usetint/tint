@@ -123,8 +123,10 @@ module Tint
 		end
 
 		def git
-			ENV["SITE_PRIVATE_KEY_PATH"] = ssh_private_key_path.to_s
-			@git ||= Git.open(cache_path)
+			@git ||= Git.open(
+				cache_path,
+				env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
+			)
 		end
 
 		def git?
@@ -160,10 +162,15 @@ module Tint
 		end
 
 		def clone(remote=@options[:remote])
-			ENV["SITE_PRIVATE_KEY_PATH"] = ssh_private_key_path.to_s
 			begin
 				# First, do a shallow clone so that we are up and running
-				Git.clone(remote, cache_path.basename, path: cache_path.dirname, depth: 1)
+				Git.clone(
+					remote,
+					cache_path.basename,
+					path: cache_path.dirname,
+					depth: 1,
+					env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
+				)
 
 				# Make sure the UI can tell we are ready to rock
 				open(cache_path.join('.git').join('tint-cloned'), 'w').close
@@ -203,12 +210,20 @@ module Tint
 		end
 
 		def commit_with(message, user=nil, tries: 1, depth: 1, &block)
-			ENV["SITE_PRIVATE_KEY_PATH"] = ssh_private_key_path.to_s
-
 			Dir.mktmpdir("tint-push") do |dir|
-				Git.clone(@options[:remote], "clone", path: dir, depth: depth)
+				Git.clone(
+					@options[:remote],
+					"clone",
+					path: dir,
+					depth: depth,
+					env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
+				)
+
 				path = Pathname.new(dir).join("clone")
-				git = Git.open(path.to_s)
+				git = Git.open(
+					path.to_s,
+					env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
+				)
 
 				block.call(path)
 				git.add(all: true)
