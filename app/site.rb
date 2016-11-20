@@ -115,9 +115,9 @@ module Tint
 
 		def resource(path)
 			resource = Tint::Resource.new(self, path)
-			klass = if resource.directory? || !resource.exist?
+			klass = if resource.directory? || (!resource.in_annex? && !resource.exist?)
 				Tint::Directory
-			elsif resource.file?
+			elsif resource.file? || resource.in_annex?
 				Tint::File
 			else
 				raise "This path is not a file or directory."

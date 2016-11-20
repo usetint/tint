@@ -55,12 +55,12 @@ module Tint
 					end
 				end
 
-				get "/?*", if: -> { resource.directory? || !resource.exist? } do
+				get "/?*", if: -> { resource.is_a?(Tint::Directory) } do
 					authorize resource, :index?
 					respond_with :index, resource
 				end
 
-				get "/?*", if: -> { resource.yml? || !resource.content? } do
+				get "/?*", if: -> { resource.yml? || (resource.text? && !resource.content?) } do
 					authorize resource, :edit?
 
 					slim :yml, locals: {
