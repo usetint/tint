@@ -1,4 +1,5 @@
 require "erb"
+require "fileutils"
 require "git"
 require "shellwords"
 require "tmpdir"
@@ -215,8 +216,8 @@ module Tint
 
 		def sync(remote=@options[:remote])
 			if git? && cloned?
-				git.fetch(remote)
-				git.reset_hard("FETCH_HEAD")
+				git.fetch(remote, refs: "+refs/heads/*:refs/remotes/origin/*")
+				git.reset_hard("remotes/origin/HEAD")
 
 				# Fetch any large files from git-annex
 				git.lib.send(:command, "annex get") if git_annex?
@@ -227,36 +228,44 @@ module Tint
 
 		def commit_with(message, user=nil, tries: 1, depth: 1, &block)
 			Dir.mktmpdir("tint-push") do |dir|
-				Git.clone(
-					@options[:remote],
-					"clone",
-					path: dir,
-					depth: depth,
-					env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
-				)
+				begin
+					Git.clone(
+						@options[:remote],
+						"clone",
+						path: dir,
+						depth: depth,
+						no_single_branch: true,
+						env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
+					)
 
-				path = Pathname.new(dir).join("clone")
-				git = Git.open(
-					path.to_s,
-					env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
-				)
+					path = Pathname.new(dir).join("clone")
+					git = Git.open(
+						path.to_s,
+						env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
+					)
 
-				block.call(path)
-				git.add(all: true)
+					block.call(path, git)
+					git.add(all: true)
 
-				if maybe_commit(git, message, user)
-					begin
-						if ENV["SITE_PATH"]
-							# If we push to a checked-out repository, we'll get nasty errors
-							sync(path.to_s)
-						else
-							git.push
-							sync
+					if maybe_commit(git, message, user)
+						begin
+							if ENV["SITE_PATH"]
+								# If we push to a checked-out repository, we'll get nasty errors
+								sync(path.to_s)
+							else
+								git.push
+								git.lib.send(:command, "annex copy", ["--to", "origin"]) if git_annex?
+								sync
+							end
+						rescue Git::GitExecuteError => e
+							raise e if tries > 4
+							commit_with(message, user, tries: tries+1, depth: depth, &block)
 						end
-					rescue Git::GitExecuteError => e
-						raise e if tries > 4
-						commit_with(message, user, tries: tries+1, depth: depth, &block)
 					end
+
+				ensure
+					# Make everything writeable so that mktmpdir cleanup will work
+					FileUtils.chmod_R(0700, git.repo.to_s)
 				end
 			end
 		end
