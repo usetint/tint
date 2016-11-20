@@ -42,7 +42,7 @@ module Tint
 		end
 
 		def name
-			path.basename.to_s
+			relative_path.basename.to_s
 		end
 
 		def fn
