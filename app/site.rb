@@ -137,6 +137,10 @@ module Tint
 			cache_path.join('.git').directory?
 		end
 
+		def git_annex?
+			git.is_branch?("git-annex")
+		end
+
 		def log
 			git.log.tap(&:size)
 		rescue Git::GitExecuteError
@@ -168,11 +172,13 @@ module Tint
 		def clone(remote=@options[:remote])
 			begin
 				# First, do a shallow clone so that we are up and running
+				# No single branch so that further operations can at least see remote branches
 				Git.clone(
 					remote,
 					cache_path.basename,
 					path: cache_path.dirname,
 					depth: 1,
+					no_single_branch: true,
 					env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
 				)
 
@@ -189,6 +195,9 @@ module Tint
 			Tint.db[:sites].where(site_id: @options[:site_id]).update(status: nil)
 
 			begin
+				# Fetch any large files from git-annex
+				git.lib.send(:command, "annex get") if git_annex?
+
 				# Now, fetch the history for future use
 				git.fetch(remote, unshallow: true)
 			rescue
