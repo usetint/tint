@@ -217,6 +217,9 @@ module Tint
 			if git? && cloned?
 				git.fetch(remote)
 				git.reset_hard("FETCH_HEAD")
+
+				# Fetch any large files from git-annex
+				git.lib.send(:command, "annex get") if git_annex?
 			elsif !git?
 				clone(remote)
 			end
