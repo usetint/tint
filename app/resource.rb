@@ -56,6 +56,11 @@ module Tint
 			)
 		end
 
+		def unlink
+			# If we are a symlink, unlink ourselves, not the target
+			site.cache_path.join(relative_path).unlink
+		end
+
 		def respond_to?(method)
 			super || path.respond_to?(method)
 		end
