@@ -70,7 +70,7 @@ module Tint
 			end
 
 			# From frontmatter takes precedence
-			from_front = YAML.safe_load(open(path), [Date, Time]) || {} rescue {}
+			from_front = YAML.safe_load(open(path), [Date, Time, Now]) || {} rescue {}
 			if from_filename.empty?
 				from_front
 			elsif from_filename.class != from_front.class
@@ -124,8 +124,7 @@ module Tint
 		def filename_frontmatter_candidates
 			@filename_frontmatter_candidates ||=
 				(site.config["filename_frontmatter"] || {}).map do |(glob, pieces)|
-					matches = Pathname.glob([parent.path.join(glob), site.cache_path.join(glob)])
-					matches.include?(path) ? pieces : nil
+					relative_path.fnmatch?(glob) || basename.fnmatch?(glob) ? pieces : nil
 				end.compact
 		end
 
@@ -185,6 +184,13 @@ module Tint
 		end
 
 		class IncompatibleFrontmatter < TypeError
+		end
+
+		class Now < String
+			yaml_tag "!now"
+			def init_with(_coder)
+				self << Time.now.iso8601
+			end
 		end
 	end
 end

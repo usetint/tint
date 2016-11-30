@@ -1,9 +1,22 @@
+require "active_support/inflector/methods"
 require_relative "resource"
 
 module Tint
 	class Directory < Resource
 		def resource(path)
 			site.resource(relative_path.join(path))
+		end
+
+		def collection_name
+			ActiveSupport::Inflector.singularize(fn.sub(/[^A-Za-z0-9]+/, ''))
+		end
+
+		def templates
+			return [] unless exist?
+
+			path.children(false).select { |file|
+				file.to_s.start_with?(".template")
+			}.map { |file| file.to_s.split(".", 3).last }
 		end
 
 		def children(include_parent=true)

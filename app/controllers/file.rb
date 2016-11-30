@@ -189,12 +189,23 @@ module Tint
 				put "/*" do
 					authorize resource, :update?
 
+					msg = "Modified #{resource.relative_path}"
+					template = resource.relative_path.basename.to_s.start_with?(".template")
+
+					if template
+						parent = resource.parent
+						extension = resource.relative_path.basename.to_s.split(".", 3).last
+						basename = "#{SecureRandom.uuid}-#{params[:data]["title"].slugify}.#{extension}"
+						resource = Tint::File.new(site, parent.relative_path.join(basename))
+						msg = "Created new #{resource.parent.collection_name} from template"
+					end
+
 					begin
-						site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
+						site.commit_with(msg, pundit_user) do |dir|
 							updated_data = FormHelpers.process(params[:data], dir)
 
 							new_relative_path = resource.relative_path_with_frontmatter(updated_data)
-							if new_relative_path != resource.relative_path
+							if !template && new_relative_path != resource.relative_path
 								dir.join(resource.relative_path).rename(dir.join(new_relative_path))
 							end
 

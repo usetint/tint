@@ -98,4 +98,18 @@
 		list-style-type: none;
 		padding: 0;
 	}
+
+	.templates {
+		list-style-type: none;
+		padding: 0;
+
+		li {
+			display: inline;
+		}
+
+		a {
+			@extend %button;
+			@extend %small-button;
+		}
+	}
 }
