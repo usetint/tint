@@ -253,7 +253,10 @@ describe Tint::Site do
 	describe "#git" do
 		it "should call Git.open with the cache path" do
 			mock = MiniTest::Mock.new
-			mock.expect :call, true, [subject.cache_path]
+			mock.expect :call, true, [
+				subject.cache_path,
+				env: { "SITE_PRIVATE_KEY_PATH" => "/tmp/key" }
+			]
 
 			subject.stub(:ssh_private_key_path, "/tmp/key") do
 				Git.stub(:open, mock) do
