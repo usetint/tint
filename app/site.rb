@@ -109,6 +109,10 @@ module Tint
 			cache_path.join(".tint.yml")
 		end
 
+		def collections
+			@collections ||= find_collections
+		end
+
 		def resource(path)
 			resource = Tint::Resource.new(self, path)
 			klass = if resource.directory? || !resource.exist?
@@ -270,6 +274,12 @@ module Tint
 			PathHelpers.ensure(
 				@options[key] || Pathname.new(ENV.fetch(env)).join(suffix || @options[:site_id].to_s)
 			)
+		end
+
+		def find_collections(rooted_at = resource('.'))
+			return [] unless rooted_at.is_a?(Tint::Directory)
+			return [rooted_at] unless rooted_at.templates.empty?
+			rooted_at.children(false).flat_map(&method(:find_collections))
 		end
 	end
 end
