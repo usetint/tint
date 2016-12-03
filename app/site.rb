@@ -1,6 +1,7 @@
 require "erb"
 require "fileutils"
 require "git"
+require "git-annex"
 require "shellwords"
 require "tmpdir"
 
@@ -138,10 +139,6 @@ module Tint
 			cache_path.join('.git').directory?
 		end
 
-		def git_annex?
-			git.is_branch?("git-annex")
-		end
-
 		def log
 			git.log.tap(&:size)
 		rescue Git::GitExecuteError
@@ -197,7 +194,7 @@ module Tint
 
 			begin
 				# Fetch any large files from git-annex
-				git.lib.send(:command, "annex get") if git_annex?
+				git.annex.get if git.annex?
 
 				# Now, fetch the history for future use
 				git.fetch(remote, unshallow: true)
@@ -220,7 +217,7 @@ module Tint
 				git.reset_hard("remotes/origin/HEAD")
 
 				# Fetch any large files from git-annex
-				git.lib.send(:command, "annex get") if git_annex?
+				git.annex.get if git.annex?
 			elsif !git?
 				clone(remote)
 			end
@@ -254,7 +251,7 @@ module Tint
 								sync(path.to_s)
 							else
 								git.push
-								git.lib.send(:command, "annex copy", ["--to", "origin"]) if git_annex?
+								git.annex.copy(to: "origin") if git.annex?
 								sync
 							end
 						rescue Git::GitExecuteError => e

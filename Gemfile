@@ -5,6 +5,7 @@ gem "sinatra-contrib"
 
 gem "activesupport", "< 5.0.0" # For pundit
 gem "git", github: "usetint/ruby-git"
+gem "git-annex", github: "usetint/ruby-git-annex"
 gem "github_api"
 gem "gitlab"
 gem "httparty"

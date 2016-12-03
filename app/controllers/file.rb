@@ -184,7 +184,7 @@ module Tint
 								FormHelpers.upload(dir.join(resource.parent.relative_path), params[:file], name)
 
 								# If old resource was in annex, put the new one there
-								git.lib.send(:command, "annex add", [resource.relative_path.to_s]) if resource.in_annex?
+								git.annex.add(resource.relative_path.to_s) if resource.in_annex?
 							end
 						end
 					end
