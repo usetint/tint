@@ -21,7 +21,7 @@ html
 							- if site.cloned?
 								li: a href=site.route("files") class=("active" if controller == :file and !site.collections.include?(resource)) File Manager
 								- site.collections.each do |collection|
-									li: a href=collection.route class=("active" if controller == :file and collection == resource) = collection.collection_name.titlecase
+									li: a href=collection.route class=("active" if controller == :file and collection == resource) = collection.collection_name(2).titlecase
 							- if policy(site).manage_users?
 								li: a href=site.route("users/") Manage Users
 				form method="post" action="/auth/login"
