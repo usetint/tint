@@ -1,6 +1,6 @@
 h1 = params["filename"]
 
-form action=file.route method="post" enctype="multipart/form-data"
+form#binary action=file.route method="post" enctype="multipart/form-data"
 	input type="hidden" name="_method" value="PUT"
 	label
 		== input.render
