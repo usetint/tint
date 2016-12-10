@@ -5,9 +5,13 @@ require "json"
 module Tint
 	module GitProviders
 		class Github
+			attr_reader :nickname
+
 			def initialize(payload)
-				token = JSON.parse(payload)["credentials"]["token"]
+				payload = JSON.parse(payload)
+				token = payload["credentials"]["token"]
 				@github = ::Github.new(oauth_token: token, per_page: 100, auto_pagination: true)
+				@nickname = payload["info"]["nickname"]
 			end
 
 			def repositories(exclude: [])

@@ -1,32 +1,7 @@
+h1 Sites
+
 ul
 	- sites.each do |site|
 		li: a href=site.route = site.fn
 
-a href="/auth/login" Associate Another Identity
-
-h1 New Site
-form method="POST" action="/"
-	label
-		| Site name:
-		input type="text" name="fn" required="required"
-	label
-		| Git remote:
-		input type="text" name="remote" required="required"
-	button type="submit" Add
-
-- if git_providers.length > 0
-	h1 Or, choose from the following repositories
-
-	- git_providers.each do |provider|
-		- provider_name = provider.class.name.split("::").last
-		h1 = "On #{provider_name}"
-
-		ul
-			- provider.repositories(exclude: repos).each do |repo|
-				li
-					a href=repo[:link] title=repo[:description] = repo[:fn]
-					form method="POST" action="/"
-						input type="hidden" name="provider" value=provider_name.downcase
-						input type="hidden" name="fn" value=repo[:fn]
-						input type="hidden" name="remote" value=repo[:remote]
-						button type="submit" Add
+a href="/new" Add Site

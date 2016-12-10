@@ -4,12 +4,15 @@ require "json"
 module Tint
 	module GitProviders
 		class Gitlab
+			attr_reader :nickname
+
 			def initialize(payload)
 				omniauth = JSON.parse(payload)
 				@gitlab = ::Gitlab.client(
 					endpoint: "#{omniauth["site"]}/api/v3",
 					private_token: omniauth["credentials"]["token"]
 				)
+				@nickname = omniauth["info"]["username"]
 			end
 
 			def repositories(exclude: [])

@@ -1,0 +1,7 @@
+@import "variables";
+@import "mixins";
+
+a[href="/auth/login"],
+a[href="/new"] {
+	@extend %button;
+}
