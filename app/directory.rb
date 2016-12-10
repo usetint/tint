@@ -7,8 +7,14 @@ module Tint
 			site.resource(relative_path.join(path))
 		end
 
-		def collection_name
-			ActiveSupport::Inflector.singularize(fn.sub(/[^A-Za-z0-9]+/, ''))
+		def collection_name(count=1)
+			base = relative_path.to_s.gsub(/[^A-Za-z0-9]+/, ' ').strip
+
+			if count == 1
+				ActiveSupport::Inflector.singularize(base)
+			else
+				ActiveSupport::Inflector.pluralize(base)
+			end
 		end
 
 		def templates
