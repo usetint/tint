@@ -65,6 +65,13 @@ describe Tint::Resource do
 		it "should return the path basename" do
 			assert_equal(path.split("/").last, subject.fn)
 		end
+
+		describe "symlink" do
+			let(:path) { "directory/symlink" }
+			it "should return a symlink's basename, not what is pointed to" do
+				assert_equal(path.split("/").last, subject.fn)
+			end
+		end
 	end
 
 	describe "#fn" do

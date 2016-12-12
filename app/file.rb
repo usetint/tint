@@ -16,7 +16,13 @@ module Tint
 		end
 
 		def mime
-			FileMagic.open(:mime) { |magic| magic.file(path.to_s) }
+			if exist?
+				FileMagic.open(:mime) { |magic| magic.file(path.to_s) }
+			elsif symlink?
+				"inode/symlink"
+			else
+				"inode/x-empty"
+			end
 		end
 
 		def markdown?
@@ -103,6 +109,8 @@ module Tint
 		end
 
 		def detect_content_or_frontmatter
+			return [false, false] unless exist?
+
 			@content_or_frontmatter ||= begin
 				has_frontmatter = false
 				path.each_line.with_index do |line, idx|

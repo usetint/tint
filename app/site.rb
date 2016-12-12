@@ -1,5 +1,7 @@
 require "erb"
+require "fileutils"
 require "git"
+require "git-annex"
 require "shellwords"
 require "tmpdir"
 
@@ -115,9 +117,9 @@ module Tint
 
 		def resource(path)
 			resource = Tint::Resource.new(self, path)
-			klass = if resource.directory? || !resource.exist?
+			klass = if resource.directory? || (!resource.in_annex? && !resource.exist?)
 				Tint::Directory
-			elsif resource.file?
+			elsif resource.file? || resource.in_annex?
 				Tint::File
 			else
 				raise "This path is not a file or directory."
@@ -168,11 +170,13 @@ module Tint
 		def clone(remote=@options[:remote])
 			begin
 				# First, do a shallow clone so that we are up and running
+				# No single branch so that further operations can at least see remote branches
 				Git.clone(
 					remote,
 					cache_path.basename,
 					path: cache_path.dirname,
 					depth: 1,
+					no_single_branch: true,
 					env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
 				)
 
@@ -189,6 +193,9 @@ module Tint
 			Tint.db[:sites].where(site_id: @options[:site_id]).update(status: nil)
 
 			begin
+				# Fetch any large files from git-annex
+				git.annex.get if git.annex?
+
 				# Now, fetch the history for future use
 				git.fetch(remote, unshallow: true)
 			rescue
@@ -206,8 +213,11 @@ module Tint
 
 		def sync(remote=@options[:remote])
 			if git? && cloned?
-				git.fetch(remote)
-				git.reset_hard("FETCH_HEAD")
+				git.fetch(remote, refs: "+refs/heads/*:refs/remotes/origin/*")
+				git.reset_hard("remotes/origin/HEAD")
+
+				# Fetch any large files from git-annex
+				git.annex.get if git.annex?
 			elsif !git?
 				clone(remote)
 			end
@@ -215,36 +225,37 @@ module Tint
 
 		def commit_with(message, user=nil, tries: 1, depth: 1, &block)
 			Dir.mktmpdir("tint-push") do |dir|
-				Git.clone(
-					@options[:remote],
-					"clone",
-					path: dir,
-					depth: depth,
-					env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
-				)
+				begin
+					git = Git.clone(
+						@options[:remote],
+						"clone",
+						path: dir,
+						depth: depth,
+						no_single_branch: true,
+						env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
+					)
 
-				path = Pathname.new(dir).join("clone")
-				git = Git.open(
-					path.to_s,
-					env: { "SITE_PRIVATE_KEY_PATH" => ssh_private_key_path.to_s }
-				)
+					path = Pathname.new(dir).join("clone")
+					block.call(path, git)
+					git.add(all: true)
 
-				block.call(path)
-				git.add(all: true)
-
-				if maybe_commit(git, message, user)
-					begin
+					if maybe_commit(git, message, user)
 						if ENV["SITE_PATH"]
 							# If we push to a checked-out repository, we'll get nasty errors
 							sync(path.to_s)
 						else
 							git.push
+							git.annex.copy(to: "origin") if git.annex?
 							sync
 						end
-					rescue Git::GitExecuteError => e
-						raise e if tries > 4
-						commit_with(message, user, tries: tries+1, depth: depth, &block)
 					end
+
+				rescue Git::GitExecuteError
+					raise if tries > 4
+					commit_with(message, user, tries: tries+1, depth: depth, &block)
+				ensure
+					# Make everything writeable so that mktmpdir cleanup will work
+					FileUtils.chmod_R(0700, git.repo.to_s)
 				end
 			end
 		end

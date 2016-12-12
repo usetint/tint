@@ -55,12 +55,12 @@ module Tint
 					end
 				end
 
-				get "/?*", if: -> { resource.directory? || !resource.exist? } do
+				get "/?*", if: -> { resource.is_a?(Tint::Directory) } do
 					authorize resource, :index?
 					respond_with :index, resource
 				end
 
-				get "/?*", if: -> { resource.yml? || !resource.content? } do
+				get "/?*", if: -> { resource.yml? || (resource.text? && !resource.content?) } do
 					authorize resource, :edit?
 
 					slim :yml, locals: {
@@ -164,7 +164,7 @@ module Tint
 					authorize resource, :update?
 
 					if (params[:file].is_a?(Hash) && params[:file][:tempfile]) || params.has_key?("data")
-						site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir|
+						site.commit_with("Modified #{resource.relative_path}", pundit_user) do |dir, git|
 							name = if params.has_key?("data")
 								updated_data = FormHelpers.process(params[:data], dir)
 								new_relative_path = resource.relative_path_with_frontmatter(updated_data)
@@ -178,7 +178,13 @@ module Tint
 							end
 
 							if (params[:file].is_a?(Hash) && params[:file][:tempfile])
+								# Remove broken annex symlink
+								dir.join(resource.relative_path).unlink if resource.in_annex?
+
 								FormHelpers.upload(dir.join(resource.parent.relative_path), params[:file], name)
+
+								# If old resource was in annex, put the new one there
+								git.annex.add(resource.relative_path.to_s) if resource.in_annex?
 							end
 						end
 					end

@@ -27,7 +27,8 @@ module Tint
 
 		def path
 			@path ||= begin
-				path = site.cache_path.join(relative_path).realdirpath
+				path = site.cache_path.join(relative_path)
+				path = in_annex? ? final_target : path.realdirpath
 
 				unless path.to_s.start_with?(site.cache_path.to_s)
 					raise "File is outside of project scope!"
@@ -42,11 +43,22 @@ module Tint
 		end
 
 		def name
-			path.basename.to_s
+			relative_path.basename.to_s
 		end
 
 		def fn
 			@fn ||= path == site.cache_path ? "files" : name
+		end
+
+		def in_annex?
+			final_target.to_s.start_with?(
+				site.cache_path.join(".git").join("annex").to_s
+			)
+		end
+
+		def unlink
+			# If we are a symlink, unlink ourselves, not the target
+			site.cache_path.join(relative_path).unlink
 		end
 
 		def respond_to?(method)
@@ -73,5 +85,10 @@ module Tint
 	protected
 
 		attr_reader :site
+
+		def final_target(pth=site.cache_path.join(relative_path))
+			return pth unless pth.symlink?
+			final_target(pth.dirname.join(pth.readlink))
+		end
 	end
 end
