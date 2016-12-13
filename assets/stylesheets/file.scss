@@ -113,3 +113,7 @@
 		}
 	}
 }
+
+#binary > label:first-of-type > input[type=text] {
+	display: none;
+}
