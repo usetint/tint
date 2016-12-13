@@ -31,8 +31,8 @@ module Tint
 		rm -rf #{clone} #{prefix}
 		mkdir -p #{prefix}
 		git clone --depth=1 --no-single-branch #{remote} #{clone}
-		git annex get || true # Get from annex if there is one
 		cd #{clone}
+		git annex get || true # Get from annex if there is one
 
 		make PREFIX=#{prefix}
 		make install PREFIX=#{prefix}
