@@ -88,7 +88,7 @@ module Tint
 	end
 end
 
-# Monkepatch to allow digging into session
+# Monkypatch to allow digging into session
 
 require "rack/session/abstract/id"
 

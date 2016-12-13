@@ -1,4 +1,10 @@
 GIT
+  remote: git://github.com/invoca/ruby_dig.git
+  revision: 19fa8c1d2cc7706d015a3004f028169a2ff83391
+  specs:
+    ruby_dig (0.0.3)
+
+GIT
   remote: git://github.com/sishen/omniauth-bitbucket.git
   revision: bda8447b0ea32bcde4002046b3efffeda03d50f0
   specs:
@@ -117,7 +123,6 @@ GEM
       rack (>= 1.0)
     rake (11.2.2)
     ruby-filemagic (0.7.1)
-    ruby_dig (0.0.2)
     sass (3.4.22)
     scss_lint (0.50.2)
       rake (>= 0.9, < 12)
@@ -189,7 +194,7 @@ DEPENDENCIES
   pry-byebug
   rake
   ruby-filemagic
-  ruby_dig
+  ruby_dig!
   sass
   scss_lint
   sentry-raven
