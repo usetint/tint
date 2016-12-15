@@ -71,6 +71,12 @@ window.addEventListener("load", function() {
 				fileBrowser(fileInput);
 			}
 		});
+
+		forEach(li.querySelectorAll("fieldset"), function(fieldset) {
+			if(fieldset.parentElement !== li && notInNestedList(fieldset, li.parentElement)) {
+				hydrateFieldset(fieldset);
+			}
+		});
 	}
 
 	function renumber(ol, li) {
