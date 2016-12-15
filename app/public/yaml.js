@@ -63,7 +63,7 @@ window.addEventListener("load", function() {
 
 		findOrCreateButton("clone", "Clone").addEventListener("click", function() {
 			var item = li.cloneNode(true);
-			renameAppendHydrate(li.parentElement, item, nameRegexp(li.parentElement));
+			renameAppendHydrate(li.parentElement, item);
 		});
 
 		enableDisableMoveButtons(li.parentNode, li, Array.prototype.indexOf.call(li.parentNode.children, li));
