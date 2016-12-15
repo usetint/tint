@@ -133,6 +133,26 @@ window.addEventListener("load", function() {
 		});
 	}
 
+	function toggleFieldset(fieldset) {
+		forEach(fieldset.children, function(el) {
+			if(el.nodeName !== "LEGEND") {
+				el.style.display = el.style.display === "none" ? "block" : "none";
+			}
+		});
+	}
+
+	function hydrateFieldset(fieldset) {
+		forEach(fieldset.children, function(el) {
+			if(el.nodeName === "LEGEND") {
+				el.addEventListener("click", function() {
+					toggleFieldset(fieldset);
+				});
+			} else {
+				el.style.display = "none";
+			}
+		});
+	}
+
 	forEach(document.querySelectorAll("form ol[data-key] > li:last-child"), function(li) {
 		var ol = li.parentElement;
 		var button = document.createElement("button");
@@ -143,6 +163,7 @@ window.addEventListener("load", function() {
 	});
 
 	forEach(document.querySelectorAll("form fieldset.yml > label > input[type=file]"), fileBrowser);
+	forEach(document.querySelectorAll("form fieldset.yml > fieldset, form fieldset.yml > fieldset > fieldset"), hydrateFieldset);
 
 	var hidden = document.querySelectorAll("form .hidden");
 	forEach(hidden, function(el) { el.style.display = 'none'; });
