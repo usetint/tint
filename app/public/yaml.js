@@ -20,6 +20,17 @@ window.addEventListener("load", function() {
 		find(li.children, function(el) { return el.className === "move-down"; }).disabled = number >= ol.children.length - 1;
 	}
 
+	function notInNestedList(el, targetParent) {
+		// We should only hydrate "direct" children that are not in a
+		// descendant ol[data-key]
+		var traverseParents = el.parentElement;
+		while(traverseParents && traverseParents.nodeName !== "OL" && !traverseParents.dataset.key) {
+			traverseParents = traverseParents.parentElement;
+		}
+
+		return traverseParents === targetParent;
+	}
+
 	function hydrateLi(li) {
 		function findOrCreateButton(className, label) {
 			var button = find(li.children, function(el) { return el.className === className; });
@@ -56,14 +67,7 @@ window.addEventListener("load", function() {
 		enableDisableMoveButtons(li.parentNode, li, Array.prototype.indexOf.call(li.parentNode.children, li));
 
 		forEach(li.querySelectorAll("input[type=file]"), function(fileInput) {
-			// We should only hydrate "direct" children that are not in a
-			// descendant ol[data-key]
-			var traverseParents = fileInput.parentElement;
-			while(traverseParents.nodeName !== "OL" && !traverseParents.dataset.key) {
-				traverseParents = traverseParents.parentElement;
-			}
-
-			if(traverseParents === li.parentElement) {
+			if(notInNestedList(fileInput, li.parentElement)) {
 				fileBrowser(fileInput);
 			}
 		});
@@ -163,7 +167,11 @@ window.addEventListener("load", function() {
 	});
 
 	forEach(document.querySelectorAll("form fieldset.yml > label > input[type=file]"), fileBrowser);
-	forEach(document.querySelectorAll("form fieldset.yml > fieldset, form fieldset.yml > fieldset > fieldset"), hydrateFieldset);
+	forEach(document.querySelectorAll("form fieldset.yml fieldset"), function(fieldset) {
+		if(notInNestedList(fieldset, null)) {
+			hydrateFieldset(fieldset);
+		}
+	});
 
 	var hidden = document.querySelectorAll("form .hidden");
 	forEach(hidden, function(el) { el.style.display = 'none'; });
