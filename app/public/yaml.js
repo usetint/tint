@@ -16,8 +16,8 @@ window.addEventListener("load", function() {
 	}
 
 	function enableDisableMoveButtons(ol, li, number) {
-		find(li.children, function(el) { return el.className === "move-up"; }).disabled = number < 1;
-		find(li.children, function(el) { return el.className === "move-down"; }).disabled = number >= ol.children.length - 1;
+		find(li.firstChild.children, function(el) { return el.className === "move-up"; }).disabled = number < 1;
+		find(li.firstChild.children, function(el) { return el.className === "move-down"; }).disabled = number >= ol.children.length - 1;
 	}
 
 	function notInNestedList(el, targetParent) {
@@ -32,12 +32,14 @@ window.addEventListener("load", function() {
 	}
 
 	function hydrateLi(li) {
+		var fieldset = li.firstChild;
+
 		function findOrCreateButton(className, label) {
-			var button = find(li.children, function(el) { return el.className === className; });
+			var button = find(fieldset.children, function(el) { return el.className === className; });
 
 			if(!button) {
 				button = document.createElement("button");
-				li.appendChild(button);
+				fieldset.insertBefore(button, fieldset.firstChild);
 
 				button.type = "button";
 				button.className = className;
@@ -46,11 +48,6 @@ window.addEventListener("load", function() {
 
 			return button;
 		}
-
-		findOrCreateButton("clone", "Clone").addEventListener("click", function() {
-			var item = li.cloneNode(true);
-			renameAppendHydrate(li.parentElement, item, nameRegexp(li.parentElement));
-		});
 
 		findOrCreateButton("move-up", "▲").addEventListener("click", function() {
 			li.parentNode.insertBefore(li, li.previousElementSibling);
@@ -62,6 +59,11 @@ window.addEventListener("load", function() {
 			li.parentNode.insertBefore(li.nextElementSibling, li);
 			renumber(li.parentNode, li);
 			renumber(li.parentNode, li.previousElementSibling);
+		});
+
+		findOrCreateButton("clone", "Clone").addEventListener("click", function() {
+			var item = li.cloneNode(true);
+			renameAppendHydrate(li.parentElement, item, nameRegexp(li.parentElement));
 		});
 
 		enableDisableMoveButtons(li.parentNode, li, Array.prototype.indexOf.call(li.parentNode.children, li));

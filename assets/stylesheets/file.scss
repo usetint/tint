@@ -47,10 +47,44 @@
 		margin: 0 -2rem 1rem;
 		padding: 1rem 2rem;
 
-		legend {
-			font-size: 0.8rem;
-			font-weight: bold;
-			text-transform: uppercase;
+
+		fieldset {
+			background: #ccc;
+			border: none;
+			margin-bottom: 0.5em;
+			padding: 1em;
+
+			legend {
+				cursor: pointer;
+				float: left;
+				font-size: 0.8rem;
+				font-weight: bold;
+				text-transform: uppercase;
+				width: 100%;
+
+				+ * {
+					clear: left;
+					padding-top: 1em;
+				}
+			}
+
+			fieldset,
+			fieldset fieldset fieldset,
+			fieldset fieldset fieldset fieldset fieldset { background: #999; }
+
+			fieldset fieldset,
+			fieldset fieldset fieldset fieldset { background: #ccc; }
+		}
+
+		ol {
+			list-style-type: none;
+			padding: 0;
+
+			li > fieldset > button[type="button"] {
+				background: none;
+				color: #000;
+				float: right;
+			}
 		}
 
 		input {
