@@ -142,11 +142,8 @@ window.addEventListener("load", function() {
 		hydrate(ol);
 	});
 
-	forEach(document.querySelectorAll("form fieldset.yml > label > input[type=file]"), function(input) {
-		fileBrowser(input);
-	});
+	forEach(document.querySelectorAll("form fieldset.yml > label > input[type=file]"), fileBrowser);
 
 	var hidden = document.querySelectorAll("form .hidden");
 	forEach(hidden, function(el) { el.style.display = 'none'; });
-
 });
