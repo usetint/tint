@@ -123,6 +123,7 @@ window.addEventListener("load", function() {
 
 		ol.appendChild(item);
 		hydrateLi(item);
+		renumber(ol, item.previousElementSibling);
 
 		if(item.getBoundingClientRect().bottom > window.innerHeight) {
 			item.scrollIntoView(false);
