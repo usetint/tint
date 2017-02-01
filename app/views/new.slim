@@ -1,0 +1,28 @@
+h1 New Site
+
+- unless git_providers.empty?
+	section
+		h1 From one of your git providers
+
+		ul
+			- git_providers.each do |(id, provider)|
+				- provider_name = provider.class.name.split("::").last
+				li
+					a href="?from=#{id}"
+						= provider_name
+						- if provider.respond_to?(:nickname) && provider.nickname
+							= " (#{provider.nickname})"
+
+a href="/auth/login" Add a new provider
+
+section
+	h1 or configure your site manually
+
+	form method="POST" action="/"
+		label
+			| Site name:
+			input type="text" name="fn" required="required"
+		label
+			| Git remote:
+			input type="text" name="remote" required="required"
+		button type="submit" Add

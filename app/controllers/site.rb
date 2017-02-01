@@ -20,14 +20,9 @@ module Tint
 				else
 					authorize Tint::Site, :index?
 
-					git_providers = Tint.db[:identities].where(user_id: pundit_user.user_id).map do |identity|
-						GitProviders.build(identity[:provider], identity[:omniauth])
-					end.compact
-
 					sites = policy_scope(Tint::Site)
-					repos = sites.map { |site| site.remote }
 
-					slim :index, locals: { sites: sites, repos: repos, git_providers: git_providers }
+					slim :index, locals: { sites: sites }
 				end
 			end
 
@@ -63,6 +58,28 @@ module Tint
 				end
 
 				redirect to("/#{site_id}/")
+			end
+
+			get "/new", params: :from do
+				authorize Tint::Site, :create?
+
+				provider, uid = params[:from].to_s.split(":", 2)
+				identity = Tint.db[:identities][user_id: pundit_user.user_id, provider: provider, uid: uid]
+				git_provider = GitProviders.build(identity[:provider], identity[:omniauth])
+
+				repos = policy_scope(Tint::Site).map(&:remote)
+				slim :new_from, locals: { git_provider_name: provider, git_provider: git_provider, repos: repos }
+			end
+
+			get "/new" do
+				authorize Tint::Site, :create?
+
+				git_providers = Tint.db[:identities].where(user_id: pundit_user.user_id).map do |identity|
+					["#{identity[:provider]}:#{identity[:uid]}", GitProviders.build(identity[:provider], identity[:omniauth])]
+				end.reject { |(_, p)| !p }
+
+				session["back_to"] = "/new"
+				slim :new, locals: { git_providers: git_providers }
 			end
 
 			namespace "/:site" do
