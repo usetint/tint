@@ -1,6 +1,9 @@
-h1 = params['filename']
+h1 Source
+
 form action=path method="post"
 	input type="hidden" name="_method" value="PUT"
 	textarea name="source"
 	button type="submit" Save
-a href="?" Back to editor
+
+- if request.query_string == "source"
+	a href="?" Back to editor

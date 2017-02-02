@@ -1,20 +1,21 @@
-form#content enctype="multipart/form-data" action=path method="post"
+form#content enctype="multipart/form-data" action=resource.route method="post"
 	input type="hidden" name="_method" value="PUT"
 
 	header
-		- unless path.split("/").last.start_with?(".template")
+		- unless resource.template?
 			a href="?source" Source
 
-		label
-			| Page Title
-			input type="text" name="data[title]" placeholder="Untitled Page" value=(frontmatter || {})["title"]
+		- if title
+			label
+				| Page Title
+				input type="text" name="data[title]" placeholder="Untitled Page" value=title
 
-	textarea name="content"
+	- if wysiwyg
+		textarea name="content"
 
-	- meta = (frontmatter || {}).reject {|k,v| k == "title"}
-	- if meta.size > 0
+	- if frontmatter.size > 0
 		fieldset.yml
-			== render_yml(meta)
+			== render_yml(frontmatter)
 
 	footer
 		button type="submit" Save and Update

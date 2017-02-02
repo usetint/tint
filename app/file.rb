@@ -33,6 +33,10 @@ module Tint
 			[".yaml", ".yml"].include? extension
 		end
 
+		def template?
+			name.start_with?(".template")
+		end
+
 		def stream(force_binary=false)
 			if !force_binary && text?
 				path.each_line.with_index do |line, idx|

@@ -45,14 +45,7 @@ module Tint
 				end
 
 				get "/?*", query: "source" do
-					authorize resource, :edit?
-
-					if resource.text?
-						html = slim :source, locals: { path: resource.route }
-						stream_into_element("<textarea name=\"source\">", html, resource)
-					else
-						slim :error, locals: { message: "Only text files may be edited by source" }
-					end
+					source_view
 				end
 
 				get "/?*", if: -> { resource.is_a?(Tint::Directory) } do
@@ -60,26 +53,31 @@ module Tint
 					respond_with :index, resource
 				end
 
-				get "/?*", if: -> { resource.yml? || (resource.text? && !resource.content?) } do
+				get "/?*", if: -> { resource.markdown? || resource.yml? || resource.frontmatter? } do
 					authorize resource, :edit?
 
-					slim :yml, locals: {
-						data: resource.frontmatter,
-						path: resource.route
+					wysiwyg = resource.markdown?
+					frontmatter = resource.frontmatter || {}
+
+					title = if !resource.yml? && frontmatter.has_key?("title")
+						frontmatter.delete("title").to_s
+					end
+
+					html = slim :text, locals: {
+						title: title,
+						frontmatter: frontmatter,
+						wysiwyg: wysiwyg
 					}
+
+					if wysiwyg
+						stream_into_element("<textarea name=\"content\">", html, resource, :stream_content)
+					else
+						html
+					end
 				end
 
 				get "/?*", if: -> { resource.text? } do
-					authorize resource, :edit?
-
-					frontmatter = resource.frontmatter? && resource.frontmatter
-					html = slim :text, locals: {
-						frontmatter: frontmatter,
-						wysiwyg: resource.markdown?,
-						path: resource.route
-					}
-
-					stream_into_element("<textarea name=\"content\">", html, resource, :stream_content)
+					source_view
 				end
 
 				get "/?*" do
@@ -197,27 +195,28 @@ module Tint
 
 					msg = "Modified #{resource.relative_path}"
 					template = resource.relative_path.basename.to_s.start_with?(".template")
+					file = resource
 
 					if template
 						parent = resource.parent
 						extension = resource.relative_path.basename.to_s.split(".", 3).last
 						basename = "#{SecureRandom.uuid}-#{params[:data]["title"].slugify}.#{extension}"
-						resource = Tint::File.new(site, parent.relative_path.join(basename))
-						msg = "Created new #{resource.parent.collection_name} from template"
+						file = Tint::File.new(site, parent.relative_path.join(basename))
+						msg = "Created new #{file.parent.collection_name} from template"
 					end
 
 					begin
 						site.commit_with(msg, pundit_user) do |dir|
 							updated_data = FormHelpers.process(params[:data], dir)
 
-							new_relative_path = resource.relative_path_with_frontmatter(updated_data)
-							if !template && new_relative_path != resource.relative_path
-								dir.join(resource.relative_path).rename(dir.join(new_relative_path))
+							new_relative_path = file.relative_path_with_frontmatter(updated_data)
+							if !template && new_relative_path != file.relative_path
+								dir.join(file.relative_path).rename(dir.join(new_relative_path))
 							end
 
 							dir.join(new_relative_path).open("w") do |f|
 								if updated_data
-									if resource.yml?
+									if file.yml?
 										f.puts updated_data.to_yaml.sub(/\A---\r?\n?/, "")
 									else
 										f.puts updated_data.to_yaml
@@ -226,14 +225,14 @@ module Tint
 
 									if params.has_key?("content")
 										f.puts(params[:content].encode(universal_newline: true))
-									elsif !resource.yml?
-										resource.stream_content(&f.method(:puts))
+									elsif !file.yml?
+										file.stream_content(&f.method(:puts))
 									end
 								end
 							end
 						end
 
-						redirect to(resource.parent.route)
+						redirect to(file.parent.route)
 					rescue FormHelpers::Invalid
 						halt 500, $!.to_s
 					end
@@ -286,6 +285,17 @@ module Tint
 			end
 
 		protected
+
+			def source_view
+				authorize resource, :edit?
+
+				if resource.text?
+					html = slim :source, locals: { path: resource.route }
+					stream_into_element("<textarea name=\"source\">", html, resource)
+				else
+					slim :error, locals: { message: "Only text files may be edited by source" }
+				end
+			end
 
 			def valid_build_system(build_system)
 				build_systems = [:jekyll]
