@@ -175,8 +175,8 @@ window.addEventListener("load", function() {
 		hydrate(ol);
 	});
 
-	forEach(document.querySelectorAll("form fieldset.yml > label > input[type=file]"), fileBrowser);
-	forEach(document.querySelectorAll("form fieldset.yml fieldset"), function(fieldset) {
+	forEach(document.querySelectorAll(".yml > label > input[type=file]"), fileBrowser);
+	forEach(document.querySelectorAll(".yml fieldset"), function(fieldset) {
 		if(notInNestedList(fieldset, null)) {
 			hydrateFieldset(fieldset);
 		}
