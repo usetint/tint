@@ -12,6 +12,10 @@ module Tint
 				@omniauth = JSON.parse(payload)
 			end
 
+			def valid?
+				true
+			end
+
 			def repositories(exclude: [])
 				get_repositories.reject { |repo|
 					repo["scm"] != "git" || Array(exclude).include?(remote(repo))

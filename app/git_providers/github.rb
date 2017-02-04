@@ -14,6 +14,11 @@ module Tint
 				@nickname = payload["info"]["nickname"]
 			end
 
+			def valid?
+				!!@github.users.get
+			rescue ::Github::Error::Unauthorized
+			end
+
 			def repositories(exclude: [])
 				@github.repos.list.select { |repo|
 					repo.permissions.admin && !exclude.include?(repo.ssh_url)
