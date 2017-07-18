@@ -6,7 +6,7 @@ module Tint
 		job_id = Shellwords.escape(job_id.to_s)
 		site_id = Shellwords.escape(site_id.to_s)
 		remote = Shellwords.escape(remote.to_s)
-		app_url = Shellwords.escape(ENV.fetch("APP_URL"))
+		app_url = Shellwords.escape(ENV["INTERNAL_APP_URL"] || ENV.fetch("APP_URL"))
 
 		prefix = "/tmp/#{job_id}"
 		clone = "/tmp/#{job_id}-clone"
@@ -40,7 +40,7 @@ module Tint
 		cd /tmp
 		tar --posix --one-file-system --owner=33 --group=33 \\
 			-cf #{tar} #{job_id}/
-		curl -u #{job_id}:#{token} \\
+		curl #{ENV["INTERNAL_APP_URL"] && "-k"} -u #{job_id}:#{token} \\
 			#{app_url}/#{site_id}/deploy \\
 			--data-binary @#{tar}
 
