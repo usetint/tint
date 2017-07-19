@@ -11,6 +11,8 @@ module Tint
 			return unless scalarish?(value)
 
 			norm_key = key.to_s.downcase
+			norm_key = site.config.dig("types", key) || norm_key
+
 			if select_options(site, key)
 				MultipleSelect
 			elsif select_options(site, ActiveSupport::Inflector.pluralize(key.to_s))
