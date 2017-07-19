@@ -5,10 +5,11 @@ describe Tint::Input do
 	describe ".type" do
 		subject { Tint::Input.type(key, tvalue, site) }
 
-		let(:site) { OpenStruct.new(config: { "options" => options }) }
+		let(:site) { OpenStruct.new(config: { "options" => options, "types" => types }) }
 		let(:key) { "generic_key" }
 		let(:tvalue) { "generic_value" }
 		let(:options) { {} }
+		let(:types) { {} }
 
 		describe "config defined select options" do
 			let(:options) do
@@ -28,6 +29,20 @@ describe Tint::Input do
 
 				it "should return Select" do
 					assert_equal(Tint::Input::Select, subject)
+				end
+			end
+		end
+
+		describe "config defined type overrides" do
+			let(:types) do
+				{ "akey" => "datetime" }
+			end
+
+			describe "when types includes key" do
+				let(:key) { "akey" }
+
+				it "should return DateTime" do
+					assert_equal(Tint::Input::DateTime, subject)
 				end
 			end
 		end

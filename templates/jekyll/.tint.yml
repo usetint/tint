@@ -5,6 +5,9 @@ hidden_paths:
   - .*
   - Makefile
 
+types:
+  date: datetime
+
 filename_frontmatter:
   "_posts/*":
     - key: date
