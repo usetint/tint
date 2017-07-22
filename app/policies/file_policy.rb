@@ -13,5 +13,13 @@ module Tint
 		def destroy?
 			user && record.users.any? { |u| u[:user_id] == user.user_id }
 		end
+
+		def source?
+			matches_record_and_role(record, "owner")
+		end
+
+		def rename?
+			matches_record_and_role(record, "owner")
+		end
 	end
 end

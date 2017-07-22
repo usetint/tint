@@ -2,7 +2,7 @@ form#content enctype="multipart/form-data" action=resource.route method="post"
 	input type="hidden" name="_method" value="PUT"
 
 	header
-		- unless resource.template?
+		- if !resource.template? && policy(resource).source?
 			a href="?source" Source
 
 		- if title

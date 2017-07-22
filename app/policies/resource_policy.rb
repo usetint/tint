@@ -1,3 +1,5 @@
+require_relative 'application_policy'
+
 module Tint
 	class ResourcePolicy < ApplicationPolicy
 		def index?

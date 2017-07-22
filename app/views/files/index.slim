@@ -1,7 +1,8 @@
 .actions
-	form action=object.route method="post"
-		input type="text" name="folder" required="required"
-		button type="submit" New folder
+	- if policy(resource).mkdir?
+		form action=object.route method="post"
+			input type="text" name="folder" required="required"
+			button type="submit" New folder
 
 	form action=object.route method="post" enctype="multipart/form-data"
 		input type="file" name="file" required="required"
@@ -40,7 +41,7 @@ ul.files
 
 				a.download href="#{file.route}?download" Download
 
-			- unless file == object.parent
+			- if file != object.parent && policy(file).rename?
 				form action=file.route method="post"
 					input type="hidden" name="_method" value="PUT"
 					input type="hidden" name="move"

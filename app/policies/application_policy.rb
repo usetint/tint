@@ -47,5 +47,13 @@ module Tint
 				scope
 			end
 		end
+
+	protected
+
+		def matches_record_and_role(record, role)
+			user && record.users.any? do |u|
+				u[:role] == role && u[:user_id] == user.user_id
+			end
+		end
 	end
 end
