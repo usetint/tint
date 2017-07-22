@@ -7,6 +7,14 @@ require_relative "directory"
 
 module Tint
 	class File < Resource
+		def fn
+			if !@fn && frontmatter? && frontmatter.has_key?("title")
+				@fn = frontmatter["title"]
+			end
+
+			super
+		end
+
 		def text?
 			mime.split("/").first == "text"
 		end
