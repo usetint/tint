@@ -2,8 +2,9 @@ require "filemagic"
 require "slugify"
 require "yaml"
 
-require_relative "resource"
 require_relative "directory"
+require_relative "input"
+require_relative "resource"
 
 module Tint
 	class File < Resource
@@ -67,14 +68,18 @@ module Tint
 		end
 
 		def content?
+			return false if image?
 			detect_content_or_frontmatter[0]
 		end
 
 		def frontmatter?
+			return false if image?
 			detect_content_or_frontmatter[1] || filename_frontmatter_candidates.length > 0
 		end
 
 		def frontmatter
+			return if image?
+
 			from_filename = filename_frontmatter_candidates.reduce({}) do |data, pieces|
 				data.merge(try_filename_frontmatter_candidate(pieces))
 			end
