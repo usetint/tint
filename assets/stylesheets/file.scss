@@ -42,27 +42,6 @@
 		width: calc(100% + 4rem);
 	}
 
-	.yml {
-		background: #f8f8f8;
-		border: none;
-		margin: 0 -2rem 1rem;
-		padding: 1rem 2rem;
-
-		legend {
-			font-size: 0.8rem;
-			font-weight: bold;
-			text-transform: uppercase;
-		}
-
-		input {
-			background: #fff;
-		}
-
-		button[disabled] {
-			display: none;
-		}
-	}
-
 	> footer {
 		background: #f8f8f8;
 		border-top: 1px solid #d9d9d9;
@@ -72,6 +51,61 @@
 		right: 0;
 		text-align: right;
 		width: 75%;
+	}
+}
+
+.yml {
+	background: #f8f8f8;
+	border: none;
+	margin: 0 -2rem 1rem;
+	padding: 1rem 2rem;
+
+
+	fieldset {
+		background: #ccc;
+		border: none;
+		margin-bottom: 0.5em;
+		padding: 1em;
+
+		legend {
+			cursor: pointer;
+			float: left;
+			font-size: 0.8rem;
+			font-weight: bold;
+			text-transform: uppercase;
+			width: 100%;
+
+			+ * {
+				clear: left;
+				padding-top: 1em;
+			}
+		}
+
+		fieldset,
+		fieldset fieldset fieldset,
+		fieldset fieldset fieldset fieldset fieldset { background: #999; }
+
+		fieldset fieldset,
+		fieldset fieldset fieldset fieldset { background: #ccc; }
+	}
+
+	ol {
+		list-style-type: none;
+		padding: 0;
+
+		li > fieldset > button[type="button"] {
+			background: none;
+			color: #000;
+			float: right;
+		}
+	}
+
+	input {
+		background: #fff;
+	}
+
+	button[disabled] {
+		display: none;
 	}
 }
 

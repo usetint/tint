@@ -16,17 +16,30 @@ window.addEventListener("load", function() {
 	}
 
 	function enableDisableMoveButtons(ol, li, number) {
-		find(li.children, function(el) { return el.className === "move-up"; }).disabled = number < 1;
-		find(li.children, function(el) { return el.className === "move-down"; }).disabled = number >= ol.children.length - 1;
+		find(li.firstChild.children, function(el) { return el.className === "move-up"; }).disabled = number < 1;
+		find(li.firstChild.children, function(el) { return el.className === "move-down"; }).disabled = number >= ol.children.length - 1;
+	}
+
+	function notInNestedList(el, targetParent) {
+		// We should only hydrate "direct" children that are not in a
+		// descendant ol[data-key]
+		var traverseParents = el.parentElement;
+		while(traverseParents && traverseParents.nodeName !== "OL" && !traverseParents.dataset.key) {
+			traverseParents = traverseParents.parentElement;
+		}
+
+		return traverseParents === targetParent;
 	}
 
 	function hydrateLi(li) {
+		var fieldset = li.firstChild;
+
 		function findOrCreateButton(className, label) {
-			var button = find(li.children, function(el) { return el.className === className; });
+			var button = find(fieldset.children, function(el) { return el.className === className; });
 
 			if(!button) {
 				button = document.createElement("button");
-				li.appendChild(button);
+				fieldset.insertBefore(button, fieldset.firstChild);
 
 				button.type = "button";
 				button.className = className;
@@ -35,11 +48,6 @@ window.addEventListener("load", function() {
 
 			return button;
 		}
-
-		findOrCreateButton("clone", "Clone").addEventListener("click", function() {
-			var item = li.cloneNode(true);
-			renameAppendHydrate(li.parentElement, item, nameRegexp(li.parentElement));
-		});
 
 		findOrCreateButton("move-up", "▲").addEventListener("click", function() {
 			li.parentNode.insertBefore(li, li.previousElementSibling);
@@ -53,18 +61,22 @@ window.addEventListener("load", function() {
 			renumber(li.parentNode, li.previousElementSibling);
 		});
 
+		findOrCreateButton("clone", "Clone").addEventListener("click", function() {
+			var item = li.cloneNode(true);
+			renameAppendHydrate(li.parentElement, item);
+		});
+
 		enableDisableMoveButtons(li.parentNode, li, Array.prototype.indexOf.call(li.parentNode.children, li));
 
 		forEach(li.querySelectorAll("input[type=file]"), function(fileInput) {
-			// We should only hydrate "direct" children that are not in a
-			// descendant ol[data-key]
-			var traverseParents = fileInput.parentElement;
-			while(traverseParents.nodeName !== "OL" && !traverseParents.dataset.key) {
-				traverseParents = traverseParents.parentElement;
-			}
-
-			if(traverseParents === li.parentElement) {
+			if(notInNestedList(fileInput, li.parentElement)) {
 				fileBrowser(fileInput);
+			}
+		});
+
+		forEach(li.querySelectorAll("fieldset"), function(fieldset) {
+			if(fieldset.parentElement !== li && notInNestedList(fieldset, li.parentElement)) {
+				hydrateFieldset(fieldset);
 			}
 		});
 	}
@@ -111,6 +123,7 @@ window.addEventListener("load", function() {
 
 		ol.appendChild(item);
 		hydrateLi(item);
+		renumber(ol, item.previousElementSibling);
 
 		if(item.getBoundingClientRect().bottom > window.innerHeight) {
 			item.scrollIntoView(false);
@@ -133,6 +146,26 @@ window.addEventListener("load", function() {
 		});
 	}
 
+	function toggleFieldset(fieldset) {
+		forEach(fieldset.children, function(el) {
+			if(el.nodeName !== "LEGEND") {
+				el.style.display = el.style.display === "none" ? "block" : "none";
+			}
+		});
+	}
+
+	function hydrateFieldset(fieldset) {
+		forEach(fieldset.children, function(el) {
+			if(el.nodeName === "LEGEND") {
+				el.addEventListener("click", function() {
+					toggleFieldset(fieldset);
+				});
+			} else {
+				el.style.display = "none";
+			}
+		});
+	}
+
 	forEach(document.querySelectorAll("form ol[data-key] > li:last-child"), function(li) {
 		var ol = li.parentElement;
 		var button = document.createElement("button");
@@ -142,11 +175,13 @@ window.addEventListener("load", function() {
 		hydrate(ol);
 	});
 
-	forEach(document.querySelectorAll("form fieldset.yml > label > input[type=file]"), function(input) {
-		fileBrowser(input);
+	forEach(document.querySelectorAll(".yml > label > input[type=file]"), fileBrowser);
+	forEach(document.querySelectorAll(".yml fieldset"), function(fieldset) {
+		if(notInNestedList(fieldset, null)) {
+			hydrateFieldset(fieldset);
+		}
 	});
 
 	var hidden = document.querySelectorAll("form .hidden");
 	forEach(hidden, function(el) { el.style.display = 'none'; });
-
 });
