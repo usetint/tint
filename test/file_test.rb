@@ -110,10 +110,38 @@ describe Tint::File do
 		end
 	end
 
+	describe "image file" do
+		let(:path) { "20150501-IMG_9497.jpg" }
+
+		describe "#content?" do
+			it { refute(subject.content?) }
+		end
+
+		describe "#frontmatter?" do
+			it { refute(subject.frontmatter?) }
+		end
+
+		describe "#frontmatter" do
+			it "should return nil" do
+				assert_nil(subject.frontmatter)
+			end
+		end
+
+		describe "when the site config has frontmatter rules" do
+			before { set_frontmatter_rules(site) }
+
+			describe "#frontmatter?" do
+				it "should return nil" do
+					refute(subject.frontmatter?)
+				end
+			end
+		end
+	end
+
 	def set_frontmatter_rules(site)
 		site.cache_path.join(".tint.yml").open("w") do |f|
 			f.puts(YAML::dump("filename_frontmatter" => {
-				"filename_frontmatter/*" => [
+				"*" => [
 					{"key" => "date", "strptime" => "%Y-%m-%d"},
 					{"match" => "-"},
 					{"key" => "title", "match" => "[^\\.]+", "format" => "slugify" }
