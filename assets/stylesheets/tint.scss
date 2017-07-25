@@ -142,7 +142,7 @@ body {
 	padding: 0;
 
 	li {
-		align-items: center;
+		align-items: flex-start;
 		border-bottom: 1px solid #ebebeb;
 		display: flex;
 
@@ -151,16 +151,26 @@ body {
 		}
 
 		> * {
-			margin: 0 0.5rem;
+			margin: 0.7rem 0.5rem 0.5rem;
 		}
 
-		> :first-child {
+		> h1 {
 			display: block;
 			flex: 1;
+			font-size: 1.5rem;
+			font-weight: normal;
+			margin-top: 0.5rem;
 			overflow: hidden;
-			padding: 0.3rem 0;
+			padding: 0;
 			text-overflow: ellipsis;
 			white-space: nowrap;
+
+			a { display: block; }
+			small {
+				background: #fff;
+				color: rgba(#000, 0.6);
+				font-size: 0.6em;
+			}
 		}
 
 		> .download {

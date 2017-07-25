@@ -31,7 +31,10 @@
 ul.files
 	- object.children.reject { |file| moves.include?(file) }.each do |file|
 		li
-			a href=file.route = file.fn
+			h1
+				a href=file.route = file.fn
+				- if file.name =~ /[^\.]/ && file.name != file.fn
+					small = file.name
 
 			- unless file.directory?
 				form action=file.route method="post"
