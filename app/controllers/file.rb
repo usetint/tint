@@ -130,7 +130,7 @@ module Tint
 				end
 
 				put "/*", params: :name do
-					authorize resource, :update?
+					authorize resource, :rename?
 
 					new = resource.parent.resource(params[:name])
 					if new.exist? && resource != new
@@ -267,7 +267,7 @@ module Tint
 				end
 
 				post "/?*", params: :folder do
-					authorize resource, :update?
+					authorize resource, :mkdir?
 
 					new_folder = Tint::Directory.new(site, resource.relative_path.join(params[:folder]))
 					redirect to(new_folder.route)
@@ -287,7 +287,7 @@ module Tint
 		protected
 
 			def source_view
-				authorize resource, :edit?
+				authorize resource, :source?
 
 				if resource.text?
 					html = slim :source, locals: { path: resource.route }

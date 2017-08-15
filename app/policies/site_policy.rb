@@ -12,13 +12,13 @@ module Tint
 		end
 
 		def update?
-			user && record.users.any? { |u| u[:user_id] == user.user_id }
-		end
-
-		def manage_users?
 			user && record.users.any? do |u|
 				u[:role] == "owner" && u[:user_id] == user.user_id
 			end
+		end
+
+		def manage_users?
+			update?
 		end
 
 		def accept_invitation?

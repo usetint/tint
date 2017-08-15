@@ -3,12 +3,12 @@ h1 = site.fn
 form method="post" action=site.route("sync")
 	button type="submit" Sync & Build
 
-- unless ENV["SITE_PATH"]
+- if !ENV["SITE_PATH"] && policy(site).destroy?
 	form method="post" action=site.route
 		input type="hidden" name="_method" value="DELETE"
 		button type="submit" Delete this site
 
-- if site.cloned?
+- if site.cloned? && policy(site).update?
 	- unless site.makefile?
 		p.error YOU DO NOT HAVE A MAKEFILE. THIS IS VERY BAD.
 		form method="post" action=site.route("files/Makefile")
@@ -46,22 +46,23 @@ form method="post" action=site.route("sync")
 - elsif !site.cloned?
 	p Please wait, we are syncing your remote...
 
-form method="post" action=site.route
-	input type="hidden" name="_method" value="PUT"
+- if policy(site).update?
+	form method="post" action=site.route
+		input type="hidden" name="_method" value="PUT"
 
-	label
-		| Name
-		input type="text" name="fn" value=site.fn
+		label
+			| Name
+			input type="text" name="fn" value=site.fn
 
-	label
-		| Remote
-		input type="text" name="remote" value=site.remote
+		label
+			| Remote
+			input type="text" name="remote" value=site.remote
 
-	label
-		| Subdomain
-		input type="text" name="subdomain" value=site.subdomain
+		label
+			| Subdomain
+			input type="text" name="subdomain" value=site.subdomain
 
-	button type="submit" Update
+		button type="submit" Update
 
 - unless ENV["SITE_PATH"] || site.cloned?
 	section
