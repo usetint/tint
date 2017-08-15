@@ -15,6 +15,11 @@ module Tint
 				@nickname = omniauth["info"]["username"]
 			end
 
+			def valid?
+				!!@gitlab.user
+			rescue ::Gitlab::Error::Unauthorized
+			end
+
 			def repositories(exclude: [])
 				@gitlab.projects(archived: false).auto_paginate.select { |repo|
 					!exclude.include?(repo.ssh_url_to_repo)

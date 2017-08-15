@@ -76,7 +76,7 @@ module Tint
 
 				git_providers = Tint.db[:identities].where(user_id: pundit_user.user_id).map do |identity|
 					["#{identity[:provider]}:#{identity[:uid]}", GitProviders.build(identity[:provider], identity[:omniauth])]
-				end.reject { |(_, p)| !p }
+				end.reject { |(_, p)| !p || !p.valid? }
 
 				session["back_to"] = "/new"
 				slim :new, locals: { git_providers: git_providers }

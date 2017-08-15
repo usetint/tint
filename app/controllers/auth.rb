@@ -68,7 +68,7 @@ module Tint
 					identity = Tint.db[:identities][provider: params[:provider], uid: uid]
 
 					if identity
-						if pundit_user
+						if pundit_user && pundit_user.user_id != identity[:user_id]
 							status 400
 							return slim :error, locals: { message: "That identity is claimed by another account." }
 						end
